@@ -33,19 +33,23 @@ export function shuffleDeck(deck: Card[], rng: () => number = Math.random): Card
 /**
  * Determines whether a card qualifies as a neutral opening card.
  *
- * Rules Exclusion:
- * - 2: Imposes draw penalty
- * - Jack: Wild, demands suit
- * - Ace: A♠ imposes penalty; other Aces pass penalty
- * - 7 of Hearts: Instant win
- * - 8: Imposes skip on first player
+ * Official Published Written Rule (https://502-game.vercel.app/rules):
+ * "If the starting card is a 2, a Jack, any Ace or the 7 of Hearts,
+ *  put it back at the bottom of the deck and turn up another card."
+ *
+ * Excluded Cards:
+ * - Any 2 (2♠, 2♥, 2♦, 2♣)
+ * - Any Jack (J♠, J♥, J♦, J♣)
+ * - Any Ace (A♠, A♥, A♦, A♣)
+ * - 7 of Hearts (7♥)
+ *
+ * Note on 8: Follows published written rule strictly (8 is permitted).
  */
 export function isNeutralOpeningCard(card: Card): boolean {
   if (card.rank === '2') return false;
   if (card.rank === 'J') return false;
   if (card.rank === 'A') return false;
   if (card.rank === '7' && card.suit === 'hearts') return false;
-  if (card.rank === '8') return false;
   return true;
 }
 

@@ -22,11 +22,10 @@ describe('Game Engine State Transition Tests', () => {
 
     expect(state.discardPile).toHaveLength(1);
     const topCard = state.discardPile[0];
-    // Must be neutral!
+    // Must be neutral per published written rule!
     expect(topCard.rank).not.toBe('2');
     expect(topCard.rank).not.toBe('J');
     expect(topCard.rank).not.toBe('A');
-    expect(topCard.rank).not.toBe('8');
     expect(!(topCard.rank === '7' && topCard.suit === 'hearts')).toBe(true);
 
     // Human player 0 starts round 1

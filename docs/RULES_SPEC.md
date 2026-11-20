@@ -36,10 +36,10 @@ This specification defines the formal rules, mathematical penalties, state machi
 #### Ambiguity 1: Status of Rank 8 in Opening Exclusion
 - **Observation**:
   - The written rules text explicitly lists: *"If the starting card is a 2, a Jack, any Ace or the 7 of Hearts, put it back at the bottom of the deck and turn up another card."* It omits **8**, even though an 8 skips the next player in normal play.
-  - If an 8 were permitted as the opening card, either player 1 would be penalized with an immediate skip before taking any action, or the opening 8 would have its skip effect suppressed.
+  - In card game theory, starting discard cards only exert effects when played from a player's hand; an opening neutral card is passive.
 - **Resolution & Selected Interpretation**:
-  - In our engine, **Rank 8 is treated as non-neutral and is also excluded from being the opening card** (re-drawn just like 2, Jack, Ace, and 7♥).
-  - **Rationale**: An opening card must be strictly neutral and passive (ranks 3, 4, 5, 6, non-heart 7, 9, 10, Q, K). This ensures completely fair start-of-round conditions for the opening player without requiring a synthetic "suppressed effect" edge case.
+  - In strict accordance with the published written rules of SuitSaga Arena, **only the four explicitly documented exclusions are rejected: `{ 2, Jack, any Ace, 7 of Hearts }`**.
+  - Rank 8 is not excluded in the published text; if an 8 appears as the opening discard card, it simply establishes the initial suit and value without initiating a skip on player 1 (as it was turned up by the deal, not played by an opponent).
 
 ---
 

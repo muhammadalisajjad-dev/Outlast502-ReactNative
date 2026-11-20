@@ -26,17 +26,17 @@ describe('Deck Engine Tests', () => {
     expect(new Set(shuffled.map(c => c.id)).size).toBe(52);
   });
 
-  test('neutral opening card excludes 2, Jack, Ace, 7 of Hearts, and 8', () => {
-    // Excluded
+  test('neutral opening card strictly excludes 2, Jack, Ace, and 7 of Hearts per written rule', () => {
+    // Excluded per published written rules
     expect(isNeutralOpeningCard({ id: '1', rank: '2', suit: 'clubs' })).toBe(false);
     expect(isNeutralOpeningCard({ id: '2', rank: '2', suit: 'hearts' })).toBe(false);
     expect(isNeutralOpeningCard({ id: '3', rank: 'J', suit: 'spades' })).toBe(false);
     expect(isNeutralOpeningCard({ id: '4', rank: 'A', suit: 'spades' })).toBe(false);
     expect(isNeutralOpeningCard({ id: '5', rank: 'A', suit: 'hearts' })).toBe(false);
     expect(isNeutralOpeningCard({ id: '6', rank: '7', suit: 'hearts' })).toBe(false);
-    expect(isNeutralOpeningCard({ id: '7', rank: '8', suit: 'diamonds' })).toBe(false);
 
-    // Permitted neutral cards
+    // Permitted neutral cards (including 8 per published written text)
+    expect(isNeutralOpeningCard({ id: '7', rank: '8', suit: 'diamonds' })).toBe(true);
     expect(isNeutralOpeningCard({ id: '8', rank: '3', suit: 'hearts' })).toBe(true);
     expect(isNeutralOpeningCard({ id: '9', rank: '4', suit: 'spades' })).toBe(true);
     expect(isNeutralOpeningCard({ id: '10', rank: '7', suit: 'spades' })).toBe(true);

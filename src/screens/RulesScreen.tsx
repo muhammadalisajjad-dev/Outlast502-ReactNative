@@ -47,7 +47,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
             • <Text style={styles.boldText}>Dealing:</Text> 7 cards dealt to each active player.
           </Text>
           <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Neutral Opening Card:</Text> If the opening card is a 2, Jack, Ace, 7♥, or 8, it is put at the bottom of the deck until a neutral card appears.
+            • <Text style={styles.boldText}>Neutral Opening Card:</Text> If the opening card is a 2, Jack, Ace, or 7♥, it is put at the bottom of the deck until a neutral card appears.
           </Text>
           <Text style={styles.bulletPoint}>
             • <Text style={styles.boldText}>Normal Turn:</Text> Play 1 card matching the discard top by suit or rank, or draw 1 card.

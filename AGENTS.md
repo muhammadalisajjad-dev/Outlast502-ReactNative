@@ -15,7 +15,7 @@ Target Platform: Android & iOS (via Expo), portrait orientation.
 - **Never Modify Other Projects**: Keep all file reads, writes, and commands isolated to `C:\Users\hp\Downloads\Outlast502`.
 
 ## 3. Key Rule Invariants
-- Opening card must never be `{ 2, J, A, 7♥, 8 }`.
+- Opening card must never be `{ 2, J, A, 7♥ }` (following published written rule).
 - Pending penalties take precedence: Jack and 7♥ cannot cancel pending penalties.
 - End-of-round final 2 or A♠ forces the next player to draw before round scoring without answering.
 - Cumulative score >= 502 eliminates a player, unless they are the round winner (protected for that round).
