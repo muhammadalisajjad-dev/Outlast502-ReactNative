@@ -1,41 +1,25 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+# OUTLAST 502 — Agent Instructions & Working Conventions
 
-## Expo has changed — do not trust your training data
+This document specifies conventions for AI agents working in this repository.
 
-Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
+## 1. Project Overview
+OUTLAST 502 is an original React Native / Expo mobile game implementation of the 502 card game.
+Reference: https://502-game.vercel.app/
+Target Platform: Android & iOS (via Expo), portrait orientation.
 
-1. Read the major version of the `expo` package in `package.json`.
-2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
-3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
+## 2. Mandatory Architectural Constraints
+- **Pure Game Engine Isolation**: Game logic must remain strictly inside `src/engine/` as pure, deterministic TypeScript functions without any React, React Native, or DOM imports.
+- **No Direct Rule Modifications**: All rules must conform strictly to `docs/RULES_SPEC.md`. Do not invent or alter card penalties or scoring without consulting the spec.
+- **No Paid APIs**: Never introduce paid third-party services or dependencies requiring paid accounts.
+- **Expo Compatibility**: Install any native modules using `npx expo install <package>` to guarantee SDK version compatibility.
+- **Never Modify Other Projects**: Keep all file reads, writes, and commands isolated to `C:\Users\hp\Downloads\Outlast502`.
 
-## Commands
+## 3. Key Rule Invariants
+- Opening card must never be `{ 2, J, A, 7♥, 8 }`.
+- Pending penalties take precedence: Jack and 7♥ cannot cancel pending penalties.
+- End-of-round final 2 or A♠ forces the next player to draw before round scoring without answering.
+- Cumulative score >= 502 eliminates a player, unless they are the round winner (protected for that round).
+- 52-card standard deck (no jokers). 7 cards dealt per player.
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
-
-```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
-npx expo lint               # lint
-npx tsc --noEmit            # typecheck
-npx expo-doctor             # diagnose dependency and config issues
-npx expo install --fix      # fix incompatible package versions
-```
-
-Run lint and typecheck before declaring any task done.
-
-## Navigation & Routing
-
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
-
-## Building with EAS
-
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
-
-## Rules
-
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+## 4. Documentation Maintenance
+Whenever code or architecture is updated, ensure `PROJECT_STATUS.md`, `docs/FILE_MAP.md`, and other relevant docs are updated to reflect the changes.

@@ -1,20 +1,69 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GameProvider } from './src/context/GameContext';
+import { HomeScreen } from './src/screens/HomeScreen';
+import { SetupScreen } from './src/screens/SetupScreen';
+import { GameScreen } from './src/screens/GameScreen';
+import { ScoreboardScreen } from './src/screens/ScoreboardScreen';
+import { HistoryScreen } from './src/screens/HistoryScreen';
+import { RulesScreen } from './src/screens/RulesScreen';
+
+type ScreenType = 'home' | 'setup' | 'game' | 'scoreboard' | 'history' | 'rules';
+
+function MainNavigator() {
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
+  const [previousScreen, setPreviousScreen] = useState<ScreenType>('home');
+
+  const navigateTo = (screen: ScreenType) => {
+    setPreviousScreen(currentScreen);
+    setCurrentScreen(screen);
+  };
+
+  const handleBack = () => {
+    setCurrentScreen(previousScreen === 'setup' ? 'home' : previousScreen);
+  };
+
+  switch (currentScreen) {
+    case 'home':
+      return <HomeScreen onNavigate={navigateTo} />;
+
+    case 'setup':
+      return (
+        <SetupScreen
+          onBack={() => setCurrentScreen('home')}
+          onStartGame={() => setCurrentScreen('game')}
+        />
+      );
+
+    case 'game':
+      return (
+        <GameScreen
+          onOpenScoreboard={() => navigateTo('scoreboard')}
+          onOpenRules={() => navigateTo('rules')}
+          onGoHome={() => setCurrentScreen('home')}
+        />
+      );
+
+    case 'scoreboard':
+      return <ScoreboardScreen onBack={handleBack} />;
+
+    case 'history':
+      return <HistoryScreen onBack={() => setCurrentScreen('home')} />;
+
+    case 'rules':
+      return <RulesScreen onBack={handleBack} />;
+
+    default:
+      return <HomeScreen onNavigate={navigateTo} />;
+  }
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <GameProvider>
+        <MainNavigator />
+      </GameProvider>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
