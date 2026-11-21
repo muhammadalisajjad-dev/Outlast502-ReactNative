@@ -5,7 +5,8 @@ import { Typography } from '../../theme/typography';
 
 interface BadgeProps {
   label: string;
-  variant?: 'gold' | 'lime' | 'crimson' | 'neutral' | 'suit';
+  variant?: 'gold' | 'lime' | 'crimson' | 'neutral' | 'suit' | 'amber';
+  icon?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
@@ -13,6 +14,7 @@ interface BadgeProps {
 export const Badge: React.FC<BadgeProps> = ({
   label,
   variant = 'neutral',
+  icon,
   style,
   textStyle,
 }) => {
@@ -33,6 +35,11 @@ export const Badge: React.FC<BadgeProps> = ({
           container: styles.crimsonContainer,
           text: styles.crimsonText,
         };
+      case 'amber':
+        return {
+          container: styles.amberContainer,
+          text: styles.amberText,
+        };
       case 'suit':
         return {
           container: styles.suitContainer,
@@ -51,6 +58,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <View style={[styles.baseContainer, v.container, style]}>
+      {icon && <View style={styles.iconBox}>{icon}</View>}
       <Text style={[styles.baseText, v.text, textStyle]}>{label}</Text>
     </View>
   );
@@ -58,37 +66,48 @@ export const Badge: React.FC<BadgeProps> = ({
 
 const styles = StyleSheet.create({
   baseContainer: {
-    paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     alignSelf: 'flex-start',
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  iconBox: {
+    marginRight: 4,
   },
   baseText: {
     ...Typography.badge,
+    fontSize: 9.5,
   },
   goldContainer: {
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    borderColor: Colors.gold,
+    backgroundColor: 'rgba(203, 178, 106, 0.12)',
+    borderColor: Colors.borderSubtle,
   },
   goldText: {
     color: Colors.goldLight,
   },
   limeContainer: {
-    backgroundColor: 'rgba(46, 204, 113, 0.15)',
-    borderColor: Colors.playableLime,
+    backgroundColor: 'rgba(52, 211, 153, 0.12)',
+    borderColor: 'rgba(52, 211, 153, 0.35)',
   },
   limeText: {
-    color: Colors.playableLime,
+    color: Colors.playableMint,
   },
   crimsonContainer: {
-    backgroundColor: 'rgba(231, 76, 60, 0.18)',
-    borderColor: Colors.crimsonLight,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.35)',
   },
   crimsonText: {
     color: Colors.crimsonLight,
+  },
+  amberContainer: {
+    backgroundColor: 'rgba(217, 119, 6, 0.12)',
+    borderColor: 'rgba(217, 119, 6, 0.35)',
+  },
+  amberText: {
+    color: Colors.amberLight,
   },
   suitContainer: {
     backgroundColor: Colors.surfaceElevated,
@@ -98,8 +117,8 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   neutralContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderMuted,
   },
   neutralText: {
     color: Colors.textSecondary,

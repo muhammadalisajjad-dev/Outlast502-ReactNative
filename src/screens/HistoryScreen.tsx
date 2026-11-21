@@ -15,6 +15,17 @@ import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { triggerHaptic } from '../utils/haptics';
+import {
+  ChevronLeft,
+  Crown,
+  Cloud,
+  HardDrive,
+  RefreshCw,
+  Trash2,
+  Trophy,
+  Calendar,
+  Layers,
+} from 'lucide-react-native';
 
 interface HistoryScreenProps {
   onBack: () => void;
@@ -35,7 +46,6 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
         setCloudActive(true);
         const cloud = await fetchFirebaseHistory();
         if (cloud.length > 0) {
-          // Merge unique matches by id
           const map = new Map<string, MatchRecord>();
           local.forEach(m => map.set(m.id, m));
           cloud.forEach(m => map.set(m.id, { ...m, syncedToFirebase: true }));
@@ -65,88 +75,133 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>← Back</Text>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
+          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.title}>MATCH HISTORY</Text>
         <View style={{ width: 50 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Status Banner */}
         <View style={styles.statusCard}>
           <View style={styles.statusLeft}>
-            <Text style={styles.statusTitle}>Persistence Engine</Text>
+            <View style={styles.statusTitleRow}>
+              {cloudActive ? (
+                <Cloud size={14} color={Colors.playableMint} style={{ marginRight: 6 }} />
+              ) : (
+                <HardDrive size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+              )}
+              <Text style={styles.statusTitle}>
+                {cloudActive ? 'CLOUD PERSISTENCE ACTIVE' : 'LOCAL PERSISTENCE ENGINE'}
+              </Text>
+            </View>
             <Text style={styles.statusSubtitle}>
               {cloudActive
-                ? '🟢 Firebase Firestore Cloud Active & Local Cache'
-                : '🟡 Local Storage Active (Offline Mode Resilient)'}
+                ? 'Firestore Cloud sync verified & local offline cache active'
+                : 'AsyncStorage local storage active (offline resilient)'}
             </Text>
           </View>
-          <TouchableOpacity onPress={loadHistory} style={styles.refreshBtn}>
-            <Text style={styles.refreshBtnText}>🔄</Text>
+
+          <TouchableOpacity
+            onPress={loadHistory}
+            style={styles.refreshBtn}
+            activeOpacity={0.75}
+          >
+            <RefreshCw size={14} color={Colors.goldLight} />
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={Colors.gold} style={{ marginTop: 40 }} />
+          <ActivityIndicator size="small" color={Colors.gold} style={{ marginTop: 40 }} />
         ) : matches.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🏆</Text>
-            <Text style={styles.emptyTitle}>No Matches Logged Yet</Text>
+            <View style={styles.emptyIconBox}>
+              <Trophy size={28} color={Colors.goldLight} />
+            </View>
+            <Text style={styles.emptyTitle}>NO MATCHES RECORDED</Text>
             <Text style={styles.emptySubtitle}>
-              Complete a match to record final scores, player ranks, and cloud logs.
+              Complete a match to record champion standings, final point totals, and cloud sync logs.
             </Text>
           </View>
         ) : (
           <>
-            {matches.map(match => {
-              const dateStr = new Date(match.timestamp).toLocaleDateString(undefined, {
+            {matches.map(m => {
+              const dateStr = new Date(m.timestamp).toLocaleDateString(undefined, {
                 month: 'short',
                 day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
+                year: 'numeric',
               });
 
               return (
-                <View key={match.id} style={styles.matchCard}>
-                  <View style={styles.matchHeader}>
-                    <View>
-                      <Text style={styles.matchDate}>{dateStr}</Text>
-                      <Text style={styles.matchRounds}>
-                        {match.totalRounds} Rounds Played • {match.playerCount} Players
-                      </Text>
+                <View key={m.id} style={styles.matchCard}>
+                  <View style={styles.matchCardHeader}>
+                    <View style={styles.matchMetaRow}>
+                      <Calendar size={11} color={Colors.textMuted} style={{ marginRight: 4 }} />
+                      <Text style={styles.dateText}>{dateStr}</Text>
+                      <Text style={styles.metaDot}>·</Text>
+                      <Layers size={11} color={Colors.textMuted} style={{ marginRight: 4 }} />
+                      <Text style={styles.roundsText}>{m.totalRounds} Rounds</Text>
                     </View>
-                    <View style={styles.winnerBadge}>
-                      <Text style={styles.winnerText}>👑 {match.winnerName}</Text>
+
+                    <View style={styles.syncBadge}>
+                      {m.syncedToFirebase ? (
+                        <Cloud size={10} color={Colors.playableMint} style={{ marginRight: 4 }} />
+                      ) : (
+                        <HardDrive size={10} color={Colors.textMuted} style={{ marginRight: 4 }} />
+                      )}
+                      <Text
+                        style={[
+                          styles.syncText,
+                          m.syncedToFirebase && styles.syncTextCloud,
+                        ]}
+                      >
+                        {m.syncedToFirebase ? 'Cloud' : 'Local'}
+                      </Text>
                     </View>
                   </View>
 
-                  {/* Player Scores */}
-                  <View style={styles.playerList}>
-                    {match.players.map(p => (
-                      <View key={p.playerId} style={styles.playerScoreRow}>
-                        <Text style={styles.playerName}>
-                          {p.isWinner ? '🥇 ' : p.isEliminated ? '💀 ' : '🥈 '}
-                          {p.name} {p.isHuman ? '(You)' : ''}
-                        </Text>
-                        <Text style={styles.playerScore}>
-                          {p.finalScore} pts
-                        </Text>
-                      </View>
-                    ))}
+                  {/* Champion Banner */}
+                  <View style={styles.championBox}>
+                    <Crown size={14} color={Colors.goldLight} style={{ marginRight: 6 }} />
+                    <Text style={styles.championName}>
+                      Champion: {m.winnerName}
+                    </Text>
+                  </View>
+
+                  {/* Final Player Scores */}
+                  <View style={styles.playerScoresRow}>
+                    {m.players.map((ps, idx) => {
+                      return (
+                        <View key={ps.playerId || idx} style={styles.playerScoreChip}>
+                          <Text style={styles.chipPlayerName} numberOfLines={1}>
+                            {ps.name}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.chipScoreText,
+                              ps.isWinner && styles.chipScoreWinner,
+                            ]}
+                          >
+                            {ps.finalScore}p
+                          </Text>
+                        </View>
+                      );
+                    })}
                   </View>
                 </View>
               );
             })}
 
-            <Button
-              title="Clear Local History"
-              variant="outline"
-              size="small"
+            <TouchableOpacity
               onPress={handleClear}
               style={styles.clearBtn}
-            />
+              activeOpacity={0.75}
+            >
+              <Trash2 size={13} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
+              <Text style={styles.clearBtnText}>CLEAR LOCAL HISTORY</Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
@@ -166,143 +221,214 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(212, 175, 55, 0.2)',
+    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
+    backgroundColor: 'rgba(6, 19, 13, 0.95)',
   },
   backBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.surfaceElevated,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
   },
   backBtnText: {
+    ...Typography.badge,
     color: Colors.goldLight,
-    fontWeight: '700',
-    fontSize: 13,
+    fontSize: 10,
+    letterSpacing: 1,
   },
   title: {
-    ...Typography.titleSmall,
+    ...Typography.badge,
     color: Colors.gold,
-    letterSpacing: 1.5,
+    fontSize: 12,
+    letterSpacing: 1.8,
   },
   container: {
-    padding: 16,
-    alignItems: 'center',
+    padding: 18,
+    paddingBottom: 36,
   },
   statusCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: Colors.surfaceCard,
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: 'rgba(15, 36, 26, 0.85)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 14,
     marginBottom: 16,
   },
   statusLeft: {
     flex: 1,
+    marginRight: 12,
+  },
+  statusTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 3,
   },
   statusTitle: {
-    ...Typography.bodySmall,
+    ...Typography.labelUpper,
     color: Colors.goldLight,
-    fontWeight: '700',
+    fontSize: 10,
+    letterSpacing: 1,
   },
   statusSubtitle: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
     fontSize: 11,
-    color: Colors.textSecondary,
-    marginTop: 2,
+    lineHeight: 15,
   },
   refreshBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: Colors.surfaceElevated,
-  },
-  refreshBtnText: {
-    fontSize: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(203, 178, 106, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyContainer: {
+    paddingVertical: 48,
     alignItems: 'center',
-    marginTop: 40,
-    paddingHorizontal: 30,
   },
-  emptyIcon: {
-    fontSize: 48,
+  emptyIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    borderWidth: 1,
+    borderColor: Colors.borderSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   emptyTitle: {
-    ...Typography.titleSmall,
-    color: Colors.textPrimary,
+    ...Typography.labelUpper,
+    color: Colors.goldLight,
+    fontSize: 12,
+    letterSpacing: 1.5,
     marginBottom: 6,
   },
   emptySubtitle: {
     ...Typography.bodySmall,
     color: Colors.textMuted,
     textAlign: 'center',
+    maxWidth: 280,
+    lineHeight: 17,
   },
   matchCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: Colors.surfaceElevated,
-    borderColor: Colors.borderSubtle,
+    backgroundColor: 'rgba(15, 36, 26, 0.85)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 10,
     padding: 14,
     marginBottom: 12,
   },
-  matchHeader: {
+  matchCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 10,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
+    paddingBottom: 6,
+    borderBottomWidth: 0.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
-  matchDate: {
-    fontSize: 13,
-    color: Colors.goldLight,
-    fontWeight: '700',
-  },
-  matchRounds: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  winnerBadge: {
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    borderColor: Colors.gold,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  winnerText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: Colors.goldLight,
-  },
-  playerList: {
-    marginTop: 2,
-  },
-  playerScoreRow: {
+  matchMetaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 3,
+    alignItems: 'center',
   },
-  playerName: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontWeight: '600',
+  dateText: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 10.5,
   },
-  playerScore: {
-    fontSize: 12,
-    color: Colors.textPrimary,
+  metaDot: {
+    color: Colors.textMuted,
+    marginHorizontal: 6,
+    fontSize: 10,
+  },
+  roundsText: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 10.5,
+  },
+  syncBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 3,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+  },
+  syncText: {
+    fontSize: 9,
     fontWeight: '700',
+    color: Colors.textMuted,
+  },
+  syncTextCloud: {
+    color: Colors.playableMint,
+  },
+  championBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: 'rgba(203, 178, 106, 0.3)',
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  championName: {
+    ...Typography.bodySmall,
+    color: Colors.goldLight,
+    fontWeight: '800',
+    fontSize: 12.5,
+  },
+  playerScoresRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  playerScoreChip: {
+    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    borderRadius: 4,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 6,
+    marginBottom: 6,
+    alignItems: 'center',
+  },
+  chipPlayerName: {
+    fontSize: 9.5,
+    color: Colors.textMuted,
+    marginBottom: 1,
+  },
+  chipScoreText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+  },
+  chipScoreWinner: {
+    color: Colors.playableMint,
   },
   clearBtn: {
-    marginTop: 12,
-    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(185, 28, 28, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 11,
+    marginTop: 8,
+  },
+  clearBtnText: {
+    ...Typography.badge,
+    color: Colors.crimsonLight,
+    fontSize: 10.5,
+    letterSpacing: 0.8,
   },
 });

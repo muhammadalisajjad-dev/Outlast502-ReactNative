@@ -9,6 +9,7 @@ import { MatchRecord } from '../types/history';
 
 let isConfigured = false;
 let dbInstance: any = null;
+let authInstance: any = null;
 
 // Firebase configuration placeholder (populated via env or user settings)
 const DEFAULT_FIREBASE_CONFIG = {
@@ -20,8 +21,8 @@ const DEFAULT_FIREBASE_CONFIG = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
 };
 
-async function getFirestoreDb() {
-  if (dbInstance) return dbInstance;
+async function getFirebaseInstances() {
+  if (dbInstance && authInstance) return { db: dbInstance, auth: authInstance };
   if (!DEFAULT_FIREBASE_CONFIG.projectId) {
     return null;
   }
@@ -29,11 +30,23 @@ async function getFirestoreDb() {
   try {
     const { initializeApp, getApps } = await import('firebase/app');
     const { getFirestore } = await import('firebase/firestore');
+    const { getAuth, signInAnonymously } = await import('firebase/auth');
 
     const app = getApps().length === 0 ? initializeApp(DEFAULT_FIREBASE_CONFIG) : getApps()[0];
     dbInstance = getFirestore(app);
+    authInstance = getAuth(app);
+
+    // Ensure anonymous authentication for secure per-user rules
+    if (!authInstance.currentUser) {
+      try {
+        await signInAnonymously(authInstance);
+      } catch (authErr) {
+        console.warn('Anonymous sign-in skipped or failed:', authErr);
+      }
+    }
+
     isConfigured = true;
-    return dbInstance;
+    return { db: dbInstance, auth: authInstance };
   } catch (error) {
     console.warn('Firebase initialization skipped or failed:', error);
     return null;
@@ -46,19 +59,32 @@ export function isFirebaseConfigured(): boolean {
 
 /**
  * Syncs a completed match record to Firebase Firestore.
+ * Scoped securely under the authenticated user's history.
  */
 export async function syncMatchToFirebase(match: MatchRecord): Promise<boolean> {
-  const db = await getFirestoreDb();
-  if (!db) {
+  const instances = await getFirebaseInstances();
+  if (!instances) {
     return false;
   }
 
+  const { db, auth } = instances;
+  const uid = auth.currentUser?.uid;
+
   try {
     const { doc, setDoc } = await import('firebase/firestore');
-    await setDoc(doc(db, 'matches', match.id), {
+    const matchData = {
       ...match,
+      userId: uid || 'anonymous',
       syncedAt: Date.now(),
-    });
+    };
+
+    if (uid) {
+      // Primary: user-scoped secure document
+      await setDoc(doc(db, 'users', uid, 'matches', match.id), matchData);
+    } else {
+      // Fallback
+      await setDoc(doc(db, 'matches', match.id), matchData);
+    }
     return true;
   } catch (error) {
     console.warn('Failed to sync match to Firebase:', error);
@@ -70,20 +96,47 @@ export async function syncMatchToFirebase(match: MatchRecord): Promise<boolean> 
  * Fetches recent match history from Firebase Firestore.
  */
 export async function fetchFirebaseHistory(): Promise<MatchRecord[]> {
-  const db = await getFirestoreDb();
-  if (!db) {
+  const instances = await getFirebaseInstances();
+  if (!instances) {
     return [];
   }
 
+  const { db, auth } = instances;
+  const uid = auth.currentUser?.uid;
+
   try {
     const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
-    const q = query(collection(db, 'matches'), orderBy('timestamp', 'desc'), limit(25));
-    const snapshot = await getDocs(q);
-
     const matches: MatchRecord[] = [];
-    snapshot.forEach(docSnap => {
-      matches.push(docSnap.data() as MatchRecord);
-    });
+
+    if (uid) {
+      // Fetch user's own matches
+      try {
+        const userMatchesQuery = query(
+          collection(db, 'users', uid, 'matches'),
+          orderBy('timestamp', 'desc'),
+          limit(25)
+        );
+        const snapshot = await getDocs(userMatchesQuery);
+        snapshot.forEach(docSnap => {
+          matches.push(docSnap.data() as MatchRecord);
+        });
+      } catch (userErr) {
+        // Fall back to root matches query if rules allow
+      }
+    }
+
+    if (matches.length === 0) {
+      try {
+        const rootQuery = query(collection(db, 'matches'), orderBy('timestamp', 'desc'), limit(25));
+        const rootSnapshot = await getDocs(rootQuery);
+        rootSnapshot.forEach(docSnap => {
+          matches.push(docSnap.data() as MatchRecord);
+        });
+      } catch (rootErr) {
+        // Ignored if permissions are restricted
+      }
+    }
+
     return matches;
   } catch (error) {
     console.warn('Failed to fetch from Firebase Firestore:', error);

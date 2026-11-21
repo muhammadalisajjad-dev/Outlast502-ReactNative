@@ -18,6 +18,8 @@ import { PenaltyModal } from '../components/modals/PenaltyModal';
 import { RoundOverModal } from '../components/modals/RoundOverModal';
 import { GameOverModal } from '../components/modals/GameOverModal';
 import { Colors } from '../theme/colors';
+import { Typography } from '../theme/typography';
+import { Sparkles } from 'lucide-react-native';
 
 interface GameScreenProps {
   onOpenScoreboard: () => void;
@@ -49,7 +51,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Initializing Match...</Text>
+          <Text style={styles.loadingText}>INITIALIZING MATCH...</Text>
         </View>
       </SafeAreaView>
     );
@@ -100,28 +102,52 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       <View style={styles.tableFelt}>
         {/* Table Felt Rail Border */}
         <View style={styles.feltBorderFrame}>
-          {/* Recent Action Banner / Marquee */}
-          <View style={styles.logBanner}>
-            <Text style={styles.logText} numberOfLines={1}>
-              {recentLog}
-            </Text>
-          </View>
+          {/* Inner hairline gold ring */}
+          <View style={styles.innerFeltBorder}>
+            {/* Felt Table Center Watermark */}
+            <View style={styles.feltWatermark}>
+              <Text style={styles.watermarkSuits}>♠  ♥  ♦  ♣</Text>
+              <Text style={styles.watermarkTitle}>OUTLAST 502</Text>
+              <View style={styles.watermarkRing} />
+            </View>
 
-          {/* Center Piles (Draw & Discard) */}
-          <View style={styles.centerPilesRow}>
-            <DrawPile
-              count={gameState.drawPile.length}
-              canDraw={canDraw}
-              onDraw={drawCard}
-            />
+            {/* Recent Action Banner */}
+            {recentLog ? (
+              <View style={styles.logBanner}>
+                <Sparkles size={11} color={Colors.gold} style={{ marginRight: 6 }} />
+                <Text style={styles.logText} numberOfLines={1}>
+                  {recentLog}
+                </Text>
+              </View>
+            ) : <View style={{ height: 26 }} />}
 
-            <View style={styles.pileSeparator} />
+            {/* Center Piles (Draw & Discard) */}
+            <View style={styles.centerPilesRow}>
+              <DrawPile
+                count={gameState.drawPile.length}
+                canDraw={canDraw}
+                onDraw={drawCard}
+              />
 
-            <DiscardPile
-              topCard={topDiscard}
-              declaredSuit={gameState.declaredSuit}
-              count={gameState.discardPile.length}
-            />
+              <View style={styles.pileSeparator} />
+
+              <DiscardPile
+                topCard={topDiscard}
+                declaredSuit={gameState.declaredSuit}
+                count={gameState.discardPile.length}
+              />
+            </View>
+
+            {/* Subtle table footer guideline */}
+            <View style={styles.tableFooterStatus}>
+              <Text style={styles.tableFooterText}>
+                {gameState.pendingPenalty.active
+                  ? `PENALTY ACTIVE · ${gameState.pendingPenalty.cardsOwed} CARDS OWED`
+                  : gameState.declaredSuit
+                  ? `SUIT DEMANDED · ${gameState.declaredSuit.toUpperCase()}`
+                  : `STANDARD SHEDDING · DECK: ${gameState.drawPile.length}`}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -180,52 +206,107 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
+    ...Typography.badge,
     color: Colors.goldLight,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 1.5,
   },
   opponentsContainer: {
-    paddingVertical: 8,
-    backgroundColor: 'rgba(6, 26, 17, 0.7)',
+    paddingVertical: 6,
+    backgroundColor: 'rgba(6, 19, 13, 0.85)',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(212, 175, 55, 0.15)',
+    borderBottomColor: 'rgba(203, 178, 106, 0.12)',
   },
   opponentsScroll: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     alignItems: 'center',
   },
   tableFelt: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     justifyContent: 'center',
   },
   feltBorderFrame: {
     flex: 1,
     backgroundColor: Colors.tableFelt,
-    borderRadius: 24,
-    borderWidth: 6,
+    borderRadius: 20,
+    borderWidth: 4,
     borderColor: Colors.tableRail,
-    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  innerFeltBorder: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(203, 178, 106, 0.15)',
+    borderRadius: 16,
+    padding: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
+    position: 'relative',
+  },
+  feltWatermark: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
+  watermarkSuits: {
+    color: 'rgba(203, 178, 106, 0.05)',
+    fontSize: 24,
+    letterSpacing: 8,
+    marginBottom: 4,
+  },
+  watermarkTitle: {
+    ...Typography.badge,
+    color: 'rgba(203, 178, 106, 0.04)',
+    fontSize: 16,
+    letterSpacing: 4,
+  },
+  watermarkRing: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 1,
+    borderColor: 'rgba(203, 178, 106, 0.03)',
+  },
+  tableFooterStatus: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    backgroundColor: 'rgba(6, 19, 13, 0.6)',
+    borderRadius: 10,
+    borderWidth: 0.5,
+    borderColor: 'rgba(203, 178, 106, 0.15)',
+  },
+  tableFooterText: {
+    ...Typography.badge,
+    fontSize: 8.5,
+    color: Colors.textMuted,
+    letterSpacing: 0.8,
   },
   logBanner: {
-    backgroundColor: 'rgba(6, 26, 17, 0.7)',
-    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 20,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
-    maxWidth: '90%',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
+    maxWidth: '92%',
   },
   logText: {
     color: Colors.textSecondary,
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -236,11 +317,11 @@ const styles = StyleSheet.create({
     marginVertical: 'auto',
   },
   pileSeparator: {
-    width: 36,
+    width: 28,
   },
   playerHandSection: {
-    backgroundColor: 'rgba(6, 26, 17, 0.95)',
-    borderTopWidth: 2,
-    borderTopColor: 'rgba(212, 175, 55, 0.3)',
+    backgroundColor: 'rgba(6, 19, 13, 0.98)',
+    borderTopWidth: 1.5,
+    borderTopColor: 'rgba(203, 178, 106, 0.25)',
   },
 });

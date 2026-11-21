@@ -25,7 +25,7 @@ export const DrawPile: React.FC<DrawPileProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        activeOpacity={canDraw ? 0.8 : 1}
+        activeOpacity={canDraw ? 0.78 : 1}
         onPress={handlePress}
         disabled={!canDraw}
         style={[
@@ -33,6 +33,10 @@ export const DrawPile: React.FC<DrawPileProps> = ({
           canDraw && styles.canDrawGlow,
         ]}
       >
+        {/* Layered Deck Effect */}
+        {count > 2 && <View style={styles.deckLayer2} />}
+        {count > 1 && <View style={styles.deckLayer1} />}
+
         <PlayingCard faceDown size="large" />
 
         {/* Deck Count Badge */}
@@ -41,8 +45,8 @@ export const DrawPile: React.FC<DrawPileProps> = ({
         </View>
       </TouchableOpacity>
 
-      <Text style={styles.pileLabel}>
-        {canDraw ? 'Tap to Draw' : 'Draw Deck'}
+      <Text style={[styles.pileLabel, canDraw && styles.pileLabelActive]}>
+        {canDraw ? 'DRAW (+1)' : 'DECK'}
       </Text>
     </View>
   );
@@ -55,21 +59,43 @@ const styles = StyleSheet.create({
   },
   pileWrapper: {
     position: 'relative',
-    borderRadius: 8,
+    borderRadius: 7,
+  },
+  deckLayer2: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+    width: 84,
+    height: 122,
+    borderRadius: 7,
+    backgroundColor: '#0a1726',
+    borderWidth: 0.5,
+    borderColor: 'rgba(203, 178, 106, 0.2)',
+  },
+  deckLayer1: {
+    position: 'absolute',
+    top: 1.5,
+    left: 1.5,
+    width: 84,
+    height: 122,
+    borderRadius: 7,
+    backgroundColor: '#0c1e30',
+    borderWidth: 0.5,
+    borderColor: 'rgba(203, 178, 106, 0.3)',
   },
   canDrawGlow: {
     shadowColor: Colors.gold,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
   },
   badgeContainer: {
     position: 'absolute',
     bottom: -6,
     right: -6,
     backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
+    borderColor: Colors.borderSubtle,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 6,
@@ -77,15 +103,17 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: Colors.goldLight,
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
   },
   pileLabel: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    marginTop: 6,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    ...Typography.labelUpper,
+    color: Colors.textMuted,
+    marginTop: 8,
+    fontSize: 9.5,
+  },
+  pileLabelActive: {
+    color: Colors.goldLight,
+    fontWeight: '800',
   },
 });

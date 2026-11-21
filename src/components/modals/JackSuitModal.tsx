@@ -29,9 +29,9 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modalCard}>
-          <Text style={styles.title}>🃏 Jack Declared!</Text>
+          <Text style={styles.title}>JACK DECLARED</Text>
           <Text style={styles.subtitle}>
-            Choose a suit to demand from the next player:
+            Select a suit to demand from the next player:
           </Text>
 
           <View style={styles.grid}>
@@ -40,7 +40,7 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
               return (
                 <TouchableOpacity
                   key={suit}
-                  activeOpacity={0.8}
+                  activeOpacity={0.78}
                   style={styles.suitButton}
                   onPress={() => handleSelect(suit)}
                 >
@@ -52,7 +52,7 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
                   >
                     {SUIT_SYMBOLS[suit]}
                   </Text>
-                  <Text style={styles.suitName}>{SUIT_NAMES[suit]}</Text>
+                  <Text style={styles.suitName}>{SUIT_NAMES[suit].toUpperCase()}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -75,20 +75,21 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 320,
     backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
-    borderWidth: 2,
-    borderRadius: 16,
+    borderColor: Colors.borderSubtle,
+    borderWidth: 1.5,
+    borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    shadowColor: Colors.gold,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
     shadowRadius: 10,
-    elevation: 10,
+    elevation: 8,
   },
   title: {
     ...Typography.titleSmall,
     color: Colors.goldLight,
+    letterSpacing: 1.5,
     marginBottom: 4,
   },
   subtitle: {
@@ -104,27 +105,29 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   suitButton: {
-    width: '47%',
+    width: '48%',
     backgroundColor: Colors.cardIvory,
-    borderRadius: 10,
-    borderWidth: 1.5,
     borderColor: Colors.cardBorder,
+    borderWidth: 1,
+    borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
+    marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
   },
   suitSymbol: {
-    fontSize: 32,
-    marginBottom: 4,
+    fontSize: 30,
+    lineHeight: 34,
+    marginBottom: 2,
   },
   suitName: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1a1a1a',
+    ...Typography.badge,
+    color: Colors.cardBlackSuit,
+    fontSize: 9.5,
   },
 });

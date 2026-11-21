@@ -10,6 +10,7 @@ import { Player, RoundResult } from '../../types/game';
 import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
+import { Crown, Zap, AlertTriangle, Shield, Skull } from 'lucide-react-native';
 
 interface RoundOverModalProps {
   visible: boolean;
@@ -27,34 +28,41 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
   if (!roundResult) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.cardContainer}>
-          <Text style={styles.title}>ROUND {roundResult.roundNumber} OVER</Text>
+          <Text style={styles.title}>ROUND {roundResult.roundNumber} COMPLETE</Text>
 
           {/* Winner Banner */}
           <View style={styles.winnerBanner}>
-            <Text style={styles.winnerTitle}>
-              👑 {roundResult.winnerName} Won!
-            </Text>
-            <Text style={styles.winReason}>
-              {roundResult.winReason === 'seven_of_hearts'
-                ? '⚡ 7 of Hearts Instant Win'
-                : '🃏 Emptied Hand'}
-            </Text>
+            <View style={styles.winnerHeaderRow}>
+              <Crown size={18} color={Colors.goldLight} style={{ marginRight: 6 }} />
+              <Text style={styles.winnerTitle}>
+                {roundResult.winnerName} Won
+              </Text>
+            </View>
+
+            <View style={styles.winReasonRow}>
+              <Zap size={12} color={Colors.gold} style={{ marginRight: 4 }} />
+              <Text style={styles.winReason}>
+                {roundResult.winReason === 'seven_of_hearts'
+                  ? '7 of Hearts Instant Round Victory'
+                  : 'Shed All Hand Cards'}
+              </Text>
+            </View>
           </View>
 
-          {/* Special Final Penalty Notice */}
+          {/* Forced Penalty Notice */}
           {roundResult.forcedPenaltyPlayerId && (
             <View style={styles.forcedPenaltyNotice}>
+              <AlertTriangle size={13} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
               <Text style={styles.forcedPenaltyText}>
-                ⚠️ Final card was a penalty card! Next player was forced to draw{' '}
-                {roundResult.forcedPenaltyCards} cards before scoring.
+                Final card was a penalty card! Next player drew {roundResult.forcedPenaltyCards} cards before round scoring.
               </Text>
             </View>
           )}
 
-          <Text style={styles.sectionHeading}>Round Score Summary</Text>
+          <Text style={styles.sectionHeading}>ROUND SCORE BREAKDOWN</Text>
 
           {/* Player Breakdown */}
           <ScrollView style={styles.scoreList}>
@@ -73,19 +81,29 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
                   ]}
                 >
                   <View style={styles.playerInfo}>
-                    <Text style={styles.playerName}>
+                    <Text style={[styles.playerName, isWinner && styles.winnerNameText]}>
                       {p.name} {p.isHuman ? '(You)' : ''}
                     </Text>
+
                     {p.immuneThisRound && (
-                      <Text style={styles.immunityBadge}>🛡️ IMMUNE THIS ROUND</Text>
+                      <View style={styles.statusPill}>
+                        <Shield size={9} color={Colors.goldLight} style={{ marginRight: 3 }} />
+                        <Text style={styles.immunityBadge}>IMMUNE</Text>
+                      </View>
                     )}
+
                     {isEliminated && (
-                      <Text style={styles.eliminatedBadge}>💀 ELIMINATED (502+)</Text>
+                      <View style={[styles.statusPill, { borderColor: 'rgba(239, 68, 68, 0.4)' }]}>
+                        <Skull size={9} color={Colors.crimsonLight} style={{ marginRight: 3 }} />
+                        <Text style={styles.eliminatedBadge}>ELIMINATED</Text>
+                      </View>
                     )}
                   </View>
 
                   <View style={styles.scoreDetails}>
-                    <Text style={styles.roundScoreText}>+{roundScore} pts</Text>
+                    <Text style={[styles.roundScoreText, isWinner && styles.winnerScoreText]}>
+                      {isWinner && roundScore === 0 ? '0 pts' : `+${roundScore} pts`}
+                    </Text>
                     <Text style={styles.cumulativeText}>
                       Total: {p.cumulativeScore} / 502
                     </Text>
@@ -96,11 +114,11 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
           </ScrollView>
 
           <Button
-            title="Next Round →"
+            title="Start Next Round"
             variant="gold"
-            size="large"
+            size="medium"
             onPress={onNextRound}
-            style={styles.nextBtn}
+            style={styles.actionBtn}
           />
         </View>
       </View>
@@ -118,127 +136,147 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: '100%',
-    maxWidth: 380,
-    maxHeight: '85%',
+    maxWidth: 350,
     backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
-    borderWidth: 2,
-    borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: Colors.gold,
+    borderColor: Colors.borderSubtle,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    padding: 18,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 12,
+    shadowRadius: 10,
+    elevation: 8,
   },
   title: {
-    ...Typography.titleMedium,
+    ...Typography.badge,
     color: Colors.gold,
-    letterSpacing: 1.5,
-    marginBottom: 10,
+    fontSize: 11,
+    letterSpacing: 1.8,
+    textAlign: 'center',
+    marginBottom: 12,
   },
   winnerBanner: {
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    borderColor: Colors.gold,
+    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    borderColor: Colors.borderSubtle,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    borderRadius: 8,
+    padding: 12,
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+  winnerHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
   },
   winnerTitle: {
     ...Typography.titleSmall,
     color: Colors.goldLight,
+    fontWeight: '800',
   },
-  winReason: {
-    fontSize: 12,
-    color: Colors.playableLime,
-    fontWeight: '700',
+  winReasonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
   },
-  forcedPenaltyNotice: {
-    backgroundColor: 'rgba(231, 76, 60, 0.2)',
-    borderColor: Colors.crimsonLight,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 10,
-    width: '100%',
-  },
-  forcedPenaltyText: {
-    fontSize: 11,
-    color: '#ffcdd2',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  sectionHeading: {
+  winReason: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
-    fontWeight: '700',
-    alignSelf: 'flex-start',
+    fontSize: 11,
+  },
+  forcedPenaltyNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(185, 28, 28, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 8,
+    marginBottom: 10,
+  },
+  forcedPenaltyText: {
+    ...Typography.bodySmall,
+    color: '#fca5a5',
+    fontSize: 10.5,
+    flex: 1,
+  },
+  sectionHeading: {
+    ...Typography.labelUpper,
+    color: Colors.textMuted,
+    fontSize: 9.5,
     marginBottom: 6,
-    textTransform: 'uppercase',
   },
   scoreList: {
-    width: '100%',
-    marginBottom: 16,
+    maxHeight: 180,
+    marginBottom: 14,
   },
   playerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceElevated,
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   winnerRow: {
-    borderColor: Colors.gold,
-    backgroundColor: 'rgba(26, 66, 48, 0.9)',
+    backgroundColor: 'rgba(203, 178, 106, 0.08)',
+    borderRadius: 6,
   },
   eliminatedRow: {
     opacity: 0.5,
-    borderColor: Colors.crimson,
   },
   playerInfo: {
     flex: 1,
   },
   playerName: {
-    ...Typography.bodyMedium,
+    ...Typography.bodySmall,
     color: Colors.textPrimary,
     fontWeight: '700',
   },
+  winnerNameText: {
+    color: Colors.goldLight,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    borderWidth: 0.5,
+    borderColor: Colors.borderSubtle,
+    borderRadius: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
   immunityBadge: {
-    fontSize: 10,
-    color: Colors.playableLime,
+    fontSize: 8,
     fontWeight: '800',
-    marginTop: 1,
+    color: Colors.goldLight,
+    letterSpacing: 0.4,
   },
   eliminatedBadge: {
-    fontSize: 10,
-    color: Colors.crimsonLight,
+    fontSize: 8,
     fontWeight: '800',
-    marginTop: 1,
+    color: Colors.crimsonLight,
+    letterSpacing: 0.4,
   },
   scoreDetails: {
     alignItems: 'flex-end',
   },
   roundScoreText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    color: Colors.goldLight,
+    color: Colors.crimsonLight,
+  },
+  winnerScoreText: {
+    color: Colors.playableMint,
   },
   cumulativeText: {
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.textMuted,
   },
-  nextBtn: {
+  actionBtn: {
     width: '100%',
   },
 });

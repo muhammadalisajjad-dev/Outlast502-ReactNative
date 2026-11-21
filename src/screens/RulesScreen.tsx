@@ -9,6 +9,16 @@ import {
 } from 'react-native';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
+import {
+  ChevronLeft,
+  Shield,
+  Zap,
+  BookOpen,
+  Crown,
+  Layers,
+  AlertTriangle,
+  RotateCcw,
+} from 'lucide-react-native';
 
 interface RulesScreenProps {
   onBack: () => void;
@@ -18,153 +28,184 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>← Back</Text>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
+          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.title}>OFFICIAL 502 RULES</Text>
         <View style={{ width: 50 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Goal Section */}
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Core Objective Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🎯 Objective of 502</Text>
+          <View style={styles.cardHeader}>
+            <Shield size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>OBJECTIVE & SURVIVAL</Text>
+          </View>
           <Text style={styles.bodyText}>
-            502 is a fast shedding card game for 2 to 6 players played with a
-            standard 52-card deck (no jokers). The goal is to get rid of all your
-            cards. Cards remaining in your hand at round end become penalty
-            points.
+            502 is an intense card shedding game for 2 to 6 participants played with a standard 52-card deck (no jokers). The goal is to empty your hand. Unplayed cards remaining in hand at round end convert into penalty points.
           </Text>
-          <Text style={[styles.bodyText, { marginTop: 8, color: Colors.crimsonLight, fontWeight: '700' }]}>
-            Any player who reaches 502 points is eliminated. The last survivor wins!
-          </Text>
+          <View style={styles.calloutBox}>
+            <Text style={styles.calloutText}>
+              Any player accumulating 502 or more points is eliminated. The last surviving player wins the match.
+            </Text>
+          </View>
         </View>
 
-        {/* Turn Flow */}
+        {/* Turn Flow Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔄 Turn & Setup</Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Dealing:</Text> 7 cards dealt to each active player.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Neutral Opening Card:</Text> If the opening card is a 2, Jack, Ace, or 7♥, it is put at the bottom of the deck until a neutral card appears.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Normal Turn:</Text> Play 1 card matching the discard top by suit or rank, or draw 1 card.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Drawing Ends Turn:</Text> Drawing ends your turn immediately. You cannot play the drawn card on that turn.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Voluntary Draw:</Text> You may draw even when you hold a playable card.
-          </Text>
+          <View style={styles.cardHeader}>
+            <Layers size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>TURN STRUCTURE & DEAL</Text>
+          </View>
+
+          <View style={styles.bulletRow}>
+            <View style={styles.bulletDot} />
+            <Text style={styles.bulletText}>
+              <Text style={styles.boldText}>Initial Deal:</Text> 7 cards dealt to each active player.
+            </Text>
+          </View>
+
+          <View style={styles.bulletRow}>
+            <View style={styles.bulletDot} />
+            <Text style={styles.bulletText}>
+              <Text style={styles.boldText}>Neutral Opening Card:</Text> If the starter card is a 2, Jack, Ace, or 7♥, it is tucked to the deck bottom until a neutral card appears.
+            </Text>
+          </View>
+
+          <View style={styles.bulletRow}>
+            <View style={styles.bulletDot} />
+            <Text style={styles.bulletText}>
+              <Text style={styles.boldText}>Matching:</Text> Play 1 card matching the discard top by suit or rank, or draw 1 card.
+            </Text>
+          </View>
+
+          <View style={styles.bulletRow}>
+            <View style={styles.bulletDot} />
+            <Text style={styles.bulletText}>
+              <Text style={styles.boldText}>Turn Termination:</Text> Drawing from the deck immediately concludes your turn; the drawn card cannot be played on that turn.
+            </Text>
+          </View>
+
+          <View style={styles.bulletRow}>
+            <View style={styles.bulletDot} />
+            <Text style={styles.bulletText}>
+              <Text style={styles.boldText}>Voluntary Draw:</Text> Players may draw voluntarily even when holding playable cards.
+            </Text>
+          </View>
         </View>
 
-        {/* Special Cards */}
+        {/* Action Cards Grid */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>⚡ Special Cards</Text>
+          <View style={styles.cardHeader}>
+            <Zap size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>ACTION & PENALTY CARDS</Text>
+          </View>
 
           <View style={styles.specialCardItem}>
-            <Text style={styles.specialCardName}>👑 7 of Hearts (7♥) — Instant Win</Text>
+            <View style={styles.cardLabelRow}>
+              <Text style={styles.specialCardBadge}>7♥</Text>
+              <Text style={styles.specialCardName}>7 of Hearts — Instant Victory</Text>
+            </View>
             <Text style={styles.bodyText}>
-              Wild card. Immediately ends the round with the player as winner,
-              regardless of remaining cards. However, cards left in their hand
-              still count as penalty points!
+              Wild card. Immediately concludes the round in victory, regardless of other cards held. However, unplayed cards left in hand still count as penalty points! Protected from elimination.
             </Text>
           </View>
 
           <View style={styles.specialCardItem}>
-            <Text style={styles.specialCardName}>🃏 Jack (any suit) — Wild Suit Demand</Text>
+            <View style={styles.cardLabelRow}>
+              <Text style={styles.specialCardBadge}>J</Text>
+              <Text style={styles.specialCardName}>Jack — Wild Suit Demand</Text>
+            </View>
             <Text style={styles.bodyText}>
-              Can be played on any card. Player declares a suit. The next player
-              must follow that suit, answer with another Jack or 7♥, or draw.
+              Playable on any normal card. The player declares a suit. The next participant must follow that suit, answer with another Jack or 7♥, or draw.
             </Text>
           </View>
 
           <View style={styles.specialCardItem}>
-            <Text style={styles.specialCardName}>⚔️ 2 (any suit) — Draw 2 (Stackable)</Text>
+            <View style={styles.cardLabelRow}>
+              <Text style={styles.specialCardBadge}>2</Text>
+              <Text style={styles.specialCardName}>2 — Draw 2 (Stackable: 2, 4, 6, 8)</Text>
+            </View>
             <Text style={styles.bodyText}>
-              Next player must draw 2 cards. Can be answered with another 2,
-              stacking the penalty (+2 each time: 2, 4, 6, 8). The first player
-              who cannot or will not add a 2 draws the accumulated total.
+              Next player owes 2 cards. Can be answered with another 2, passing and incrementing the penalty (+2 each time up to 8). The first player unable or unwilling to add a 2 draws the entire stack.
             </Text>
           </View>
 
           <View style={styles.specialCardItem}>
-            <Text style={styles.specialCardName}>🗡️ Ace of Spades (A♠) — Draw 5</Text>
+            <View style={styles.cardLabelRow}>
+              <Text style={styles.specialCardBadge}>A♠</Text>
+              <Text style={styles.specialCardName}>Ace of Spades — Draw 5 (Passable)</Text>
+            </View>
             <Text style={styles.bodyText}>
-              Next player owes 5 cards. Can be passed by playing any other Ace
-              (A♥, A♦, A♣). The penalty remains 5 cards (never grows).
+              Next player owes 5 cards. Can be passed by playing any other Ace (A♥, A♦, A♣). The penalty remains fixed at 5 cards (never stacks). Other Aces have no special effect except passing A♠.
             </Text>
           </View>
 
-          <View style={styles.specialCardItem}>
-            <Text style={styles.specialCardName}>🛑 8 (any suit) — Skip</Text>
+          <View style={[styles.specialCardItem, { borderBottomWidth: 0 }]}>
+            <View style={styles.cardLabelRow}>
+              <Text style={styles.specialCardBadge}>8</Text>
+              <Text style={styles.specialCardName}>8 — Skip Next Player</Text>
+            </View>
             <Text style={styles.bodyText}>
-              Next player loses their turn without drawing. Can be countered with
-              another 8 to pass the skip onward.
+              Skips the next player's turn. Can be answered with another 8 to pass the skip onward.
             </Text>
           </View>
-        </View>
-
-        {/* Penalty Priority Rule */}
-        <View style={[styles.card, { borderColor: Colors.crimsonLight }]}>
-          <Text style={[styles.cardTitle, { color: Colors.crimsonLight }]}>
-            ⚠️ Crucial Rule: Penalties Come First!
-          </Text>
-          <Text style={styles.bodyText}>
-            When a 2-penalty, A♠-penalty, or 8-skip is waiting for you, normal
-            play is strictly paused.
-          </Text>
-          <Text style={[styles.bodyText, { marginTop: 6, fontWeight: '700', color: Colors.goldLight }]}>
-            A Jack or 7♥ CANNOT cancel a pending penalty! You may only play the
-            matching counter (2, Ace, or 8) or accept the penalty.
-          </Text>
         </View>
 
         {/* Scoring Table */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📊 Penalty Point Table</Text>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>7 of Hearts (7♥) & Ace of Spades (A♠)</Text>
-            <Text style={styles.scoreValue}>100 pts</Text>
+          <View style={styles.cardHeader}>
+            <BookOpen size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>PENALTY POINT VALUES</Text>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>2, 8, and Jack (any suit)</Text>
-            <Text style={styles.scoreValue}>30 pts</Text>
+          <Text style={styles.sectionHint}>
+            Assessed for unplayed cards remaining in hand at round completion:
+          </Text>
+
+          <View style={styles.tableRowHeader}>
+            <Text style={styles.tableColHeader}>Card Rank</Text>
+            <Text style={styles.tableColHeaderRight}>Penalty Points</Text>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>A♥, A♦, and A♣ (other Aces)</Text>
-            <Text style={styles.scoreValue}>20 pts</Text>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCol}>Numbered Cards (3–10)</Text>
+            <Text style={styles.tableColRight}>Face value (3–10 pts)</Text>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>10, Queen, King (10, Q, K)</Text>
-            <Text style={styles.scoreValue}>10 pts</Text>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCol}>Rank 2 (any suit)</Text>
+            <Text style={styles.tableColRight}>20 points</Text>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>3, 4, 5, 6, 9, other 7s (7♠, 7♦, 7♣)</Text>
-            <Text style={styles.scoreValue}>5 pts</Text>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCol}>Jack, Queen, King</Text>
+            <Text style={styles.tableColRight}>10 points each</Text>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Empty hand round winner</Text>
-            <Text style={styles.scoreValue}>0 pts</Text>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCol}>Standard Aces (A♥, A♦, A♣)</Text>
+            <Text style={styles.tableColRight}>15 points each</Text>
+          </View>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCol}>Ace of Spades (A♠)</Text>
+            <Text style={[styles.tableColRight, { color: Colors.crimsonLight, fontWeight: '700' }]}>
+              50 points
+            </Text>
+          </View>
+          <View style={[styles.tableRow, { borderBottomWidth: 0 }]}>
+            <Text style={styles.tableCol}>7 of Hearts (7♥)</Text>
+            <Text style={[styles.tableColRight, { color: Colors.goldLight, fontWeight: '700' }]}>
+              0 points (Free Wild)
+            </Text>
           </View>
         </View>
 
-        {/* Elimination & Protection */}
+        {/* End of Round Penalty Clause */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🛡️ Elimination & Protection</Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>502 Threshold:</Text> Players reaching 502 points are eliminated.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Round Winner Immunity:</Text> The round winner is immune from elimination in that round, even if their score crosses 502 (e.g. from 7♥ remaining hand points). They are evaluated again next round.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Tie-Break:</Text> If all remaining players cross 502 in the same round, the player with the lowest score wins.
-          </Text>
-          <Text style={styles.bulletPoint}>
-            • <Text style={styles.boldText}>Next Round Starter:</Text> The winner of the previous round always starts the next round.
+          <View style={styles.cardHeader}>
+            <AlertTriangle size={14} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>FINAL CARD FORCED PENALTY</Text>
+          </View>
+          <Text style={styles.bodyText}>
+            If a player wins a round by shedding a 2 or A♠ as their final card, the next player in sequence MUST draw the full penalty (2 or 5 cards) before round scoring begins, without opportunity to answer.
           </Text>
         </View>
       </ScrollView>
@@ -184,53 +225,89 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(212, 175, 55, 0.2)',
+    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
+    backgroundColor: 'rgba(6, 19, 13, 0.95)',
   },
   backBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.surfaceElevated,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
   },
   backBtnText: {
+    ...Typography.badge,
     color: Colors.goldLight,
-    fontWeight: '700',
-    fontSize: 13,
+    fontSize: 10,
+    letterSpacing: 1,
   },
   title: {
-    ...Typography.titleSmall,
+    ...Typography.badge,
     color: Colors.gold,
-    letterSpacing: 1.5,
+    fontSize: 12,
+    letterSpacing: 1.8,
   },
   container: {
-    padding: 16,
-    alignItems: 'center',
+    padding: 18,
+    paddingBottom: 36,
   },
   card: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: Colors.surfaceCard,
-    borderColor: Colors.borderSubtle,
+    backgroundColor: 'rgba(15, 36, 26, 0.85)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 10,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   cardTitle: {
-    ...Typography.titleSmall,
-    fontSize: 15,
-    color: Colors.goldLight,
-    marginBottom: 8,
+    ...Typography.labelUpper,
+    color: Colors.gold,
+    fontSize: 11,
+    letterSpacing: 1.2,
   },
   bodyText: {
-    ...Typography.bodySmall,
+    ...Typography.bodyMedium,
     color: Colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 20,
+    fontSize: 12.5,
   },
-  bulletPoint: {
+  calloutBox: {
+    backgroundColor: 'rgba(185, 28, 28, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 10,
+    marginTop: 10,
+  },
+  calloutText: {
     ...Typography.bodySmall,
+    color: '#fca5a5',
+    fontWeight: '700',
+    fontSize: 11.5,
+    lineHeight: 16,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  bulletDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.gold,
+    marginTop: 7,
+    marginRight: 8,
+  },
+  bulletText: {
+    ...Typography.bodyMedium,
     color: Colors.textSecondary,
-    marginBottom: 6,
+    fontSize: 12,
+    flex: 1,
     lineHeight: 18,
   },
   boldText: {
@@ -238,33 +315,73 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   specialCardItem: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  cardLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  specialCardBadge: {
+    backgroundColor: Colors.cardIvory,
+    color: Colors.cardBlackSuit,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: '900',
+    marginRight: 8,
+    borderWidth: 0.5,
+    borderColor: Colors.cardBorder,
   },
   specialCardName: {
-    ...Typography.bodyMedium,
+    ...Typography.bodySmall,
     color: Colors.goldLight,
     fontWeight: '700',
-    marginBottom: 3,
+    fontSize: 12.5,
   },
-  scoreRow: {
+  sectionHint: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 11,
+    marginBottom: 10,
+  },
+  tableRowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
+    borderBottomColor: 'rgba(203, 178, 106, 0.3)',
+    marginBottom: 4,
+  },
+  tableColHeader: {
+    ...Typography.labelUpper,
+    color: Colors.gold,
+    fontSize: 9.5,
+  },
+  tableColHeaderRight: {
+    ...Typography.labelUpper,
+    color: Colors.gold,
+    fontSize: 9.5,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 7,
+    borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
-  scoreLabel: {
+  tableCol: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
-    flex: 1,
+    fontSize: 12,
   },
-  scoreValue: {
+  tableColRight: {
     ...Typography.bodySmall,
-    color: Colors.goldLight,
-    fontWeight: '800',
-    marginLeft: 10,
+    color: Colors.textPrimary,
+    fontWeight: '600',
+    fontSize: 12,
   },
 });

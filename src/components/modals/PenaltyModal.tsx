@@ -4,6 +4,7 @@ import { PenaltyState } from '../../types/game';
 import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
+import { AlertTriangle } from 'lucide-react-native';
 
 interface PenaltyModalProps {
   pendingPenalty: PenaltyState;
@@ -24,26 +25,26 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
     switch (pendingPenalty.type) {
       case 'two':
         return {
-          title: `⚠️ 2-STACK PENALTY (${pendingPenalty.cardsOwed} CARDS)`,
+          title: `2-STACK PENALTY (${pendingPenalty.cardsOwed} CARDS)`,
           subtitle: hasCounterCard
-            ? `Play a 2 from your hand to pass & add +2, or draw ${pendingPenalty.cardsOwed} cards:`
-            : `You have no 2. You must draw ${pendingPenalty.cardsOwed} cards:`,
-          actionTitle: `Draw ${pendingPenalty.cardsOwed} Cards`,
+            ? `Play a 2 to pass & stack +2, or draw ${pendingPenalty.cardsOwed} cards:`
+            : `No 2 in hand. Must draw ${pendingPenalty.cardsOwed} cards:`,
+          actionTitle: `Draw ${pendingPenalty.cardsOwed}`,
         };
       case 'ace':
         return {
-          title: '⚠️ ACE OF SPADES PENALTY (5 CARDS)',
+          title: 'ACE OF SPADES (5 CARDS)',
           subtitle: hasCounterCard
-            ? 'Play any Ace from your hand to pass 5 cards, or draw 5 cards:'
-            : 'You have no Ace. You must draw 5 cards:',
+            ? 'Play any Ace to pass 5 cards, or draw 5 cards:'
+            : 'No Ace in hand. Must draw 5 cards:',
           actionTitle: 'Draw 5 Cards',
         };
       case 'skip':
         return {
-          title: '⚠️ SKIP ACTIVATED',
+          title: 'SKIP ACTIVE',
           subtitle: hasCounterCard
-            ? 'Play an 8 from your hand to pass the skip, or lose your turn:'
-            : 'You have no 8. Your turn is skipped:',
+            ? 'Play an 8 to pass the skip, or forfeit turn:'
+            : 'No 8 in hand. Turn is skipped:',
           actionTitle: 'Accept Skip',
         };
       default:
@@ -56,6 +57,10 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
 
   return (
     <View style={styles.bannerContainer}>
+      <View style={styles.iconCol}>
+        <AlertTriangle size={18} color="#ffffff" />
+      </View>
+
       <View style={styles.contentCol}>
         <Text style={styles.bannerTitle}>{details.title}</Text>
         <Text style={styles.bannerSubtitle}>{details.subtitle}</Text>
@@ -74,39 +79,45 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
 
 const styles = StyleSheet.create({
   bannerContainer: {
-    backgroundColor: 'rgba(192, 57, 43, 0.95)',
-    borderColor: Colors.crimsonLight,
-    borderWidth: 1.5,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    backgroundColor: 'rgba(185, 28, 28, 0.95)',
+    borderColor: 'rgba(239, 68, 68, 0.6)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
     marginHorizontal: 16,
-    marginVertical: 6,
+    marginVertical: 4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: Colors.crimson,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  iconCol: {
+    marginRight: 10,
   },
   contentCol: {
     flex: 1,
     marginRight: 10,
   },
   bannerTitle: {
-    ...Typography.bodySmall,
+    ...Typography.badge,
     color: '#ffffff',
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontSize: 10,
+    letterSpacing: 0.8,
   },
   bannerSubtitle: {
+    ...Typography.bodySmall,
+    color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 11,
-    color: '#fbeee6',
-    marginTop: 2,
+    marginTop: 1,
   },
   actionBtn: {
-    minWidth: 100,
+    backgroundColor: '#7f1d1d',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    paddingHorizontal: 10,
   },
 });

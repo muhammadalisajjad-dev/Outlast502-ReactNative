@@ -36,8 +36,8 @@ describe('Game Engine State Transition Tests', () => {
     let state = initMatch(3, 'TestUser');
     const topCard = state.discardPile[0];
 
-    // Give player 0 a matching card
-    const matchingCard: Card = { id: 'match_1', rank: topCard.rank, suit: 'hearts' };
+    // Give player 0 a normal matching card (rank 4 matches by suit)
+    const matchingCard: Card = { id: 'match_1', rank: '4', suit: topCard.suit };
     state.players[0].hand[0] = matchingCard;
 
     state = executePlayCard(state, 'player_0', 'match_1');

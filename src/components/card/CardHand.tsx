@@ -10,6 +10,7 @@ import { Card } from '../../types/card';
 import { PlayingCard } from './PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
+import { Sparkles, Layers } from 'lucide-react-native';
 
 interface CardHandProps {
   hand: Card[];
@@ -26,18 +27,33 @@ export const CardHand: React.FC<CardHandProps> = ({
   isMyTurn,
   style,
 }) => {
+  const playableCount = hand.filter(c => playableCardIds.has(c.id)).length;
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.headerRow}>
-        <Text style={styles.handTitle}>
-          Your Hand ({hand.length} {hand.length === 1 ? 'card' : 'cards'})
-        </Text>
-        {isMyTurn && (
-          <Text style={styles.turnHint}>
-            {playableCardIds.size > 0
-              ? 'Tap a glowing card to play'
-              : 'No matching cards — draw from deck'}
+        <View style={styles.titleGroup}>
+          <Layers size={13} color={Colors.gold} style={{ marginRight: 6 }} />
+          <Text style={styles.handTitle}>
+            HAND ({hand.length})
           </Text>
+        </View>
+
+        {isMyTurn && (
+          <View style={styles.hintGroup}>
+            {playableCount > 0 ? (
+              <>
+                <Sparkles size={12} color={Colors.playableMint} style={{ marginRight: 4 }} />
+                <Text style={styles.turnHintPlayable}>
+                  {playableCount} playable {playableCount === 1 ? 'card' : 'cards'}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.turnHintDraw}>
+                No matches — tap deck to draw
+              </Text>
+            )}
+          </View>
         )}
       </View>
 
@@ -82,27 +98,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 6,
   },
-  handTitle: {
-    ...Typography.bodySmall,
-    color: Colors.textGold,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+  titleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  turnHint: {
+  handTitle: {
+    ...Typography.labelUpper,
+    color: Colors.goldLight,
+  },
+  hintGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  turnHintPlayable: {
     ...Typography.bodySmall,
-    color: Colors.playableLime,
-    fontWeight: '600',
+    color: Colors.playableMint,
+    fontWeight: '700',
+    fontSize: 11,
+  },
+  turnHintDraw: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
     fontSize: 11,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingTop: 14,
+    paddingBottom: 14,
     alignItems: 'center',
   },
   cardWrapper: {
     zIndex: 1,
   },
   overlappingCard: {
-    marginLeft: -14, // Fanned card overlap effect
+    marginLeft: -14,
   },
 });

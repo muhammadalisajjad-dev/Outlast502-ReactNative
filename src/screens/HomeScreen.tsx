@@ -5,11 +5,23 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
 import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { useGame } from '../context/GameContext';
+import {
+  Play,
+  Users,
+  BarChart3,
+  History,
+  BookOpen,
+  Shield,
+  Zap,
+  Sparkles,
+  Layers,
+} from 'lucide-react-native';
 
 interface HomeScreenProps {
   onNavigate: (screen: 'game' | 'setup' | 'scoreboard' | 'history' | 'rules') => void;
@@ -25,94 +37,139 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Luxury Brand Header */}
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Editorial Brand Crest */}
         <View style={styles.brandContainer}>
-          <View style={styles.suitRow}>
+          <View style={styles.insigniaPill}>
             <Text style={[styles.suitGlyph, { color: Colors.cardBlackSuit }]}>♠</Text>
             <Text style={[styles.suitGlyph, { color: Colors.cardRedSuit }]}>♥</Text>
+            <View style={styles.crestShield}>
+              <Text style={styles.crestText}>502</Text>
+            </View>
             <Text style={[styles.suitGlyph, { color: Colors.cardRedSuit }]}>♦</Text>
             <Text style={[styles.suitGlyph, { color: Colors.cardBlackSuit }]}>♣</Text>
           </View>
 
-          <Text style={styles.logoTitle}>OUTLAST 502</Text>
-          <Text style={styles.logoSubtitle}>HIGH-STAKES CARD SHEDDING</Text>
-          <View style={styles.divider} />
+          <Text style={styles.logoTitle}>OUTLAST</Text>
+          <View style={styles.badgeRow}>
+            <View style={styles.goldLine} />
+            <Text style={styles.logoSubtitle}>HIGH-STAKES CARD SHEDDING</Text>
+            <View style={styles.goldLine} />
+          </View>
+
           <Text style={styles.tagline}>
-            Shed your cards. Stack brutal penalties. Avoid 502 points to survive!
+            Shed every card. Deflect brutal penalties. Outsurvive opponents before reaching 502 points.
           </Text>
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionSection}>
+        {/* Hero Quick Play CTA */}
+        <View style={styles.heroSection}>
           <Button
-            title="Quick Play (4 Players) ⚡"
+            title="QUICK PLAY (4 PLAYERS)"
+            icon={<Play size={16} color="#13110a" fill="#13110a" />}
             variant="gold"
             size="large"
             onPress={handleQuickPlay}
-            style={styles.menuBtn}
-          />
-
-          <Button
-            title="Custom Match Setup (2–6 Players) ⚙️"
-            variant="emerald"
-            size="large"
-            onPress={() => onNavigate('setup')}
-            style={styles.menuBtn}
-          />
-
-          <Button
-            title="Match Scoreboard 📊"
-            variant="emerald"
-            size="medium"
-            onPress={() => onNavigate('scoreboard')}
-            style={styles.menuBtn}
-          />
-
-          <Button
-            title="Match History & Cloud Records ☁️"
-            variant="emerald"
-            size="medium"
-            onPress={() => onNavigate('history')}
-            style={styles.menuBtn}
-          />
-
-          <Button
-            title="Official 502 Rules & Scoring 📖"
-            variant="outline"
-            size="medium"
-            onPress={() => onNavigate('rules')}
-            style={styles.menuBtn}
+            style={styles.heroPlayBtn}
+            textStyle={styles.heroPlayBtnText}
           />
         </View>
 
-        {/* Feature Highlights Card */}
-        <View style={styles.featureCard}>
-          <Text style={styles.featureTitle}>The Rules in 30 Seconds</Text>
-          <View style={styles.bulletRow}>
-            <Text style={styles.bulletSymbol}>🃏</Text>
-            <Text style={styles.bulletText}>
-              <Text style={styles.boldText}>Match Suit or Rank:</Text> Play 1 card on your turn, or draw from the deck.
-            </Text>
+        {/* 2-Column Balanced Navigation Grid */}
+        <View style={styles.gridSection}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            activeOpacity={0.75}
+            onPress={() => onNavigate('setup')}
+          >
+            <View style={styles.cardIconBox}>
+              <Users size={18} color={Colors.goldLight} />
+            </View>
+            <Text style={styles.gridCardTitle}>Match Setup</Text>
+            <Text style={styles.gridCardSub}>2–6 Players & Bots</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            activeOpacity={0.75}
+            onPress={() => onNavigate('scoreboard')}
+          >
+            <View style={styles.cardIconBox}>
+              <BarChart3 size={18} color={Colors.goldLight} />
+            </View>
+            <Text style={styles.gridCardTitle}>Scoreboard</Text>
+            <Text style={styles.gridCardSub}>Standings & Survival</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            activeOpacity={0.75}
+            onPress={() => onNavigate('history')}
+          >
+            <View style={styles.cardIconBox}>
+              <History size={18} color={Colors.goldLight} />
+            </View>
+            <Text style={styles.gridCardTitle}>Match History</Text>
+            <Text style={styles.gridCardSub}>Local & Cloud Logs</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            activeOpacity={0.75}
+            onPress={() => onNavigate('rules')}
+          >
+            <View style={styles.cardIconBox}>
+              <BookOpen size={18} color={Colors.goldLight} />
+            </View>
+            <Text style={styles.gridCardTitle}>Official Rules</Text>
+            <Text style={styles.gridCardSub}>Cards & Penalties</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Tactical Intel Overview Card */}
+        <View style={styles.tacticalCard}>
+          <Text style={styles.tacticalTitle}>TACTICAL OVERVIEW</Text>
+
+          <View style={styles.tacticalRow}>
+            <View style={styles.tacticalIconWrap}>
+              <Layers size={14} color={Colors.gold} />
+            </View>
+            <View style={styles.tacticalContent}>
+              <Text style={styles.tacticalHeading}>Shedding Mechanics</Text>
+              <Text style={styles.tacticalBody}>
+                Play 1 card matching the discard by suit or rank, or draw 1 card to end your turn.
+              </Text>
+            </View>
           </View>
-          <View style={styles.bulletRow}>
-            <Text style={styles.bulletSymbol}>⚡</Text>
-            <Text style={styles.bulletText}>
-              <Text style={styles.boldText}>Special Powers:</Text> 2s stack (+2..8), A♠ forces 5 cards, 8 skips turn, Jacks are wild!
-            </Text>
+
+          <View style={styles.tacticalRow}>
+            <View style={styles.tacticalIconWrap}>
+              <Zap size={14} color={Colors.amberLight} />
+            </View>
+            <View style={styles.tacticalContent}>
+              <Text style={styles.tacticalHeading}>Brutal Counter-Stacking</Text>
+              <Text style={styles.tacticalBody}>
+                Counter a 2 with another 2 (+2 stack), A♠ with any Ace, and 8 with another 8 skip.
+              </Text>
+            </View>
           </View>
-          <View style={styles.bulletRow}>
-            <Text style={styles.bulletSymbol}>👑</Text>
-            <Text style={styles.bulletText}>
-              <Text style={styles.boldText}>7 of Hearts:</Text> Wild instant round win! (Remaining hand counts against winner).
-            </Text>
+
+          <View style={[styles.tacticalRow, { marginBottom: 0 }]}>
+            <View style={styles.tacticalIconWrap}>
+              <Shield size={14} color={Colors.playableMint} />
+            </View>
+            <View style={styles.tacticalContent}>
+              <Text style={styles.tacticalHeading}>502 Point Survival</Text>
+              <Text style={styles.tacticalBody}>
+                Cards left in hand count as penalty points. 502 points eliminates a player, unless protected as round winner.
+              </Text>
+            </View>
           </View>
-          <View style={styles.bulletRow}>
-            <Text style={styles.bulletSymbol}>💀</Text>
-            <Text style={styles.bulletText}>
-              <Text style={styles.boldText}>502 Elimination:</Text> Reach 502 points and you are out. Last survivor wins!
-            </Text>
-          </View>
+        </View>
+
+        {/* Footer info */}
+        <View style={styles.footerRow}>
+          <Text style={styles.footerText}>Standard 52-Card Deck · 502 Point Limit · v1.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -125,95 +182,196 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.tableDeep,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 32,
     alignItems: 'center',
   },
   brandContainer: {
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 28,
+    marginBottom: 24,
+    width: '100%',
   },
-  suitRow: {
+  insigniaPill: {
     flexDirection: 'row',
-    marginBottom: 8,
-  },
-  suitGlyph: {
-    fontSize: 24,
-    marginHorizontal: 6,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  logoTitle: {
-    ...Typography.titleLarge,
-    fontSize: 32,
-    color: Colors.gold,
-    letterSpacing: 3,
-    textAlign: 'center',
-    textShadowColor: Colors.goldDark,
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
-  },
-  logoSubtitle: {
-    ...Typography.badge,
-    fontSize: 12,
-    color: Colors.goldLight,
-    letterSpacing: 2,
-    marginTop: 4,
-  },
-  divider: {
-    width: 60,
-    height: 2,
-    backgroundColor: Colors.gold,
-    marginVertical: 12,
-  },
-  tagline: {
-    ...Typography.bodyMedium,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-  actionSection: {
-    width: '100%',
-    maxWidth: 340,
-    marginBottom: 28,
-  },
-  menuBtn: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  featureCard: {
-    width: '100%',
-    maxWidth: 340,
-    backgroundColor: Colors.surfaceCard,
+    alignItems: 'center',
+    backgroundColor: 'rgba(250, 248, 243, 0.95)',
     borderColor: Colors.borderSubtle,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  featureTitle: {
-    ...Typography.titleSmall,
-    fontSize: 15,
-    color: Colors.goldLight,
-    marginBottom: 12,
-  },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  bulletSymbol: {
+  suitGlyph: {
     fontSize: 16,
-    marginRight: 8,
-    marginTop: 1,
+    marginHorizontal: 4,
   },
-  bulletText: {
+  crestShield: {
+    backgroundColor: '#0c2419',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginHorizontal: 6,
+    borderWidth: 0.5,
+    borderColor: Colors.gold,
+  },
+  crestText: {
+    color: Colors.goldLight,
+    fontWeight: '900',
+    fontSize: 9.5,
+    letterSpacing: 0.5,
+  },
+  logoTitle: {
+    ...Typography.displayTitle,
+    color: '#ffffff',
+    letterSpacing: 4,
+    textAlign: 'center',
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 10,
+    width: '85%',
+  },
+  goldLine: {
+    flex: 1,
+    height: 0.5,
+    backgroundColor: 'rgba(203, 178, 106, 0.4)',
+  },
+  logoSubtitle: {
+    ...Typography.displaySubtitle,
+    color: Colors.gold,
+    marginHorizontal: 8,
+  },
+  tagline: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
+    textAlign: 'center',
+    maxWidth: 320,
+    lineHeight: 18,
+  },
+  heroSection: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  heroPlayBtn: {
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 10,
+    backgroundColor: Colors.gold,
+    borderColor: Colors.goldLight,
+  },
+  heroPlayBtnText: {
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+  },
+  gridSection: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+  },
+  gridCard: {
+    width: '48%',
+    backgroundColor: 'rgba(15, 36, 26, 0.85)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  cardIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(203, 178, 106, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  gridCardTitle: {
+    ...Typography.titleSmall,
+    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  gridCardSub: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 10.5,
+  },
+  tacticalCard: {
+    width: '100%',
+    backgroundColor: 'rgba(8, 22, 16, 0.9)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+  },
+  tacticalTitle: {
+    ...Typography.labelUpper,
+    color: Colors.gold,
+    fontSize: 10,
+    letterSpacing: 1.5,
+    marginBottom: 12,
+  },
+  tacticalRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  tacticalIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    marginTop: 1,
+  },
+  tacticalContent: {
     flex: 1,
   },
-  boldText: {
-    fontWeight: '700',
+  tacticalHeading: {
+    ...Typography.bodySmall,
     color: Colors.textPrimary,
+    fontWeight: '700',
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  tacticalBody: {
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  footerRow: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  footerText: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
 });

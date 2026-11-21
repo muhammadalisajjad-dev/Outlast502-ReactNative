@@ -10,6 +10,7 @@ import { Player } from '../../types/game';
 import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
+import { Trophy, Skull, RotateCcw, Home } from 'lucide-react-native';
 
 interface GameOverModalProps {
   visible: boolean;
@@ -31,7 +32,6 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   const winner = players.find(p => p.id === matchWinnerId);
   const winnerName = winner ? winner.name : 'Unknown';
 
-  // Sort players: survivors first (lowest score first), then eliminated players (lowest score first)
   const rankedPlayers = [...players].sort((a, b) => {
     if (a.id === matchWinnerId) return -1;
     if (b.id === matchWinnerId) return 1;
@@ -45,7 +45,9 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.cardContainer}>
-          <Text style={styles.trophy}>🏆</Text>
+          <View style={styles.trophyIconBox}>
+            <Trophy size={28} color={Colors.goldLight} />
+          </View>
           <Text style={styles.title}>MATCH COMPLETE</Text>
 
           {/* Winner Showcase */}
@@ -57,7 +59,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             </Text>
           </View>
 
-          <Text style={styles.sectionHeading}>Final Standings</Text>
+          <Text style={styles.sectionHeading}>FINAL STANDINGS</Text>
 
           <ScrollView style={styles.rankList}>
             {rankedPlayers.map((p, idx) => {
@@ -81,11 +83,14 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
                       #{idx + 1}
                     </Text>
                     <View>
-                      <Text style={styles.playerName}>
+                      <Text style={[styles.playerName, isFirst && styles.firstPlayerName]}>
                         {p.name} {p.isHuman ? '(You)' : ''}
                       </Text>
                       {p.isEliminated && (
-                        <Text style={styles.statusText}>💀 Eliminated (502+)</Text>
+                        <View style={styles.eliminatedTag}>
+                          <Skull size={9} color={Colors.crimsonLight} style={{ marginRight: 3 }} />
+                          <Text style={styles.statusText}>Eliminated (502+)</Text>
+                        </View>
                       )}
                     </View>
                   </View>
@@ -103,20 +108,22 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             })}
           </ScrollView>
 
-          <View style={styles.btnRow}>
+          <View style={styles.buttonRow}>
             <Button
-              title="Play Again 🔄"
+              title="Play Again"
+              icon={<RotateCcw size={14} color="#13110a" />}
               variant="gold"
               size="medium"
               onPress={onPlayAgain}
-              style={styles.actionBtn}
+              style={{ flex: 1, marginRight: 8 }}
             />
             <Button
-              title="Main Menu 🏠"
-              variant="outline"
+              title="Main Menu"
+              icon={<Home size={14} color={Colors.textPrimary} />}
+              variant="emerald"
               size="medium"
               onPress={onGoHome}
-              style={styles.actionBtn}
+              style={{ flex: 1 }}
             />
           </View>
         </View>
@@ -135,83 +142,90 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: '100%',
-    maxWidth: 380,
-    maxHeight: '85%',
+    maxWidth: 350,
     backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
-    borderWidth: 2,
-    borderRadius: 20,
+    borderColor: Colors.borderSubtle,
+    borderWidth: 1.5,
+    borderRadius: 14,
     padding: 20,
     alignItems: 'center',
-    shadowColor: Colors.gold,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 14,
-    elevation: 14,
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  trophy: {
-    fontSize: 48,
-    marginBottom: 4,
+  trophyIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(203, 178, 106, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.borderSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   title: {
-    ...Typography.titleMedium,
+    ...Typography.badge,
     color: Colors.gold,
+    fontSize: 11,
     letterSpacing: 2,
     marginBottom: 12,
   },
   winnerCard: {
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    borderColor: Colors.gold,
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    alignItems: 'center',
     width: '100%',
+    backgroundColor: 'rgba(203, 178, 106, 0.12)',
+    borderColor: Colors.gold,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
     marginBottom: 14,
   },
   championLabel: {
-    ...Typography.badge,
-    color: Colors.playableLime,
-    letterSpacing: 1,
+    ...Typography.labelUpper,
+    color: Colors.goldLight,
+    fontSize: 9,
+    letterSpacing: 1.5,
+    marginBottom: 2,
   },
   winnerName: {
-    ...Typography.titleLarge,
-    color: Colors.goldLight,
-    marginVertical: 4,
+    ...Typography.titleMedium,
+    color: Colors.textPrimary,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   winnerScore: {
     ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    fontWeight: '600',
+    color: Colors.textGold,
+    fontWeight: '700',
   },
   sectionHeading: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    fontWeight: '700',
+    ...Typography.labelUpper,
+    color: Colors.textMuted,
+    fontSize: 9.5,
     alignSelf: 'flex-start',
     marginBottom: 6,
-    textTransform: 'uppercase',
   },
   rankList: {
     width: '100%',
-    marginBottom: 16,
+    maxHeight: 180,
+    marginBottom: 14,
   },
   rankRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceElevated,
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 6,
+    justifyContent: 'space-between',
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   firstRow: {
-    borderColor: Colors.gold,
-    backgroundColor: 'rgba(26, 66, 48, 0.95)',
+    backgroundColor: 'rgba(203, 178, 106, 0.08)',
+    borderRadius: 6,
   },
   eliminatedRow: {
     opacity: 0.5,
@@ -221,38 +235,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rankNumber: {
-    fontSize: 16,
-    fontWeight: '800',
+    ...Typography.bodySmall,
     color: Colors.textMuted,
-    width: 32,
+    fontWeight: '800',
+    width: 26,
   },
   firstRankNumber: {
-    color: Colors.gold,
+    color: Colors.goldLight,
   },
   playerName: {
-    ...Typography.bodyMedium,
+    ...Typography.bodySmall,
     color: Colors.textPrimary,
     fontWeight: '700',
   },
+  firstPlayerName: {
+    color: Colors.goldLight,
+  },
+  eliminatedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 1,
+  },
   statusText: {
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.crimsonLight,
   },
   scoreText: {
-    fontSize: 13,
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
     fontWeight: '700',
-    color: Colors.goldLight,
   },
   firstScoreText: {
-    color: Colors.playableLime,
+    color: Colors.goldLight,
   },
-  btnRow: {
+  buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     width: '100%',
-  },
-  actionBtn: {
-    flex: 1,
-    marginHorizontal: 4,
   },
 });

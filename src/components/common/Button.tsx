@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  View,
 } from 'react-native';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
@@ -95,7 +96,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <TouchableOpacity
-      activeOpacity={0.8}
+      activeOpacity={0.82}
       onPress={handlePress}
       disabled={disabled || loading}
       style={[
@@ -112,8 +113,8 @@ export const Button: React.FC<ButtonProps> = ({
           color={variant === 'gold' ? Colors.surfaceDark : Colors.textPrimary}
         />
       ) : (
-        <>
-          {icon}
+        <View style={styles.contentRow}>
+          {icon && <View style={styles.iconWrapper}>{icon}</View>}
           <Text
             style={[
               styles.baseText,
@@ -125,7 +126,7 @@ export const Button: React.FC<ButtonProps> = ({
           >
             {title}
           </Text>
-        </>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -133,32 +134,47 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   baseContainer: {
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
-    borderWidth: 1,
+  },
+  iconWrapper: {
+    marginRight: 8,
   },
   baseText: {
     ...Typography.bodyMedium,
     fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: 0.4,
   },
   goldContainer: {
     backgroundColor: Colors.gold,
     borderColor: Colors.goldLight,
-    shadowColor: Colors.gold,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 4,
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
     elevation: 3,
   },
   goldText: {
-    color: '#1a1406',
+    color: '#13110a',
+    fontWeight: '800',
+    letterSpacing: 0.6,
   },
   emeraldContainer: {
     backgroundColor: Colors.surfaceElevated,
     borderColor: Colors.borderSubtle,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   emeraldText: {
     color: Colors.textPrimary,
@@ -168,46 +184,48 @@ const styles = StyleSheet.create({
     borderColor: Colors.crimsonLight,
   },
   crimsonText: {
-    color: Colors.textPrimary,
+    color: '#ffffff',
+    fontWeight: '700',
   },
   outlineContainer: {
     backgroundColor: 'transparent',
-    borderColor: Colors.gold,
+    borderColor: Colors.borderSubtle,
   },
   outlineText: {
-    color: Colors.gold,
+    color: Colors.goldLight,
   },
   subtleContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderColor: 'transparent',
   },
   subtleText: {
     color: Colors.textSecondary,
   },
   smallContainer: {
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 12,
   },
   smallText: {
     fontSize: 12,
+    letterSpacing: 0.3,
   },
   mediumContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
   },
   mediumText: {
-    fontSize: 14,
+    fontSize: 13,
   },
   largeContainer: {
     paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: 22,
   },
   largeText: {
-    fontSize: 16,
-    letterSpacing: 0.5,
+    fontSize: 15,
+    letterSpacing: 0.6,
   },
   disabledContainer: {
-    opacity: 0.5,
+    opacity: 0.45,
     shadowOpacity: 0,
     elevation: 0,
   },

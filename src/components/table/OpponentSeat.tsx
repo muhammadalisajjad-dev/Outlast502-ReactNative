@@ -1,23 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Player } from '../../types/game';
-import { PlayingCard } from '../card/PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
+import { Shield, Skull, Layers } from 'lucide-react-native';
 
 interface OpponentSeatProps {
   player: Player;
   isCurrentTurn: boolean;
 }
 
-const AVATAR_COLORS = ['#3182ce', '#805ad5', '#d69e2e', '#dd6b20', '#38b2ac'];
+const AVATAR_COLORS = ['#1e3a5f', '#2d3748', '#3b2d54', '#4a3b2c', '#234e52'];
 
 export const OpponentSeat: React.FC<OpponentSeatProps> = ({
   player,
   isCurrentTurn,
 }) => {
-  const avatarBg = AVATAR_COLORS[player.avatarSeed % AVATAR_COLORS.length] || '#4a5568';
-  const displayCardCount = Math.min(player.hand.length, 5);
+  const avatarBg = AVATAR_COLORS[player.avatarSeed % AVATAR_COLORS.length] || '#2d3748';
 
   return (
     <View
@@ -27,55 +26,64 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
         player.isEliminated && styles.eliminatedContainer,
       ]}
     >
-      {/* Avatar & Turn Indicator */}
-      <View style={[styles.avatarCircle, { backgroundColor: avatarBg }]}>
-        <Text style={styles.avatarInitial}>
-          {player.name.charAt(0).toUpperCase()}
-        </Text>
-        {isCurrentTurn && <View style={styles.turnPulseRing} />}
-      </View>
-
-      {/* Name & Status */}
-      <View style={styles.infoCol}>
-        <View style={styles.nameRow}>
-          <Text
-            style={[
-              styles.nameText,
-              isCurrentTurn && styles.nameActiveText,
-              player.isEliminated && styles.nameEliminatedText,
-            ]}
-            numberOfLines={1}
-          >
-            {player.name}
+      {/* Top Row: Avatar & Status */}
+      <View style={styles.topRow}>
+        <View
+          style={[
+            styles.avatarCircle,
+            { backgroundColor: avatarBg },
+            isCurrentTurn && styles.avatarActiveRing,
+          ]}
+        >
+          <Text style={styles.avatarInitial}>
+            {player.name.charAt(0).toUpperCase()}
           </Text>
-          {player.immuneThisRound && (
-            <View style={styles.immunePill}>
-              <Text style={styles.immuneText}>🛡️ IMMUNE</Text>
-            </View>
-          )}
         </View>
 
-        <Text style={styles.scoreText}>
-          {player.isEliminated ? 'ELIMINATED' : `${player.cumulativeScore} pts`}
+        {/* Turn / Status Tag */}
+        {player.isEliminated ? (
+          <View style={styles.eliminatedTag}>
+            <Skull size={10} color={Colors.crimsonLight} />
+          </View>
+        ) : player.immuneThisRound ? (
+          <View style={styles.immuneTag}>
+            <Shield size={10} color={Colors.goldLight} />
+          </View>
+        ) : isCurrentTurn ? (
+          <View style={styles.activePill}>
+            <Text style={styles.activePillText}>TURN</Text>
+          </View>
+        ) : null}
+      </View>
+
+      {/* Name */}
+      <Text
+        style={[
+          styles.nameText,
+          isCurrentTurn && styles.nameActiveText,
+          player.isEliminated && styles.nameEliminatedText,
+        ]}
+        numberOfLines={1}
+      >
+        {player.name}
+      </Text>
+
+      {/* Score & Cards */}
+      <View style={styles.bottomRow}>
+        <Text
+          style={[
+            styles.scoreText,
+            player.cumulativeScore >= 400 && styles.scoreDanger,
+            player.isEliminated && styles.scoreEliminated,
+          ]}
+        >
+          {player.isEliminated ? 'OUT' : `${player.cumulativeScore}p`}
         </Text>
 
-        {/* Mini Card Backs */}
         {!player.isEliminated && (
-          <View style={styles.miniCardsRow}>
-            {Array.from({ length: displayCardCount }).map((_, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.miniCardWrapper,
-                  idx > 0 && { marginLeft: -18 },
-                ]}
-              >
-                <PlayingCard faceDown size="mini" />
-              </View>
-            ))}
-            <Text style={styles.cardCountNumber}>
-              {player.hand.length}
-            </Text>
+          <View style={styles.cardCountGroup}>
+            <Layers size={10} color={Colors.textMuted} style={{ marginRight: 2 }} />
+            <Text style={styles.cardCountText}>{player.hand.length}</Text>
           </View>
         )}
       </View>
@@ -85,104 +93,140 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(11, 31, 22, 0.75)',
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    backgroundColor: 'rgba(8, 22, 16, 0.85)',
+    borderColor: 'rgba(203, 178, 106, 0.2)',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
-    marginHorizontal: 4,
-    minWidth: 105,
-    maxWidth: 135,
+    marginHorizontal: 3,
+    width: 82,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   activeTurnContainer: {
     borderColor: Colors.gold,
-    backgroundColor: 'rgba(26, 66, 48, 0.9)',
+    backgroundColor: 'rgba(15, 36, 26, 0.95)',
     shadowColor: Colors.gold,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
     elevation: 4,
   },
   eliminatedContainer: {
     opacity: 0.45,
-    borderColor: Colors.crimson,
-    backgroundColor: 'rgba(20, 10, 10, 0.8)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  avatarCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
     position: 'relative',
-    marginRight: 6,
+    marginBottom: 4,
   },
-  avatarInitial: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '800',
+  avatarCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  turnPulseRing: {
-    position: 'absolute',
-    top: -2,
-    left: -2,
-    right: -2,
-    bottom: -2,
-    borderRadius: 16,
+  avatarActiveRing: {
     borderColor: Colors.gold,
     borderWidth: 1.5,
   },
-  infoCol: {
-    flex: 1,
+  avatarInitial: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '800',
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  activePill: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+    backgroundColor: Colors.gold,
+    paddingHorizontal: 3.5,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  activePillText: {
+    color: '#13110a',
+    fontSize: 7,
+    fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  immuneTag: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+    backgroundColor: 'rgba(203, 178, 106, 0.25)',
+    padding: 2,
+    borderRadius: 3,
+    borderWidth: 0.5,
+    borderColor: Colors.gold,
+  },
+  eliminatedTag: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+    backgroundColor: 'rgba(239, 68, 68, 0.25)',
+    padding: 2,
+    borderRadius: 3,
+    borderWidth: 0.5,
+    borderColor: Colors.crimsonLight,
   },
   nameText: {
     ...Typography.bodySmall,
-    color: Colors.textPrimary,
-    fontWeight: '700',
-    fontSize: 11,
+    color: Colors.textSecondary,
+    fontSize: 10.5,
+    fontWeight: '600',
+    textAlign: 'center',
+    width: '100%',
+    marginBottom: 2,
   },
   nameActiveText: {
     color: Colors.goldLight,
-  },
-  nameEliminatedText: {
-    color: Colors.crimsonLight,
-    textDecorationLine: 'line-through',
-  },
-  immunePill: {
-    marginLeft: 4,
-    backgroundColor: 'rgba(46, 204, 113, 0.2)',
-    paddingHorizontal: 3,
-    borderRadius: 3,
-  },
-  immuneText: {
-    fontSize: 8,
-    color: Colors.playableLime,
     fontWeight: '800',
   },
-  scoreText: {
-    fontSize: 10,
+  nameEliminatedText: {
     color: Colors.textMuted,
-    fontWeight: '600',
+    textDecorationLine: 'line-through',
   },
-  miniCardsRow: {
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingTop: 2,
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
-  miniCardWrapper: {
-    zIndex: 1,
-  },
-  cardCountNumber: {
-    fontSize: 9,
-    color: Colors.textSecondary,
+  scoreText: {
+    fontSize: 9.5,
     fontWeight: '700',
-    marginLeft: 3,
+    color: Colors.textMuted,
+  },
+  scoreDanger: {
+    color: Colors.crimsonLight,
+  },
+  scoreEliminated: {
+    color: Colors.crimsonLight,
+    fontWeight: '800',
+  },
+  cardCountGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardCountText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: Colors.textSecondary,
   },
 });

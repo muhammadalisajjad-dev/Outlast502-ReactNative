@@ -1,48 +1,90 @@
-import { TextStyle } from 'react-native';
+import { TextStyle, Platform } from 'react-native';
+
+const FONT_FAMILY = Platform.select({
+  ios: 'System',
+  android: 'sans-serif-medium',
+  default: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+});
+
+const FONT_SERIF = Platform.select({
+  ios: 'Georgia',
+  android: 'serif',
+  default: 'Georgia, serif',
+});
 
 export const Typography: Record<string, TextStyle> = {
-  titleLarge: {
-    fontSize: 28,
+  displayTitle: {
+    fontFamily: FONT_SERIF,
+    fontSize: 32,
     fontWeight: '800',
-    letterSpacing: 1.5,
+    letterSpacing: 3,
+    color: '#f8fafc',
+  },
+  displaySubtitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+  },
+  titleLarge: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
   titleMedium: {
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  titleSmall: {
+    fontFamily: FONT_FAMILY,
     fontSize: 18,
     fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  titleSmall: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   bodyLarge: {
-    fontSize: 16,
+    fontFamily: FONT_FAMILY,
+    fontSize: 15,
     fontWeight: '500',
     lineHeight: 22,
   },
   bodyMedium: {
-    fontSize: 14,
+    fontFamily: FONT_FAMILY,
+    fontSize: 13,
     fontWeight: '400',
-    lineHeight: 20,
+    lineHeight: 19,
   },
   bodySmall: {
-    fontSize: 12,
+    fontFamily: FONT_FAMILY,
+    fontSize: 11,
     fontWeight: '400',
-    lineHeight: 16,
+    lineHeight: 15,
+  },
+  labelUpper: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
   badge: {
-    fontSize: 11,
+    fontFamily: FONT_FAMILY,
+    fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
   cardRank: {
-    fontSize: 18,
+    fontFamily: FONT_SERIF,
+    fontSize: 17,
     fontWeight: '900',
-    lineHeight: 20,
+    lineHeight: 19,
   },
   cardSuit: {
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 15,
   },
 };

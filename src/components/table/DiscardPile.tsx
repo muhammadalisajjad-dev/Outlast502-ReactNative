@@ -19,11 +19,16 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.pileWrapper}>
+        {/* Subtle shadow card underneath for realistic stack depth */}
+        {count > 1 && <View style={styles.shadowCardUnder} />}
+
         {topCard ? (
-          <PlayingCard card={topCard} size="large" />
+          <View style={styles.cardRotateWrapper}>
+            <PlayingCard card={topCard} size="large" />
+          </View>
         ) : (
           <View style={styles.emptyPlaceholder}>
-            <Text style={styles.emptyText}>Empty</Text>
+            <Text style={styles.emptyText}>EMPTY</Text>
           </View>
         )}
 
@@ -33,7 +38,7 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
         </View>
       </View>
 
-      <Text style={styles.pileLabel}>Discard</Text>
+      <Text style={styles.pileLabel}>DISCARD</Text>
 
       {/* Declared Suit Badge if Jack played */}
       {declaredSuit && (
@@ -60,27 +65,43 @@ const styles = StyleSheet.create({
   pileWrapper: {
     position: 'relative',
   },
+  shadowCardUnder: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    width: 84,
+    height: 122,
+    borderRadius: 7,
+    backgroundColor: '#0a1710',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.4)',
+    transform: [{ rotate: '4deg' }],
+  },
+  cardRotateWrapper: {
+    transform: [{ rotate: '-2deg' }],
+  },
   emptyPlaceholder: {
-    width: 78,
-    height: 112,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    width: 84,
+    height: 122,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(203, 178, 106, 0.25)',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
   },
   emptyText: {
     color: Colors.textMuted,
-    ...Typography.bodySmall,
+    ...Typography.labelUpper,
+    fontSize: 9,
   },
   badgeContainer: {
     position: 'absolute',
     bottom: -6,
     right: -6,
     backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
+    borderColor: Colors.borderSubtle,
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 6,
@@ -88,29 +109,26 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: Colors.goldLight,
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
   },
   pileLabel: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    marginTop: 6,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    ...Typography.labelUpper,
+    color: Colors.textMuted,
+    marginTop: 8,
+    fontSize: 9.5,
   },
   declaredBadge: {
     marginTop: 4,
-    backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.gold,
-    borderWidth: 1.5,
-    borderRadius: 6,
+    backgroundColor: 'rgba(8, 22, 16, 0.95)',
+    borderWidth: 1,
+    borderColor: Colors.borderSubtle,
+    borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
   declaredText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    ...Typography.badge,
+    fontSize: 9,
   },
 });

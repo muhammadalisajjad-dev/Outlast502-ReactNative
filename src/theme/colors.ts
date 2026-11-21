@@ -1,48 +1,56 @@
 export const Colors = {
-  // Table & Background
-  tableDeep: '#061a11',
-  tableFelt: '#0d3824',
-  tableBorder: '#164e33',
-  tableRail: '#030d08',
+  // Deep Forest / Charcoal Table Atmosphere
+  tableDeep: '#06130d',
+  tableFelt: '#0a2318',
+  tableFeltInner: '#0e2f20',
+  tableRail: '#030a06',
+  tableBorder: '#143827',
+  tableGlow: 'rgba(203, 178, 106, 0.08)',
 
-  // Gold & Accents
-  gold: '#d4af37',
-  goldLight: '#f3e5ab',
-  goldDark: '#996515',
-  goldGlow: 'rgba(212, 175, 55, 0.4)',
+  // Brushed Champagne & Antique Gold Accents
+  gold: '#cbb26a',
+  goldLight: '#f0e3bc',
+  goldDark: '#8c7333',
+  goldMuted: 'rgba(203, 178, 106, 0.25)',
+  goldGlow: 'rgba(203, 178, 106, 0.35)',
 
-  // Playable / Action highlight
-  playableLime: '#2ecc71',
-  playableGlow: 'rgba(46, 204, 113, 0.5)',
+  // Action / Playable Highlights (Emerald & Muted Mint)
+  playableMint: '#34d399',
+  playableGlow: 'rgba(52, 211, 153, 0.45)',
 
-  // Warning & Danger
-  crimson: '#c0392b',
-  crimsonLight: '#e74c3c',
-  crimsonGlow: 'rgba(231, 76, 60, 0.4)',
-  amber: '#f39c12',
+  // Danger & Penalty Accents (Refined Crimson & Warm Amber)
+  crimson: '#b91c1c',
+  crimsonLight: '#ef4444',
+  crimsonMuted: 'rgba(239, 68, 68, 0.2)',
+  crimsonGlow: 'rgba(185, 28, 28, 0.4)',
+  amber: '#d97706',
+  amberLight: '#f59e0b',
 
-  // Cards
-  cardIvory: '#fffdfa',
-  cardBorder: '#d6cfc2',
-  cardShadow: 'rgba(0, 0, 0, 0.35)',
-  cardBack: '#1a365d',
-  cardBackPattern: '#2b6cb0',
-  cardRedSuit: '#c01525',
-  cardBlackSuit: '#1a1a1a',
+  // Playing Cards (Warm Linen Ivory & Authentic Suits)
+  cardIvory: '#faf8f3',
+  cardIvoryInner: '#f5f2e8',
+  cardBorder: '#ded8cb',
+  cardShadow: 'rgba(0, 0, 0, 0.45)',
+  cardBack: '#0d2238',
+  cardBackPattern: '#1a3a5c',
+  cardRedSuit: '#b82424',
+  cardBlackSuit: '#1c2127',
 
-  // UI Surfaces
-  surfaceDark: '#0b1f16',
-  surfaceCard: '#133324',
-  surfaceElevated: '#1a4230',
-  borderGold: '#d4af37',
-  borderSubtle: 'rgba(212, 175, 55, 0.25)',
+  // Premium UI Surfaces
+  surfaceDark: '#081610',
+  surfaceCard: '#0f241a',
+  surfaceElevated: '#153325',
+  surfaceSubtle: 'rgba(255, 255, 255, 0.04)',
+  borderGold: '#cbb26a',
+  borderSubtle: 'rgba(203, 178, 106, 0.2)',
+  borderMuted: 'rgba(255, 255, 255, 0.08)',
 
-  // Typography
-  textPrimary: '#f7fafc',
-  textSecondary: '#cbd5e0',
-  textMuted: '#718096',
-  textGold: '#f3e5ab',
+  // Editorial Typography
+  textPrimary: '#f8fafc',
+  textSecondary: '#cbd5e1',
+  textMuted: '#64748b',
+  textGold: '#f0e3bc',
 
   // Overlays
-  overlayDark: 'rgba(3, 13, 8, 0.85)',
+  overlayDark: 'rgba(3, 10, 7, 0.88)',
 };
