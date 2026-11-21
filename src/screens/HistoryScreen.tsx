@@ -34,6 +34,7 @@ interface HistoryScreenProps {
 export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  // cloudActive is only true once we have confirmed a successful Firestore response
   const [cloudActive, setCloudActive] = useState<boolean>(false);
   const insets = useResponsiveInsets();
 
@@ -44,13 +45,14 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
       setLoading(false);
 
       if (isFirebaseConfigured()) {
-        setCloudActive(true);
         try {
           const cloud = await Promise.race([
             fetchFirebaseHistory(),
             new Promise<MatchRecord[]>(resolve => setTimeout(() => resolve([]), 1500)),
           ]);
           if (cloud.length > 0) {
+            // Only set cloudActive if we actually received records from Firestore
+            setCloudActive(true);
             const map = new Map<string, MatchRecord>();
             local.forEach(m => map.set(m.id, m));
             cloud.forEach(m => map.set(m.id, { ...m, syncedToFirebase: true }));
@@ -58,9 +60,13 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
               (a, b) => b.timestamp - a.timestamp
             );
             setMatches(merged);
+          } else {
+            // Firebase is configured but returned no records; remain in local mode
+            setCloudActive(false);
           }
         } catch (cloudErr) {
           console.warn('Cloud sync fetch skipped:', cloudErr);
+          setCloudActive(false);
         }
       }
     } catch (e) {
@@ -112,8 +118,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
             </View>
             <Text style={styles.statusSubtitle}>
               {cloudActive
-                ? 'Firestore Cloud sync verified & local offline cache active'
-                : 'AsyncStorage local storage active (offline resilient)'}
+                ? 'Firestore records retrieved — anonymous auth, user-scoped rules active'
+                : isFirebaseConfigured()
+                  ? 'Firebase configured — no Firestore records yet (play a full match to sync)'
+                  : 'AsyncStorage local storage active (offline resilient)'}
             </Text>
           </View>
 

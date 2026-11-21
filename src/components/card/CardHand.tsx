@@ -6,12 +6,21 @@ import {
   StyleSheet,
   ViewStyle,
   Animated,
+  useWindowDimensions,
 } from 'react-native';
 import { Card } from '../../types/card';
 import { PlayingCard } from './PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { Sparkles, Layers } from 'lucide-react-native';
+
+// Card dimensions must match PlayingCard size="normal" dimensions
+const CARD_WIDTH = 66;
+const CARD_HEIGHT = 96;
+// Minimum visible strip of each overlapped card (rank + suit in top-left corner)
+const MIN_VISIBLE_STRIP = 28;
+// Maximum overlap - never obscure more than this
+const MAX_OVERLAP = CARD_WIDTH - MIN_VISIBLE_STRIP; // 38
 
 interface CardHandProps {
   hand: Card[];
@@ -28,6 +37,7 @@ export const CardHand: React.FC<CardHandProps> = ({
   isMyTurn,
   style,
 }) => {
+  const { width: screenWidth } = useWindowDimensions();
   const playableCount = hand.filter(c => playableCardIds.has(c.id)).length;
   const dealAnim = useRef(new Animated.Value(0)).current;
 
@@ -40,6 +50,29 @@ export const CardHand: React.FC<CardHandProps> = ({
       useNativeDriver: true,
     }).start();
   }, [hand.length, dealAnim]);
+
+  // Compute adaptive overlap so the entire hand fits within screen width.
+  // Available horizontal space = screen width minus side padding (2×16) and scroll indicator margin.
+  const availableWidth = screenWidth - 32;
+  const count = hand.length;
+
+  let overlapOffset = 0; // negative marginLeft applied to cards after the first
+  if (count > 1) {
+    // Total width if no overlap: count * CARD_WIDTH
+    // With overlap: CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlap)
+    // Solve for overlap so total fits in availableWidth:
+    //   CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlap) <= availableWidth
+    //   (CARD_WIDTH - overlap) <= (availableWidth - CARD_WIDTH) / (count - 1)
+    //   overlap >= CARD_WIDTH - (availableWidth - CARD_WIDTH) / (count - 1)
+    const neededOverlap = CARD_WIDTH - (availableWidth - CARD_WIDTH) / (count - 1);
+    overlapOffset = Math.min(Math.max(neededOverlap, 0), MAX_OVERLAP);
+  }
+
+  // If the hand still can't fit (very large hands), enable horizontal scroll
+  const totalFanWidth = count > 1
+    ? CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlapOffset)
+    : CARD_WIDTH;
+  const needsScroll = totalFanWidth > availableWidth;
 
   return (
     <View style={[styles.container, style]}>
@@ -87,8 +120,13 @@ export const CardHand: React.FC<CardHandProps> = ({
       >
         <ScrollView
           horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          scrollEnabled={needsScroll}
+          showsHorizontalScrollIndicator={needsScroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            // When scrolling, left-align; when fitting, centre
+            needsScroll ? styles.scrollContentLeft : styles.scrollContentCentered,
+          ]}
         >
           {hand.map((card, index) => {
             const isPlayable = isMyTurn && playableCardIds.has(card.id);
@@ -97,7 +135,11 @@ export const CardHand: React.FC<CardHandProps> = ({
                 key={card.id}
                 style={[
                   styles.cardWrapper,
-                  index > 0 && styles.overlappingCard,
+                  // Raise playable cards slightly so they're visually accessible
+                  isPlayable && styles.cardWrapperPlayable,
+                  index > 0 && { marginLeft: -overlapOffset },
+                  // Stagger z-index so later cards render on top (last card fully visible)
+                  { zIndex: index + 1 },
                 ]}
               >
                 <PlayingCard
@@ -111,6 +153,9 @@ export const CardHand: React.FC<CardHandProps> = ({
             );
           })}
         </ScrollView>
+        {needsScroll && (
+          <Text style={styles.scrollHint}>← scroll to see all cards →</Text>
+        )}
       </Animated.View>
     </View>
   );
@@ -155,12 +200,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 14,
-    alignItems: 'center',
+    alignItems: 'flex-end', // bottom-align so elevated cards rise upward
+  },
+  scrollContentLeft: {
+    // scroll mode: left-aligned, natural flow
+  },
+  scrollContentCentered: {
+    // fan mode: justify content to center of container
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   cardWrapper: {
-    zIndex: 1,
+    // zIndex set inline per card index
   },
-  overlappingCard: {
-    marginLeft: -14,
+  cardWrapperPlayable: {
+    // Extra bottom margin so the lift animation isn't clipped
+    marginBottom: 4,
+  },
+  scrollHint: {
+    ...Typography.bodySmall,
+    color: Colors.textMuted,
+    fontSize: 10,
+    textAlign: 'center',
+    paddingBottom: 4,
+    letterSpacing: 0.5,
   },
 });
