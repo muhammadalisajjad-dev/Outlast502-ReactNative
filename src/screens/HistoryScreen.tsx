@@ -4,10 +4,10 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { MatchRecord } from '../types/history';
 import { getMatchHistory, clearMatchHistory } from '../services/storage';
 import { fetchFirebaseHistory, isFirebaseConfigured } from '../services/firebase';
@@ -35,6 +35,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [cloudActive, setCloudActive] = useState<boolean>(false);
+  const insets = useResponsiveInsets();
 
   const loadHistory = async () => {
     try {
@@ -79,8 +80,8 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerRow}>
+    <View style={styles.safeArea}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
           <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
@@ -89,7 +90,13 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
         <View style={{ width: 50 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Status Banner */}
         <View style={styles.statusCard}>
           <View style={styles.statusLeft}>
@@ -211,7 +218,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

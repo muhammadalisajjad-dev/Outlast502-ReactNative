@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { PenaltyState } from '../../types/game';
 import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
@@ -17,6 +17,20 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
   hasCounterCard,
   onAcceptPenalty,
 }) => {
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (pendingPenalty.active) {
+      slideAnim.setValue(0);
+      Animated.spring(slideAnim, {
+        toValue: 1,
+        speed: 25,
+        bounciness: 6,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [pendingPenalty.cardsOwed, pendingPenalty.active, slideAnim]);
+
   if (!pendingPenalty.active || !pendingPenalty.type) {
     return null;
   }
@@ -56,7 +70,28 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
   if (!details) return null;
 
   return (
-    <View style={styles.bannerContainer}>
+    <Animated.View
+      style={[
+        styles.bannerContainer,
+        {
+          transform: [
+            {
+              translateY: slideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-12, 0],
+              }),
+            },
+            {
+              scale: slideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.95, 1],
+              }),
+            },
+          ],
+          opacity: slideAnim,
+        },
+      ]}
+    >
       <View style={styles.iconCol}>
         <AlertTriangle size={18} color="#ffffff" />
       </View>
@@ -73,7 +108,7 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
         onPress={onAcceptPenalty}
         style={styles.actionBtn}
       />
-    </View>
+    </Animated.View>
   );
 };
 

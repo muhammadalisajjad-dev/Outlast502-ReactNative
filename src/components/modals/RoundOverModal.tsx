@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Modal,
   View,
   Text,
   StyleSheet,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { Player, RoundResult } from '../../types/game';
 import { Button } from '../common/Button';
@@ -25,12 +26,41 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
   players,
   onNextRound,
 }) => {
+  const popAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      popAnim.setValue(0);
+      Animated.spring(popAnim, {
+        toValue: 1,
+        speed: 24,
+        bounciness: 5,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, popAnim]);
+
   if (!roundResult) return null;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.cardContainer}>
+        <Animated.View
+          style={[
+            styles.cardContainer,
+            {
+              transform: [
+                {
+                  scale: popAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.92, 1],
+                  }),
+                },
+              ],
+              opacity: popAnim,
+            },
+          ]}
+        >
           <Text style={styles.title}>ROUND {roundResult.roundNumber} COMPLETE</Text>
 
           {/* Winner Banner */}
@@ -120,7 +150,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
             onPress={onNextRound}
             style={styles.actionBtn}
           />
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

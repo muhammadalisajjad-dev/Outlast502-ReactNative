@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
@@ -33,6 +33,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   onStartGame,
 }) => {
   const { startMatch } = useGame();
+  const insets = useResponsiveInsets();
   const [playerCount, setPlayerCount] = useState<number>(4);
   const [playerName, setPlayerName] = useState<string>('You');
 
@@ -49,8 +50,8 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   const activeBots = ALL_BOTS.slice(0, playerCount - 1);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerRow}>
+    <View style={styles.safeArea}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
           <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
@@ -59,7 +60,13 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         <View style={{ width: 50 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Human Player Identity */}
         <View style={styles.cardSection}>
           <View style={styles.sectionHeader}>
@@ -182,7 +189,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
           textStyle={styles.startBtnText}
         />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

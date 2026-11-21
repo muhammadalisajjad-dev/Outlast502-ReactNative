@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Modal,
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import { Suit, SUITS, SUIT_NAMES, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { Colors } from '../../theme/colors';
@@ -20,6 +21,20 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
   visible,
   onSelectSuit,
 }) => {
+  const popAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      popAnim.setValue(0);
+      Animated.spring(popAnim, {
+        toValue: 1,
+        speed: 25,
+        bounciness: 5,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, popAnim]);
+
   const handleSelect = (suit: Suit) => {
     triggerHaptic('medium');
     onSelectSuit(suit);
@@ -28,7 +43,22 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.modalCard}>
+        <Animated.View
+          style={[
+            styles.modalCard,
+            {
+              transform: [
+                {
+                  scale: popAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
+              opacity: popAnim,
+            },
+          ]}
+        >
           <Text style={styles.title}>JACK DECLARED</Text>
           <Text style={styles.subtitle}>
             Select a suit to demand from the next player:
@@ -57,7 +87,7 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
               );
             })}
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

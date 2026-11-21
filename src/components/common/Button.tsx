@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   View,
+  Animated,
 } from 'react-native';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
@@ -35,6 +36,28 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (disabled || loading) return;
+    Animated.spring(scaleAnim, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 3,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    if (disabled || loading) return;
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 5,
+    }).start();
+  };
+
   const handlePress = () => {
     if (disabled || loading) return;
     triggerHaptic('light');
@@ -97,40 +120,44 @@ export const Button: React.FC<ButtonProps> = ({
   const sizeStyle = getSizeStyle();
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.82}
-      onPress={handlePress}
-      disabled={disabled || loading}
-      style={[
-        styles.baseContainer,
-        getContainerStyle(),
-        sizeStyle.container,
-        disabled && styles.disabledContainer,
-        style,
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator
-          size="small"
-          color="#ffffff"
-        />
-      ) : (
-        <View style={styles.contentRow}>
-          {icon && <View style={styles.iconWrapper}>{icon}</View>}
-          <Text
-            style={[
-              styles.baseText,
-              getTextStyle(),
-              sizeStyle.text,
-              disabled && styles.disabledText,
-              textStyle,
-            ]}
-          >
-            {title}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handlePress}
+        disabled={disabled || loading}
+        style={[
+          styles.baseContainer,
+          getContainerStyle(),
+          sizeStyle.container,
+          disabled && styles.disabledContainer,
+          style,
+        ]}
+      >
+        {loading ? (
+          <ActivityIndicator
+            size="small"
+            color="#ffffff"
+          />
+        ) : (
+          <View style={styles.contentRow}>
+            {icon && <View style={styles.iconWrapper}>{icon}</View>}
+            <Text
+              style={[
+                styles.baseText,
+                getTextStyle(),
+                sizeStyle.text,
+                disabled && styles.disabledText,
+                textStyle,
+              ]}
+            >
+              {title}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 

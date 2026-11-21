@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   TouchableOpacity,
   View,
   Text,
   StyleSheet,
   ViewStyle,
+  Animated,
 } from 'react-native';
 import { Card, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { Colors } from '../../theme/colors';
@@ -55,6 +56,26 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   };
 
   const dims = getDimensions();
+  const liftAnim = useRef(new Animated.Value(playable ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(liftAnim, {
+      toValue: selected ? 2 : playable ? 1 : 0,
+      speed: 30,
+      bounciness: 6,
+      useNativeDriver: true,
+    }).start();
+  }, [playable, selected, liftAnim]);
+
+  const translateY = liftAnim.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [0, -8, -14],
+  });
+
+  const scale = liftAnim.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [1, 1.02, 1.05],
+  });
 
   if (faceDown || !card) {
     return (
@@ -95,71 +116,35 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={playable ? 0.78 : 1}
-      onPress={handlePress}
-      disabled={!onPress}
-      style={[
-        styles.cardBase,
-        dims,
-        playable && styles.cardPlayable,
-        selected && styles.cardSelected,
-        style,
-      ]}
+    <Animated.View
+      style={{
+        transform: [{ translateY }, { scale }],
+        zIndex: selected ? 10 : playable ? 5 : 1,
+      }}
     >
-      {/* Inner hairline border for authentic card look */}
-      <View style={[styles.innerCardBorder, { borderRadius: dims.borderRadius - 2 }]}>
-        {/* Top-Left Corner Index */}
-        <View style={styles.cornerIndexTop}>
-          <Text
-            style={[
-              Typography.cardRank,
-              {
-                color: suitColor,
-                fontSize: isMini ? 10 : isLarge ? 17 : 14,
-                lineHeight: isMini ? 11 : isLarge ? 18 : 15,
-              },
-            ]}
-          >
-            {card.rank}
-          </Text>
-          <Text
-            style={[
-              Typography.cardSuit,
-              {
-                color: suitColor,
-                fontSize: isMini ? 9 : isLarge ? 13 : 11,
-                lineHeight: isMini ? 10 : isLarge ? 14 : 12,
-              },
-            ]}
-          >
-            {suitSymbol}
-          </Text>
-        </View>
-
-        {/* Center Watermark Emblem */}
-        <View style={styles.centerEmblem}>
-          <Text
-            style={{
-              color: suitColor,
-              fontSize: isMini ? 14 : isLarge ? 38 : 28,
-              opacity: isMini ? 0.85 : 0.8,
-            }}
-          >
-            {suitSymbol}
-          </Text>
-        </View>
-
-        {/* Bottom-Right Corner Index (Inverted) */}
-        {!isMini && (
-          <View style={styles.cornerIndexBottom}>
+      <TouchableOpacity
+        activeOpacity={playable ? 0.78 : 1}
+        onPress={handlePress}
+        disabled={!onPress}
+        style={[
+          styles.cardBase,
+          dims,
+          playable && styles.cardPlayable,
+          selected && styles.cardSelected,
+          style,
+        ]}
+      >
+        {/* Inner hairline border for authentic card look */}
+        <View style={[styles.innerCardBorder, { borderRadius: dims.borderRadius - 2 }]}>
+          {/* Top-Left Corner Index */}
+          <View style={styles.cornerIndexTop}>
             <Text
               style={[
                 Typography.cardRank,
                 {
                   color: suitColor,
-                  fontSize: isLarge ? 17 : 14,
-                  lineHeight: isLarge ? 18 : 15,
+                  fontSize: isMini ? 10 : isLarge ? 17 : 14,
+                  lineHeight: isMini ? 11 : isLarge ? 18 : 15,
                 },
               ]}
             >
@@ -170,26 +155,69 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                 Typography.cardSuit,
                 {
                   color: suitColor,
-                  fontSize: isLarge ? 13 : 11,
-                  lineHeight: isLarge ? 14 : 12,
+                  fontSize: isMini ? 9 : isLarge ? 13 : 11,
+                  lineHeight: isMini ? 10 : isLarge ? 14 : 12,
                 },
               ]}
             >
               {suitSymbol}
             </Text>
           </View>
-        )}
 
-        {/* Special Card Badge */}
-        {specialBadge && !isMini && (
-          <View style={[styles.specialBadge, { backgroundColor: specialBadge.bg }]}>
-            <Text style={[styles.specialBadgeText, { color: specialBadge.textCol }]}>
-              {specialBadge.label}
+          {/* Center Watermark Emblem */}
+          <View style={styles.centerEmblem}>
+            <Text
+              style={{
+                color: suitColor,
+                fontSize: isMini ? 14 : isLarge ? 38 : 28,
+                opacity: isMini ? 0.85 : 0.8,
+              }}
+            >
+              {suitSymbol}
             </Text>
           </View>
-        )}
-      </View>
-    </TouchableOpacity>
+
+          {/* Bottom-Right Corner Index (Inverted) */}
+          {!isMini && (
+            <View style={styles.cornerIndexBottom}>
+              <Text
+                style={[
+                  Typography.cardRank,
+                  {
+                    color: suitColor,
+                    fontSize: isLarge ? 17 : 14,
+                    lineHeight: isLarge ? 18 : 15,
+                  },
+                ]}
+              >
+                {card.rank}
+              </Text>
+              <Text
+                style={[
+                  Typography.cardSuit,
+                  {
+                    color: suitColor,
+                    fontSize: isLarge ? 13 : 11,
+                    lineHeight: isLarge ? 14 : 12,
+                  },
+                ]}
+              >
+                {suitSymbol}
+              </Text>
+            </View>
+          )}
+
+          {/* Special Card Badge */}
+          {specialBadge && !isMini && (
+            <View style={[styles.specialBadge, { backgroundColor: specialBadge.bg }]}>
+              <Text style={[styles.specialBadgeText, { color: specialBadge.textCol }]}>
+                {specialBadge.label}
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
@@ -261,12 +289,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 5,
     elevation: 6,
-    transform: [{ translateY: -6 }],
   },
   cardSelected: {
     borderColor: Colors.cobaltLight,
     borderWidth: 2,
-    transform: [{ translateY: -10 }],
   },
   cornerIndexTop: {
     alignItems: 'center',

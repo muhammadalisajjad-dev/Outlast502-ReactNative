@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Modal,
   View,
   Text,
   StyleSheet,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { Player } from '../../types/game';
 import { Button } from '../common/Button';
@@ -27,6 +28,20 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   onPlayAgain,
   onGoHome,
 }) => {
+  const popAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      popAnim.setValue(0);
+      Animated.spring(popAnim, {
+        toValue: 1,
+        speed: 24,
+        bounciness: 5,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, popAnim]);
+
   if (!matchWinnerId) return null;
 
   const winner = players.find(p => p.id === matchWinnerId);
@@ -44,7 +59,22 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.cardContainer}>
+        <Animated.View
+          style={[
+            styles.cardContainer,
+            {
+              transform: [
+                {
+                  scale: popAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.92, 1],
+                  }),
+                },
+              ],
+              opacity: popAnim,
+            },
+          ]}
+        >
           <View style={styles.trophyIconBox}>
             <Trophy size={28} color={Colors.silverLight} />
           </View>
@@ -126,7 +156,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
               style={{ flex: 1 }}
             />
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

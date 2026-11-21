@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider } from './src/context/GameContext';
 import { Colors } from './src/theme/colors';
+import { ScreenTransition } from './src/components/common/ScreenTransition';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { SetupScreen } from './src/screens/SetupScreen';
 import { GameScreen } from './src/screens/GameScreen';
@@ -25,44 +27,53 @@ function MainNavigator() {
     setCurrentScreen(previousScreen === 'setup' ? 'home' : previousScreen);
   };
 
-  switch (currentScreen) {
-    case 'home':
-      return <HomeScreen onNavigate={navigateTo} />;
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'home':
+        return <HomeScreen onNavigate={navigateTo} />;
 
-    case 'setup':
-      return (
-        <SetupScreen
-          onBack={() => setCurrentScreen('home')}
-          onStartGame={() => setCurrentScreen('game')}
-        />
-      );
+      case 'setup':
+        return (
+          <SetupScreen
+            onBack={() => setCurrentScreen('home')}
+            onStartGame={() => setCurrentScreen('game')}
+          />
+        );
 
-    case 'game':
-      return (
-        <GameScreen
-          onOpenScoreboard={() => navigateTo('scoreboard')}
-          onOpenRules={() => navigateTo('rules')}
-          onGoHome={() => setCurrentScreen('home')}
-        />
-      );
+      case 'game':
+        return (
+          <GameScreen
+            onOpenScoreboard={() => navigateTo('scoreboard')}
+            onOpenRules={() => navigateTo('rules')}
+            onGoHome={() => setCurrentScreen('home')}
+          />
+        );
 
-    case 'scoreboard':
-      return <ScoreboardScreen onBack={handleBack} />;
+      case 'scoreboard':
+        return <ScoreboardScreen onBack={handleBack} />;
 
-    case 'history':
-      return <HistoryScreen onBack={() => setCurrentScreen('home')} />;
+      case 'history':
+        return <HistoryScreen onBack={() => setCurrentScreen('home')} />;
 
-    case 'rules':
-      return <RulesScreen onBack={handleBack} />;
+      case 'rules':
+        return <RulesScreen onBack={handleBack} />;
 
-    default:
-      return <HomeScreen onNavigate={navigateTo} />;
-  }
+      default:
+        return <HomeScreen onNavigate={navigateTo} />;
+    }
+  };
+
+  return (
+    <ScreenTransition key={currentScreen}>
+      {renderScreen()}
+    </ScreenTransition>
+  );
 }
 
 export default function App() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="light" translucent backgroundColor="transparent" />
       <View style={styles.rootContainer}>
         <GameProvider>
           <MainNavigator />

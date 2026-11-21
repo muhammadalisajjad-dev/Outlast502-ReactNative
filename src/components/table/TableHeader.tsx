@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
@@ -20,6 +20,18 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onOpenScoreboard,
   onOpenRules,
 }) => {
+  const turnPulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    turnPulse.setValue(0.88);
+    Animated.spring(turnPulse, {
+      toValue: 1,
+      speed: 25,
+      bounciness: 6,
+      useNativeDriver: true,
+    }).start();
+  }, [isMyTurn, activePlayerName, turnPulse]);
+
   return (
     <View style={styles.container}>
       {/* Brand & Round Info */}
@@ -28,11 +40,12 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         <Text style={styles.roundText}>ROUND {roundNumber}</Text>
       </View>
 
-      {/* Turn Banner */}
-      <View
+      {/* Turn Banner with Spring Pulse */}
+      <Animated.View
         style={[
           styles.turnBanner,
           isMyTurn ? styles.myTurnBanner : styles.otherTurnBanner,
+          { transform: [{ scale: turnPulse }] },
         ]}
       >
         {isMyTurn ? (
@@ -48,7 +61,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         >
           {isMyTurn ? 'YOUR TURN' : `${activePlayerName.toUpperCase()}'S TURN`}
         </Text>
-      </View>
+      </Animated.View>
 
       {/* Top Action Buttons (Scoreboard & Rules) */}
       <View style={styles.rightCol}>

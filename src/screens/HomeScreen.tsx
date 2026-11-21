@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
+import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
@@ -29,6 +29,7 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const { startMatch } = useGame();
+  const insets = useResponsiveInsets();
 
   const handleQuickPlay = () => {
     startMatch(4, 'You');
@@ -36,7 +37,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Editorial Brand Crest */}
         <View style={styles.brandContainer}>
@@ -172,7 +173,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           <Text style={styles.footerText}>Standard 52-Card Deck · 502 Point Limit · v1.0</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { useGame } from '../context/GameContext';
 import { TableHeader } from '../components/table/TableHeader';
 import { OpponentSeat } from '../components/table/OpponentSeat';
@@ -49,11 +49,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
   if (!gameState) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>INITIALIZING MATCH...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -67,19 +67,22 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       : null;
 
   const canDraw = isMyTurn && !gameState.pendingPenalty.active;
+  const insets = useResponsiveInsets();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="light" />
+    <View style={styles.safeArea}>
+      <StatusBar style="light" translucent backgroundColor="transparent" />
 
-      {/* Top Header */}
-      <TableHeader
-        roundNumber={gameState.roundNumber}
-        activePlayerName={activePlayer ? activePlayer.name : ''}
-        isMyTurn={isMyTurn}
-        onOpenScoreboard={onOpenScoreboard}
-        onOpenRules={onOpenRules}
-      />
+      {/* Top Header with Android & iOS safe area inset */}
+      <View style={{ paddingTop: insets.top, backgroundColor: 'rgba(8, 12, 20, 0.95)' }}>
+        <TableHeader
+          roundNumber={gameState.roundNumber}
+          activePlayerName={activePlayer ? activePlayer.name : ''}
+          isMyTurn={isMyTurn}
+          onOpenScoreboard={onOpenScoreboard}
+          onOpenRules={onOpenRules}
+        />
+      </View>
 
       {/* Opponents Row */}
       <View style={styles.opponentsContainer}>
@@ -161,8 +164,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         />
       )}
 
-      {/* Human Player Hand Area */}
-      <View style={styles.playerHandSection}>
+      {/* Human Player Hand Area with bottom safe area inset */}
+      <View style={[styles.playerHandSection, { paddingBottom: Math.max(insets.bottom, 10) }]}>
         <CardHand
           hand={myPlayerHand}
           playableCardIds={playableCardIds}
@@ -191,7 +194,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         onPlayAgain={resetMatch}
         onGoHome={onGoHome}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, Animated } from 'react-native';
 import { PlayingCard } from '../card/PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
@@ -16,14 +16,29 @@ export const DrawPile: React.FC<DrawPileProps> = ({
   canDraw,
   onDraw,
 }) => {
+  const drawAnim = useRef(new Animated.Value(1)).current;
+
   const handlePress = () => {
     if (!canDraw) return;
     triggerHaptic('medium');
+    Animated.sequence([
+      Animated.timing(drawAnim, {
+        toValue: 0.94,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(drawAnim, {
+        toValue: 1,
+        speed: 30,
+        bounciness: 6,
+        useNativeDriver: true,
+      }),
+    ]).start();
     onDraw();
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { transform: [{ scale: drawAnim }] }]}>
       <TouchableOpacity
         activeOpacity={canDraw ? 0.78 : 1}
         onPress={handlePress}
@@ -48,7 +63,7 @@ export const DrawPile: React.FC<DrawPileProps> = ({
       <Text style={[styles.pileLabel, canDraw && styles.pileLabelActive]}>
         {canDraw ? 'DRAW (+1)' : 'DECK'}
       </Text>
-    </View>
+    </Animated.View>
   );
 };
 

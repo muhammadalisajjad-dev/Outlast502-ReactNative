@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
+import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { useGame } from '../context/GameContext';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
@@ -19,6 +19,7 @@ interface ScoreboardScreenProps {
 
 export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) => {
   const { gameState } = useGame();
+  const insets = useResponsiveInsets();
 
   if (!gameState) {
     return null;
@@ -35,8 +36,8 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerRow}>
+    <View style={styles.safeArea}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
           <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
@@ -45,7 +46,13 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
         <View style={{ width: 50 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Cumulative Standings Card */}
         <View style={styles.cardSection}>
           <Text style={styles.sectionTitle}>SURVIVAL STANDINGS</Text>
@@ -180,7 +187,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Card, Suit, SUIT_NAMES, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { PlayingCard } from '../card/PlayingCard';
 import { Colors } from '../../theme/colors';
@@ -16,9 +16,22 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
   declaredSuit,
   count,
 }) => {
+  const landingAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!topCard) return;
+    landingAnim.setValue(1.08);
+    Animated.spring(landingAnim, {
+      toValue: 1,
+      speed: 25,
+      bounciness: 5,
+      useNativeDriver: true,
+    }).start();
+  }, [topCard?.id, landingAnim]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.pileWrapper}>
+      <Animated.View style={[styles.pileWrapper, { transform: [{ scale: landingAnim }] }]}>
         {/* Subtle shadow card underneath for realistic stack depth */}
         {count > 1 && <View style={styles.shadowCardUnder} />}
 
@@ -36,7 +49,7 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
         <View style={styles.badgeContainer}>
           <Text style={styles.badgeText}>{count}</Text>
         </View>
-      </View>
+      </Animated.View>
 
       <Text style={styles.pileLabel}>DISCARD</Text>
 

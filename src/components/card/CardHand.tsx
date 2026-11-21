@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   ScrollView,
   View,
   Text,
   StyleSheet,
   ViewStyle,
+  Animated,
 } from 'react-native';
 import { Card } from '../../types/card';
 import { PlayingCard } from './PlayingCard';
@@ -28,6 +29,17 @@ export const CardHand: React.FC<CardHandProps> = ({
   style,
 }) => {
   const playableCount = hand.filter(c => playableCardIds.has(c.id)).length;
+  const dealAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    dealAnim.setValue(0);
+    Animated.spring(dealAnim, {
+      toValue: 1,
+      speed: 16,
+      bounciness: 4,
+      useNativeDriver: true,
+    }).start();
+  }, [hand.length, dealAnim]);
 
   return (
     <View style={[styles.container, style]}>
@@ -57,31 +69,48 @@ export const CardHand: React.FC<CardHandProps> = ({
         )}
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <Animated.View
+        style={{
+          transform: [
+            {
+              translateY: dealAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [24, 0],
+              }),
+            },
+          ],
+          opacity: dealAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.3, 1],
+          }),
+        }}
       >
-        {hand.map((card, index) => {
-          const isPlayable = isMyTurn && playableCardIds.has(card.id);
-          return (
-            <View
-              key={card.id}
-              style={[
-                styles.cardWrapper,
-                index > 0 && styles.overlappingCard,
-              ]}
-            >
-              <PlayingCard
-                card={card}
-                playable={isPlayable}
-                onPress={isPlayable ? () => onCardPress(card) : undefined}
-                size="normal"
-              />
-            </View>
-          );
-        })}
-      </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {hand.map((card, index) => {
+            const isPlayable = isMyTurn && playableCardIds.has(card.id);
+            return (
+              <View
+                key={card.id}
+                style={[
+                  styles.cardWrapper,
+                  index > 0 && styles.overlappingCard,
+                ]}
+              >
+                <PlayingCard
+                  card={card}
+                  playable={isPlayable}
+                  onPress={isPlayable ? () => onCardPress(card) : undefined}
+                  size="normal"
+                />
+              </View>
+            );
+          })}
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 };
