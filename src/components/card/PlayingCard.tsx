@@ -20,6 +20,7 @@ interface PlayingCardProps {
   onPress?: () => void;
   size?: 'normal' | 'mini' | 'large';
   style?: ViewStyle;
+  testID?: string;
 }
 
 export const PlayingCard: React.FC<PlayingCardProps> = ({
@@ -30,6 +31,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   onPress,
   size = 'normal',
   style,
+  testID,
 }) => {
   const isRed = card ? SUIT_COLORS[card.suit] === 'red' : false;
   const suitSymbol = card ? SUIT_SYMBOLS[card.suit] : '';
@@ -46,18 +48,20 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const getDimensions = () => {
     switch (size) {
       case 'mini':
-        return { width: 32, height: 46, borderRadius: 4 };
+        return { width: 34, height: 48, borderRadius: 4 };
       case 'large':
-        return { width: 84, height: 122, borderRadius: 7 };
+        return { width: 86, height: 124, borderRadius: 8 };
       case 'normal':
       default:
-        return { width: 64, height: 94, borderRadius: 6 };
+        return { width: 66, height: 96, borderRadius: 6 };
     }
   };
 
   const dims = getDimensions();
   const liftAnim = useRef(new Animated.Value(playable ? 1 : 0)).current;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
 
+  // Lift animation when playable / selected
   useEffect(() => {
     Animated.spring(liftAnim, {
       toValue: selected ? 2 : playable ? 1 : 0,
@@ -67,14 +71,46 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     }).start();
   }, [playable, selected, liftAnim]);
 
+  // Subtle breathing pulse for playable cards
+  useEffect(() => {
+    let anim: Animated.CompositeAnimation | null = null;
+    if (playable) {
+      anim = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      anim.start();
+    } else {
+      pulseAnim.setValue(0);
+    }
+    return () => {
+      if (anim) anim.stop();
+    };
+  }, [playable, pulseAnim]);
+
   const translateY = liftAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [0, -8, -14],
+    outputRange: [0, -9, -16],
   });
 
   const scale = liftAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [1, 1.02, 1.05],
+    outputRange: [1, 1.03, 1.07],
+  });
+
+  const playableGlowOpacity = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.35, 0.85],
   });
 
   if (faceDown || !card) {
@@ -89,8 +125,16 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       >
         <View style={styles.cardBackPattern}>
           <View style={styles.cardBackInnerFrame}>
+            <View style={styles.cardBackCornerTopLeft}>
+              <Text style={styles.cardBackMiniSuit}>♠</Text>
+            </View>
+            <View style={styles.cardBackCornerBottomRight}>
+              <Text style={styles.cardBackMiniSuit}>♦</Text>
+            </View>
             <View style={styles.cardBackDiamond}>
-              <Text style={styles.cardBackText}>502</Text>
+              <View style={styles.cardBackDiamondInner}>
+                <Text style={styles.cardBackText}>502</Text>
+              </View>
             </View>
           </View>
         </View>
@@ -101,18 +145,18 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const isMini = size === 'mini';
   const isLarge = size === 'large';
 
-  // Special card tag in Midnight Lounge styling
-  let specialBadge: { label: string; bg: string; textCol: string } | null = null;
+  // High-impact Special Badges
+  let specialBadge: { label: string; bg: string; textCol: string; borderCol: string } | null = null;
   if (card.rank === '7' && card.suit === 'hearts') {
-    specialBadge = { label: 'WIN', bg: Colors.crimson, textCol: '#ffffff' };
+    specialBadge = { label: 'WIN 7♥', bg: '#991b1b', textCol: '#fef08a', borderCol: '#f59e0b' };
   } else if (card.rank === 'J') {
-    specialBadge = { label: 'WILD', bg: Colors.cobalt, textCol: '#ffffff' };
+    specialBadge = { label: 'WILD', bg: '#1d4ed8', textCol: '#ffffff', borderCol: '#60a5fa' };
   } else if (card.rank === 'A' && card.suit === 'spades') {
-    specialBadge = { label: '+5', bg: Colors.crimson, textCol: '#ffffff' };
+    specialBadge = { label: '+5 ATK', bg: '#b91c1c', textCol: '#ffffff', borderCol: '#f87171' };
   } else if (card.rank === '2') {
-    specialBadge = { label: '+2', bg: Colors.amber, textCol: '#ffffff' };
+    specialBadge = { label: '+2 ATK', bg: '#b45309', textCol: '#ffffff', borderCol: '#fbbf24' };
   } else if (card.rank === '8') {
-    specialBadge = { label: 'SKIP', bg: Colors.surfaceElevated, textCol: Colors.textAccent };
+    specialBadge = { label: 'SKIP', bg: '#1e293b', textCol: '#38bdf8', borderCol: '#0ea5e9' };
   }
 
   return (
@@ -123,7 +167,8 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       }}
     >
       <TouchableOpacity
-        activeOpacity={playable ? 0.78 : 1}
+        testID={testID}
+        activeOpacity={playable ? 0.8 : 1}
         onPress={handlePress}
         disabled={!onPress}
         style={[
@@ -134,7 +179,18 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           style,
         ]}
       >
-        {/* Inner hairline border for authentic card look */}
+        {/* Subtle breathing glow ring for playable cards */}
+        {playable && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.playableGlowRing,
+              { opacity: playableGlowOpacity, borderRadius: dims.borderRadius },
+            ]}
+          />
+        )}
+
+        {/* Inner hairline border with authentic linen styling */}
         <View style={[styles.innerCardBorder, { borderRadius: dims.borderRadius - 2 }]}>
           {/* Top-Left Corner Index */}
           <View style={styles.cornerIndexTop}>
@@ -143,8 +199,8 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                 Typography.cardRank,
                 {
                   color: suitColor,
-                  fontSize: isMini ? 10 : isLarge ? 17 : 14,
-                  lineHeight: isMini ? 11 : isLarge ? 18 : 15,
+                  fontSize: isMini ? 10.5 : isLarge ? 18 : 14.5,
+                  lineHeight: isMini ? 11 : isLarge ? 19 : 15.5,
                 },
               ]}
             >
@@ -155,7 +211,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                 Typography.cardSuit,
                 {
                   color: suitColor,
-                  fontSize: isMini ? 9 : isLarge ? 13 : 11,
+                  fontSize: isMini ? 9.5 : isLarge ? 13.5 : 11.5,
                   lineHeight: isMini ? 10 : isLarge ? 14 : 12,
                 },
               ]}
@@ -164,13 +220,13 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
             </Text>
           </View>
 
-          {/* Center Watermark Emblem */}
+          {/* Center Watermark Pip */}
           <View style={styles.centerEmblem}>
             <Text
               style={{
                 color: suitColor,
-                fontSize: isMini ? 14 : isLarge ? 38 : 28,
-                opacity: isMini ? 0.85 : 0.8,
+                fontSize: isMini ? 15 : isLarge ? 40 : 29,
+                opacity: isMini ? 0.88 : 0.82,
               }}
             >
               {suitSymbol}
@@ -185,8 +241,8 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                   Typography.cardRank,
                   {
                     color: suitColor,
-                    fontSize: isLarge ? 17 : 14,
-                    lineHeight: isLarge ? 18 : 15,
+                    fontSize: isLarge ? 18 : 14.5,
+                    lineHeight: isLarge ? 19 : 15.5,
                   },
                 ]}
               >
@@ -197,7 +253,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                   Typography.cardSuit,
                   {
                     color: suitColor,
-                    fontSize: isLarge ? 13 : 11,
+                    fontSize: isLarge ? 13.5 : 11.5,
                     lineHeight: isLarge ? 14 : 12,
                   },
                 ]}
@@ -209,12 +265,23 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 
           {/* Special Card Badge */}
           {specialBadge && !isMini && (
-            <View style={[styles.specialBadge, { backgroundColor: specialBadge.bg }]}>
+            <View
+              style={[
+                styles.specialBadge,
+                {
+                  backgroundColor: specialBadge.bg,
+                  borderColor: specialBadge.borderCol,
+                },
+              ]}
+            >
               <Text style={[styles.specialBadgeText, { color: specialBadge.textCol }]}>
                 {specialBadge.label}
               </Text>
             </View>
           )}
+
+          {/* Subtle diagonal sheen highlight */}
+          <View style={styles.cardSheen} pointerEvents="none" />
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -224,61 +291,96 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 const styles = StyleSheet.create({
   cardBase: {
     backgroundColor: Colors.cardIvory,
-    borderColor: Colors.cardBorder,
+    borderColor: '#e2dcd0',
     borderWidth: 1,
-    padding: 2,
+    padding: 2.5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 4,
     position: 'relative',
     overflow: 'hidden',
   },
+  playableGlowRing: {
+    position: 'absolute',
+    top: -2,
+    left: -2,
+    right: -2,
+    bottom: -2,
+    borderWidth: 2,
+    borderColor: Colors.playableBlue,
+  },
   innerCardBorder: {
     flex: 1,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderWidth: 0.75,
+    borderColor: 'rgba(0, 0, 0, 0.09)',
+    backgroundColor: '#fefdfa',
     justifyContent: 'space-between',
-    padding: 2.5,
+    padding: 3,
     position: 'relative',
+    overflow: 'hidden',
   },
   cardFaceDown: {
-    backgroundColor: Colors.cardBack,
-    borderColor: 'rgba(59, 130, 246, 0.4)',
-    borderWidth: 1,
-    padding: 2.5,
+    backgroundColor: '#070d18',
+    borderColor: 'rgba(56, 189, 248, 0.35)',
+    borderWidth: 1.5,
+    padding: 3,
   },
   cardBackPattern: {
     flex: 1,
-    backgroundColor: '#0c162b',
+    backgroundColor: '#0a1222',
     borderRadius: 4,
-    borderWidth: 0.5,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    padding: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
+    padding: 2.5,
   },
   cardBackInnerFrame: {
     flex: 1,
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 213, 225, 0.2)',
+    borderColor: 'rgba(251, 191, 36, 0.3)',
+    borderRadius: 2,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  cardBackCornerTopLeft: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+  },
+  cardBackCornerBottomRight: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+  },
+  cardBackMiniSuit: {
+    fontSize: 7,
+    color: 'rgba(251, 191, 36, 0.45)',
   },
   cardBackDiamond: {
-    width: '60%',
-    height: '60%',
-    borderWidth: 0.75,
-    borderColor: Colors.cobaltLight,
+    width: '64%',
+    height: '64%',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.5)',
     transform: [{ rotate: '45deg' }],
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+  },
+  cardBackDiamondInner: {
+    width: '80%',
+    height: '80%',
+    borderWidth: 0.5,
+    borderColor: 'rgba(56, 189, 248, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardBackText: {
-    color: Colors.silverLight,
-    fontWeight: '800',
-    fontSize: 8.5,
-    letterSpacing: 0.5,
+    color: '#fbbf24',
+    fontWeight: '900',
+    fontSize: 9,
+    letterSpacing: 0.8,
     transform: [{ rotate: '-45deg' }],
   },
   cardPlayable: {
@@ -286,12 +388,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     shadowColor: Colors.playableBlue,
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 6,
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+    elevation: 7,
   },
   cardSelected: {
-    borderColor: Colors.cobaltLight,
+    borderColor: Colors.goldLight,
     borderWidth: 2,
   },
   cornerIndexTop: {
@@ -314,17 +416,30 @@ const styles = StyleSheet.create({
   },
   specialBadge: {
     position: 'absolute',
-    top: 2.5,
-    right: 2.5,
+    top: 2,
+    right: 2,
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 3,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderWidth: 0.75,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   specialBadgeText: {
     fontSize: 7.5,
     fontWeight: '900',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
+  },
+  cardSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '40%',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    transform: [{ skewY: '-15deg' }],
   },
 });

@@ -49,9 +49,10 @@ async function run() {
   const browser = await chromium.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: true,
+    args: ['--autoplay-policy=no-user-gesture-required'],
   });
 
-  // Step A: Record continuous video at 390x844
+  // Step A: Record continuous video at 390x844 (Mobile Viewport)
   console.log('\n--- Starting UI Review Walkthrough Recording (390x844) ---');
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -67,56 +68,80 @@ async function run() {
   const page = await context.newPage();
 
   // 1. Home Screen
-  console.log('1. Home Screen viewing...');
+  console.log('1. Home Screen inspection...');
   await page.goto('http://localhost:8089', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(1600);
   await page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '01_home_screen_390x844.png') });
 
-  // 2. Setup Screen
-  console.log('2. Match Setup...');
+  // 2. Match Setup
+  console.log('2. Opening Match Setup...');
   const setupBtn = page.getByText('Match Setup');
   await setupBtn.first().click();
-  await page.waitForTimeout(1400);
+  await page.waitForTimeout(1200);
   await page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '02_setup_screen_390x844.png') });
 
-  // Select 4 players and start
+  // Select 4 players
   const seatBtn = page.getByText('4');
   await seatBtn.first().click();
   await page.waitForTimeout(600);
 
-  // 3. Start Match & Dealing
-  console.log('3. Starting Match & Dealing cards...');
+  // 3. Deal Cards & Start Match
+  console.log('3. Dealing cards & Starting Match...');
   const startBtn = page.getByText('DEAL CARDS & START MATCH');
   await startBtn.first().click();
-  await page.waitForTimeout(2000); // observe dealing animation
-
-  // 4. Gameplay Table
-  console.log('4. Gameplay table active...');
+  
+  // Watch card dealing animation (staggered flight from center to players)
+  await page.waitForTimeout(2000);
   await page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '03_game_table_screen_390x844.png') });
 
-  // 5. Try Playing a Card or Drawing
-  console.log('5. Playing / drawing card interaction...');
-  // Look for playable cards or draw pile
-  const playableIndicator = await page.getByText('playable card').first().isVisible().catch(() => false);
-  console.log('Playable indicator visible:', playableIndicator);
+  // 4. Interactive Card Play & Drawing
+  console.log('4. Playing & Drawing cards on table...');
+  for (let turn = 0; turn < 4; turn++) {
+    await page.waitForTimeout(1200);
 
-  // Click draw pile or play a card
-  const drawPileBtn = page.getByText('DRAW (+1)');
-  const canDraw = await drawPileBtn.first().isVisible().catch(() => false);
-  if (canDraw) {
-    console.log('Tapping Draw pile...');
-    await drawPileBtn.first().click();
-    await page.waitForTimeout(1500);
+    // Check if human turn
+    const isHumanTurn = await page.getByText('HAND (').first().isVisible().catch(() => false);
+    if (isHumanTurn) {
+      // Check for playable card
+      const playableCards = page.locator('[data-testid="playable-card"]');
+      const count = await playableCards.count().catch(() => 0);
+      if (count > 0) {
+        console.log(`Found ${count} playable card(s). Playing top playable card...`);
+        await playableCards.first().click();
+        await page.waitForTimeout(600);
+
+        // Check if Jack suit modal appeared
+        const jackModal = page.getByText('JACK DECLARED');
+        const isJack = await jackModal.first().isVisible().catch(() => false);
+        if (isJack) {
+          console.log('Jack Modal appeared! Selecting demanded suit...');
+          const suitBtn = page.locator('[data-testid^="suit-select-"]').first();
+          if (await suitBtn.isVisible().catch(() => false)) {
+            await suitBtn.click();
+          }
+          await page.waitForTimeout(800);
+        }
+      } else {
+        // Draw from deck
+        const drawBtn = page.locator('[data-testid="draw-pile-btn"]').first();
+        const canClickDraw = await page.getByText('DRAW').first().isVisible().catch(() => false);
+        if (canClickDraw) {
+          console.log('No playable card, drawing from deck (+1)...');
+          await drawBtn.click({ force: true }).catch(() => {});
+          await page.waitForTimeout(800);
+        }
+      }
+    }
+
+    // Allow bot turns to proceed with visible motion
+    await page.waitForTimeout(2000);
   }
 
-  // Allow opponent turns to progress
-  await page.waitForTimeout(2500);
-
-  // 6. Scoreboard
-  console.log('6. Inspecting Scoreboard...');
+  // 5. Scoreboard Screen
+  console.log('5. Viewing Live Scoreboard...');
   const scoreBtn = page.getByLabel('Open Scoreboard');
   await scoreBtn.first().click();
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(1500);
   await page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '05_scoreboard_screen_390x844.png') });
 
   // Back to game
@@ -124,11 +149,11 @@ async function run() {
   await backBtnScore.first().click();
   await page.waitForTimeout(1000);
 
-  // 7. Rules Screen
-  console.log('7. Inspecting Rules Screen...');
+  // 6. Rules Screen
+  console.log('6. Viewing Official Rules...');
   const rulesBtn = page.getByLabel('Open Rules');
   await rulesBtn.first().click();
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(1500);
   await page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '04_rules_screen_390x844.png') });
 
   // Back to game
@@ -136,12 +161,11 @@ async function run() {
   await backBtnRules.first().click();
   await page.waitForTimeout(1000);
 
-  // 8. Go Home and open History
-  console.log('8. Returning to Home and checking History...');
+  // 7. Seed sample finished match & inspect Match History
+  console.log('7. Returning to Home and inspecting Match History...');
   await page.goto('http://localhost:8089', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(800);
 
-  // Seed sample match so History renders complete card
   await page.evaluate(() => {
     const sampleRecord = {
       id: 'match-review-1',
@@ -180,7 +204,7 @@ async function run() {
       fs.copyFileSync(videoPath, OUTPUT_VIDEO_PATH);
       console.log('Copied review video directly to:', OUTPUT_VIDEO_PATH);
       const stats = fs.statSync(OUTPUT_VIDEO_PATH);
-      console.log(`Video confirmed: ${stats.size} bytes`);
+      console.log(`Video confirmed: ${stats.size} bytes (${(stats.size / (1024 * 1024)).toFixed(2)} MB)`);
     }
   }
 
@@ -208,34 +232,12 @@ async function run() {
   // Game table 360x800
   const note50Start = note50Page.getByText('DEAL CARDS & START MATCH');
   await note50Start.first().click();
-  await note50Page.waitForTimeout(1400);
+  await note50Page.waitForTimeout(1500);
   await note50Page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '03_game_table_screen_360x800.png') });
-
-  // Rules 360x800
-  const note50Rules = note50Page.getByLabel('Open Rules');
-  await note50Rules.first().click();
-  await note50Page.waitForTimeout(800);
-  await note50Page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '04_rules_screen_360x800.png') });
-
-  // Scoreboard 360x800
-  const note50Back = note50Page.getByText('BACK');
-  await note50Back.first().click();
-  await note50Page.waitForTimeout(600);
-  const note50Score = note50Page.getByLabel('Open Scoreboard');
-  await note50Score.first().click();
-  await note50Page.waitForTimeout(800);
-  await note50Page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '05_scoreboard_screen_360x800.png') });
-
-  // History 360x800
-  await note50Page.goto('http://localhost:8089', { waitUntil: 'networkidle' });
-  await note50Page.waitForTimeout(600);
-  await note50Page.getByText('Match History').first().click();
-  await note50Page.waitForTimeout(800);
-  await note50Page.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '06_history_screen_360x800.png') });
 
   await note50Context.close();
 
-  // Step C: Desktop capture (1280x800)
+  // Step C: Desktop Responsiveness (1280x800)
   console.log('\n--- Capturing Desktop Responsiveness (1280x800) ---');
   const deskContext = await browser.newContext({
     viewport: { width: 1280, height: 800 },
@@ -246,13 +248,13 @@ async function run() {
   await deskPage.waitForTimeout(800);
   const deskQuickPlay = deskPage.getByText('QUICK PLAY');
   await deskQuickPlay.first().click();
-  await deskPage.waitForTimeout(1200);
+  await deskPage.waitForTimeout(1400);
   await deskPage.screenshot({ path: path.join(FINAL_SCREENSHOTS_DIR, '07_desktop_1280x800.png') });
   await deskContext.close();
 
   await browser.close();
   server.close();
-  console.log('\nRecord walkthrough and screenshots completed successfully!');
+  console.log('\nReview video and screenshot suite completed successfully!');
 }
 
 run().catch(err => {

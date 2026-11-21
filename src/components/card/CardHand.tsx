@@ -105,6 +105,7 @@ export const CardHand: React.FC<CardHandProps> = ({
                   playable={isPlayable}
                   onPress={isPlayable ? () => onCardPress(card) : undefined}
                   size="normal"
+                  testID={isPlayable ? 'playable-card' : 'card-item'}
                 />
               </View>
             );

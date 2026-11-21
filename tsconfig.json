@@ -3,5 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "types": ["jest"]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "recordings",
+    "recordings_temp",
+    "scripts"
+  ]
 }

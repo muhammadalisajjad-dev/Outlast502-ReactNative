@@ -16,9 +16,17 @@ export const Colors = {
   silverLight: '#f1f5f9',
   silverMuted: 'rgba(203, 213, 225, 0.25)',
 
+  // Prestige Gold Accents (for winners, honors, immunity)
+  gold: '#d97706',
+  goldLight: '#fbbf24',
+  goldGlow: 'rgba(251, 191, 36, 0.4)',
+  goldMuted: 'rgba(251, 191, 36, 0.15)',
+  textGold: '#fde68a',
+
   // Action / Playable Highlights (Icy Blue & Mint)
   playableBlue: '#38bdf8',
   playableGlow: 'rgba(56, 189, 248, 0.45)',
+  playableMint: '#34d399',
 
   // Danger & Penalty Accents (Refined Crimson)
   crimson: '#dc2626',
@@ -33,6 +41,7 @@ export const Colors = {
   cardIvoryInner: '#f5f3eb',
   cardBorder: '#ded8cb',
   cardShadow: 'rgba(0, 0, 0, 0.5)',
+  cardMidnight: '#090f1a',
   cardBack: '#0c162b',
   cardBackPattern: '#16284a',
   cardRedSuit: '#b91c1c',

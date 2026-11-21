@@ -150,7 +150,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             <Button
               title="Main Menu"
               icon={<Home size={14} color={Colors.textPrimary} />}
-              variant="surface"
+              variant="subtle"
               size="medium"
               onPress={onGoHome}
               style={{ flex: 1 }}

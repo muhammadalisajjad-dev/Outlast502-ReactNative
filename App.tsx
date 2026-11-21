@@ -73,7 +73,7 @@ function MainNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" translucent backgroundColor="transparent" />
+      <StatusBar style="light" />
       <View style={styles.rootContainer}>
         <GameProvider>
           <MainNavigator />

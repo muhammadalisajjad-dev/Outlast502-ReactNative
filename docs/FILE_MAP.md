@@ -81,6 +81,7 @@ This document catalogues every file in the project, explaining its exact respons
 | `src/components/table/DiscardPile.tsx` | Discard stack with top face-up card and active declared suit indicator | `DiscardPile` |
 | `src/components/table/DrawPile.tsx` | Face-down deck with card count indicator and draw trigger | `DrawPile` |
 | `src/components/table/OpponentSeat.tsx` | Opponent avatar, active turn indicator, remaining card count, and score | `OpponentSeat` |
+| `src/components/table/TableMotionOverlay.tsx` | Animated card dealing sequence, flying card trajectories (hand/draw/discard), and special card announcement banners | `TableMotionOverlay` |
 | `src/components/table/TableHeader.tsx` | Round status, match info, and game controls | `TableHeader` |
 | `src/components/modals/JackSuitModal.tsx` | Modal dialog for choosing suit after playing a Jack | `JackSuitModal` |
 | `src/components/modals/PenaltyModal.tsx` | Banner/modal detailing pending penalty and required response | `PenaltyModal` |
@@ -113,6 +114,7 @@ This document catalogues every file in the project, explaining its exact respons
 | `src/theme/colors.ts` | Color tokens: emerald table, gold foil, ivory card, crimson alerts | `Colors` |
 | `src/theme/typography.ts` | Standardized typography sizes and font weights | `Typography` |
 | `src/utils/haptics.ts` | Tactile and audio feedback helper | `triggerHaptic()` |
+| `src/utils/sound.ts` | Procedural Web Audio API sound synthesizer for card deals, snaps, draws, penalties, and victory chimes | `playCardSnap()`, `playCardDeal()`, `playCardDraw()`, `playPenalty()`, `playVictoryChime()`, `playClick()` |
 
 ---
 

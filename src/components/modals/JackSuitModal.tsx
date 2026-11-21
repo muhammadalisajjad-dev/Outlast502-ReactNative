@@ -70,6 +70,7 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
               return (
                 <TouchableOpacity
                   key={suit}
+                  testID={`suit-select-${suit}`}
                   activeOpacity={0.78}
                   style={styles.suitButton}
                   onPress={() => handleSelect(suit)}
