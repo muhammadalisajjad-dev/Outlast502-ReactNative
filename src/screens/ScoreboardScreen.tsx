@@ -1,21 +1,41 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { useGame } from '../context/GameContext';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { ELIMINATION_THRESHOLD } from '../engine/elimination';
-import { ChevronLeft, Shield, Skull, Crown, AlertCircle } from 'lucide-react-native';
+import { Shield, Skull, Crown, AlertCircle } from 'lucide-react-native';
+import {
+  DecoBackdrop,
+  ClubHeader,
+  LedgerSection,
+  OrnamentDivider,
+  BrassDiamond,
+} from '../components/common/Deco';
 
 interface ScoreboardScreenProps {
   onBack: () => void;
 }
+
+const toRoman = (value: number): string => {
+  const numerals: Array<[number, string]> = [
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I'],
+  ];
+  let remaining = Math.max(1, Math.floor(value));
+  let result = '';
+  numerals.forEach(([amount, numeral]) => {
+    while (remaining >= amount) {
+      result += numeral;
+      remaining -= amount;
+    }
+  });
+  return result;
+};
 
 export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) => {
   const { gameState } = useGame();
@@ -27,7 +47,6 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
 
   const { players, roundResults } = gameState;
 
-  // Sort players for standings: active players by score ascending, eliminated players last
   const sortedPlayers = [...players].sort((a, b) => {
     if (a.isEliminated !== b.isEliminated) {
       return a.isEliminated ? 1 : -1;
@@ -37,154 +56,180 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
 
   return (
     <View style={styles.safeArea}>
-      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
-          <Text style={styles.backBtnText}>BACK</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>MATCH SCOREBOARD</Text>
-        <View style={{ width: 50 }} />
-      </View>
+      <DecoBackdrop variant="screen" />
+      <ClubHeader title="MATCH SCOREBOARD" onBack={onBack} />
 
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+          { paddingBottom: Math.max(insets.bottom + 28, 40) },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Cumulative Standings Card */}
-        <View style={styles.cardSection}>
-          <Text style={styles.sectionTitle}>SURVIVAL STANDINGS</Text>
-          <Text style={styles.sectionSubtitle}>
-            Players reaching {ELIMINATION_THRESHOLD} points are eliminated. Round winners hold immunity.
+        <View style={styles.content}>
+          <Text style={styles.pageKicker}>THE LEDGER · SURVIVAL</Text>
+          <Text style={styles.pageTitle}>Standings</Text>
+          <Text style={styles.pageSub}>
+            Points are a debt. At {ELIMINATION_THRESHOLD}, the house asks you to leave.
           </Text>
 
-          {sortedPlayers.map((p, idx) => {
-            const progress = Math.min(p.cumulativeScore / ELIMINATION_THRESHOLD, 1);
-            const isDanger = p.cumulativeScore >= 400;
-            const isWarning = p.cumulativeScore >= 250 && !isDanger;
+          <OrnamentDivider style={styles.divider} />
 
-            return (
-              <View
-                key={p.id}
-                style={[
-                  styles.playerRow,
-                  p.isEliminated && styles.eliminatedRow,
-                  idx === 0 && !p.isEliminated && styles.leaderRow,
-                ]}
-              >
-                <View style={styles.playerInfoRow}>
-                  <View style={styles.nameBlock}>
-                    <View style={styles.rankBadge}>
-                      <Text style={styles.rankBadgeText}>#{idx + 1}</Text>
-                    </View>
+          <LedgerSection
+            first
+            numeral="I"
+            title="SURVIVAL STANDINGS"
+            subtitle="Lowest score leads. Round winners hold immunity for the round they win."
+          >
+            {sortedPlayers.map((p, idx) => {
+              const progress = Math.min(p.cumulativeScore / ELIMINATION_THRESHOLD, 1);
+              const isDanger = p.cumulativeScore >= 400;
+              const isWarning = p.cumulativeScore >= 250 && !isDanger;
+              const isLeader = idx === 0 && !p.isEliminated;
 
-                    <Text style={[styles.playerName, idx === 0 && !p.isEliminated && styles.leaderName]}>
-                      {p.name} {p.isHuman ? '(You)' : ''}
+              return (
+                <View
+                  key={p.id}
+                  style={[
+                    styles.playerRow,
+                    isLeader && styles.leaderRow,
+                    p.isEliminated && styles.eliminatedRow,
+                  ]}
+                >
+                  <View style={styles.playerTopLine}>
+                    <Text style={[styles.rank, isLeader && styles.rankLeader]}>
+                      {toRoman(idx + 1)}
                     </Text>
 
-                    {p.immuneThisRound && (
-                      <View style={styles.pillBadge}>
-                        <Shield size={9} color={Colors.cobaltLight} style={{ marginRight: 3 }} />
-                        <Text style={styles.immunityBadgeText}>IMMUNE</Text>
-                      </View>
-                    )}
-
-                    {p.isEliminated && (
-                      <View style={[styles.pillBadge, { borderColor: 'rgba(239, 68, 68, 0.4)' }]}>
-                        <Skull size={9} color={Colors.crimsonLight} style={{ marginRight: 3 }} />
-                        <Text style={styles.eliminatedBadgeText}>ELIMINATED</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <Text
-                    style={[
-                      styles.scoreNumber,
-                      isWarning && styles.scoreWarning,
-                      isDanger && styles.scoreDanger,
-                      p.isEliminated && styles.scoreEliminated,
-                    ]}
-                  >
-                    {p.cumulativeScore} <Text style={styles.scoreMax}>/ 502</Text>
-                  </Text>
-                </View>
-
-                {/* Progress Bar toward 502 */}
-                <View style={styles.progressTrack}>
-                  <View
-                    style={[
-                      styles.progressBar,
-                      { width: `${progress * 100}%` },
-                      isWarning && { backgroundColor: Colors.amberLight },
-                      isDanger && { backgroundColor: Colors.crimsonLight },
-                      p.isEliminated && { backgroundColor: Colors.crimson },
-                    ]}
-                  />
-                </View>
-              </View>
-            );
-          })}
-        </View>
-
-        {/* Round by Round History */}
-        <View style={styles.cardSection}>
-          <Text style={styles.sectionTitle}>ROUND-BY-ROUND BREAKDOWN</Text>
-          <Text style={styles.sectionSubtitle}>
-            Penalty points assessed to each participant at the conclusion of each round.
-          </Text>
-
-          {roundResults.length === 0 ? (
-            <View style={styles.emptyRounds}>
-              <Text style={styles.emptyRoundsText}>Round 1 is currently in progress.</Text>
-            </View>
-          ) : (
-            roundResults.map(r => (
-              <View key={r.roundNumber} style={styles.roundCard}>
-                <View style={styles.roundCardHeader}>
-                  <Text style={styles.roundCardTitle}>Round {r.roundNumber}</Text>
-                  <View style={styles.roundWinnerPill}>
-                    <Crown size={11} color={Colors.silverLight} style={{ marginRight: 4 }} />
-                    <Text style={styles.roundWinnerText}>
-                      {r.winnerName} won ({r.winReason === 'seven_of_hearts' ? '7♥ Instant' : 'Shed Hand'})
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.roundScoresGrid}>
-                  {players.map(p => {
-                    const score = r.playerRoundScores[p.id] ?? 0;
-                    const isWinner = p.id === r.winnerId;
-                    return (
-                      <View key={p.id} style={styles.roundScoreCol}>
-                        <Text style={styles.colPlayerName} numberOfLines={1}>
-                          {p.name}
-                        </Text>
+                    <View style={styles.playerIdentity}>
+                      <View style={styles.nameLine}>
                         <Text
                           style={[
-                            styles.colScoreText,
-                            isWinner && styles.colScoreWinner,
+                            styles.playerName,
+                            isLeader && styles.leaderName,
+                            p.isEliminated && styles.eliminatedName,
                           ]}
                         >
-                          {isWinner && score === 0 ? '0' : `+${score}`}
+                          {p.name}
+                          {p.isHuman && p.name.trim().toLowerCase() !== 'you'
+                            ? ' · YOU'
+                            : ''}
                         </Text>
+                        {isLeader && <BrassDiamond size={4} filled style={{ marginLeft: 6 }} />}
+                        {p.immuneThisRound && (
+                          <Shield
+                            size={9}
+                            color={Colors.brassLight}
+                            style={{ marginLeft: 6 }}
+                          />
+                        )}
+                        {p.isEliminated && (
+                          <Skull
+                            size={9}
+                            color={Colors.crimsonLight}
+                            style={{ marginLeft: 6 }}
+                          />
+                        )}
                       </View>
-                    );
-                  })}
-                </View>
+                      <Text style={styles.playerMeta}>
+                        {p.isEliminated
+                          ? 'ELIMINATED'
+                          : p.immuneThisRound
+                          ? 'IMMUNE THIS ROUND'
+                          : isDanger
+                          ? 'DANGER · NEAR THE LIMIT'
+                          : isWarning
+                          ? 'CAUTION · PAST MIDPOINT'
+                          : 'IN THE MATCH'}
+                      </Text>
+                    </View>
 
-                {r.forcedPenaltyPlayerId && (
-                  <View style={styles.forcedPenaltyBar}>
-                    <AlertCircle size={10} color={Colors.crimsonLight} style={{ marginRight: 4 }} />
-                    <Text style={styles.forcedPenaltySub}>
-                      Final card forced penalty: {r.forcedPenaltyCards} cards drawn before scoring.
+                    <Text
+                      style={[
+                        styles.scoreNumber,
+                        isWarning && styles.scoreWarning,
+                        isDanger && styles.scoreDanger,
+                        p.isEliminated && styles.scoreEliminated,
+                      ]}
+                    >
+                      {p.cumulativeScore}
+                      <Text style={styles.scoreMax}> / {ELIMINATION_THRESHOLD}</Text>
                     </Text>
                   </View>
-                )}
+
+                  <View style={styles.progressTrack}>
+                    <View
+                      style={[
+                        styles.progressBar,
+                        { width: `${progress * 100}%` },
+                        isWarning && { backgroundColor: Colors.amberLight },
+                        isDanger && { backgroundColor: Colors.crimsonLight },
+                        p.isEliminated && { backgroundColor: Colors.burgundyLight },
+                      ]}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </LedgerSection>
+
+          <LedgerSection
+            numeral="II"
+            title="ROUND-BY-ROUND"
+            subtitle="The debt assessed at the close of each hand."
+          >
+            {roundResults.length === 0 ? (
+              <View style={styles.emptyRounds}>
+                <BrassDiamond size={5} />
+                <Text style={styles.emptyRoundsText}>THE FIRST HAND IS STILL IN PLAY</Text>
               </View>
-            ))
-          )}
+            ) : (
+              roundResults.map(r => (
+                <View key={r.roundNumber} style={styles.roundCard}>
+                  <View style={styles.roundCardHeader}>
+                    <Text style={styles.roundCardTitle}>ROUND {toRoman(r.roundNumber)}</Text>
+                    <View style={styles.roundWinnerPill}>
+                      <Crown size={10} color={Colors.brassLight} style={{ marginRight: 4 }} />
+                      <Text style={styles.roundWinnerText}>
+                        {r.winnerName} · {r.winReason === 'seven_of_hearts' ? 'SEVEN OF HEARTS' : 'SHED HAND'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.roundScoresGrid}>
+                    {players.map(p => {
+                      const score = r.playerRoundScores[p.id] ?? 0;
+                      const isWinner = p.id === r.winnerId;
+                      return (
+                        <View key={p.id} style={styles.roundScoreCol}>
+                          <Text style={styles.colPlayerName} numberOfLines={1}>
+                            {p.name}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.colScoreText,
+                              isWinner && styles.colScoreWinner,
+                            ]}
+                          >
+                            {isWinner && score === 0 ? '0' : `+${score}`}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  {r.forcedPenaltyPlayerId && (
+                    <View style={styles.forcedPenaltyBar}>
+                      <AlertCircle size={9} color={Colors.crimsonLight} style={{ marginRight: 5 }} />
+                      <Text style={styles.forcedPenaltySub}>
+                        FINAL CARD FORCED {r.forcedPenaltyCards} CARDS BEFORE SCORING
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ))
+            )}
+          </LedgerSection>
         </View>
       </ScrollView>
     </View>
@@ -194,138 +239,108 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.tableDeep,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
-    backgroundColor: 'rgba(8, 12, 20, 0.95)',
-  },
-  backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  backBtnText: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  title: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 12,
-    letterSpacing: 1.8,
+    backgroundColor: Colors.ink,
   },
   container: {
-    padding: 18,
-    paddingBottom: 36,
+    paddingHorizontal: 20,
+    paddingTop: 18,
   },
-  cardSection: {
-    backgroundColor: 'rgba(13, 21, 39, 0.85)',
-    borderColor: 'rgba(56, 189, 248, 0.15)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
+  content: {
+    width: '100%',
+    maxWidth: 540,
+    alignSelf: 'center',
   },
-  sectionTitle: {
-    ...Typography.labelUpper,
-    color: Colors.cobaltLight,
-    fontSize: 11,
-    letterSpacing: 1.2,
-    marginBottom: 2,
+  pageKicker: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 7.2,
+    letterSpacing: 2.6,
   },
-  sectionSubtitle: {
-    ...Typography.bodySmall,
-    color: Colors.textMuted,
-    fontSize: 11,
-    marginBottom: 14,
-    lineHeight: 16,
+  pageTitle: {
+    ...Typography.serifDisplay,
+    color: Colors.ivory,
+    fontSize: 32,
+    marginTop: 4,
+  },
+  pageSub: {
+    ...Typography.serifItalic,
+    color: Colors.textSecondary,
+    fontSize: 13.5,
+    lineHeight: 20,
+    marginTop: 4,
+    maxWidth: 420,
+  },
+  divider: {
+    marginTop: 16,
+    marginBottom: 18,
   },
   playerRow: {
-    marginBottom: 12,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 12,
+    paddingLeft: 9,
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'transparent',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.13)',
   },
   leaderRow: {
-    backgroundColor: 'rgba(37, 99, 235, 0.08)',
-    borderRadius: 6,
-    padding: 8,
-    paddingBottom: 8,
+    borderLeftColor: Colors.brass,
+    backgroundColor: 'rgba(198, 164, 96, 0.035)',
   },
   eliminatedRow: {
     opacity: 0.5,
   },
-  playerInfoRow: {
+  playerTopLine: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 7,
   },
-  nameBlock: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  rank: {
+    ...Typography.serifBody,
+    color: Colors.textMuted,
+    fontSize: 11,
+    letterSpacing: 0.8,
+    width: 26,
+  },
+  rankLeader: {
+    color: Colors.brassLight,
+  },
+  playerIdentity: {
     flex: 1,
   },
-  rankBadge: {
-    width: 22,
-    alignItems: 'flex-start',
-  },
-  rankBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: Colors.textMuted,
-  },
-  playerName: {
-    ...Typography.bodySmall,
-    color: Colors.textPrimary,
-    fontWeight: '700',
-    fontSize: 13,
-    marginRight: 6,
-  },
-  leaderName: {
-    color: Colors.silverLight,
-  },
-  pillBadge: {
+  nameLine: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderWidth: 0.5,
-    borderColor: Colors.borderSubtle,
-    borderRadius: 3,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
   },
-  immunityBadgeText: {
-    fontSize: 8,
-    fontWeight: '800',
-    color: Colors.cobaltLight,
-    letterSpacing: 0.4,
+  playerName: {
+    ...Typography.serifSubheading,
+    color: Colors.ivory,
+    fontSize: 17,
   },
-  eliminatedBadgeText: {
-    fontSize: 8,
-    fontWeight: '800',
-    color: Colors.crimsonLight,
-    letterSpacing: 0.4,
+  leaderName: {
+    color: Colors.brassLight,
+  },
+  eliminatedName: {
+    color: Colors.textMuted,
+    textDecorationLine: 'line-through',
+  },
+  playerMeta: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 6.3,
+    letterSpacing: 1.1,
+    marginTop: 1,
   },
   scoreNumber: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: Colors.textPrimary,
+    fontFamily: Typography.numeral.fontFamily,
+    fontSize: 22,
+    color: Colors.ivory,
+    lineHeight: 25,
   },
   scoreMax: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontFamily: Typography.bodySmall.fontFamily,
+    fontSize: 8.5,
     color: Colors.textMuted,
+    letterSpacing: 0.4,
   },
   scoreWarning: {
     color: Colors.amberLight,
@@ -338,54 +353,54 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   progressTrack: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 2,
+    height: 2,
+    backgroundColor: 'rgba(198, 164, 96, 0.12)',
+    marginLeft: 26,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: Colors.cobaltLight,
-    borderRadius: 2,
+    backgroundColor: Colors.brass,
   },
   emptyRounds: {
-    paddingVertical: 14,
+    paddingVertical: 18,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   emptyRoundsText: {
-    ...Typography.bodySmall,
+    ...Typography.micro,
     color: Colors.textMuted,
+    fontSize: 6.8,
+    letterSpacing: 1.5,
+    marginLeft: 8,
   },
   roundCard: {
-    backgroundColor: 'rgba(8, 12, 20, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.13)',
   },
   roundCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    paddingBottom: 6,
+    marginBottom: 9,
   },
   roundCardTitle: {
     ...Typography.labelUpper,
-    color: Colors.silverLight,
-    fontSize: 10.5,
+    color: Colors.brassLight,
+    fontSize: 8.5,
+    letterSpacing: 1.8,
   },
   roundWinnerPill: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   roundWinnerText: {
-    fontSize: 10,
-    fontWeight: '700',
+    ...Typography.micro,
     color: Colors.textSecondary,
+    fontSize: 6.4,
+    letterSpacing: 0.9,
   },
   roundScoresGrid: {
     flexDirection: 'row',
@@ -396,28 +411,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   colPlayerName: {
-    fontSize: 9.5,
+    ...Typography.micro,
     color: Colors.textMuted,
-    marginBottom: 2,
+    fontSize: 6.2,
+    letterSpacing: 0.8,
+    marginBottom: 3,
   },
   colScoreText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontFamily: Typography.numeral.fontFamily,
+    fontSize: 14,
     color: Colors.crimsonLight,
   },
   colScoreWinner: {
-    color: Colors.cobaltLight,
+    color: Colors.brassLight,
   },
   forcedPenaltyBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
-    paddingTop: 4,
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    marginTop: 8,
+    paddingTop: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(198, 164, 96, 0.1)',
   },
   forcedPenaltySub: {
-    fontSize: 9,
-    color: '#fca5a5',
+    ...Typography.micro,
+    color: Colors.crimsonLight,
+    fontSize: 6.2,
+    letterSpacing: 1,
   },
 });

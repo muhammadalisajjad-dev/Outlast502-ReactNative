@@ -33,77 +33,15 @@ const server = http.createServer((req, res) => {
   }
 });
 
-async function run() {
-  server.listen(8086);
-  console.log('Static test server listening on http://localhost:8086');
+const VIEWPORTS = [
+  { name: '360x800', width: 360, height: 800 },
+  { name: '375x812', width: 375, height: 812 },
+  { name: '390x844', width: 390, height: 844 },
+  { name: '412x915', width: 412, height: 915 },
+  { name: '430x932', width: 430, height: 932 },
+];
 
-  const browser = await chromium.launch({
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    headless: true,
-  });
-
-  // Cycle 1: Standard iPhone 14 / modern mobile viewport (390x844 @2x)
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    deviceScaleFactor: 2,
-    isMobile: true,
-    hasTouch: true,
-  });
-
-  const page = await context.newPage();
-
-  console.log('Navigating to Home...');
-  await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1000);
-
-  // 1. Home Screen
-  console.log('Capturing 01_home_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '01_home_screen.png') });
-
-  // 2. Setup Screen
-  console.log('Navigating to Setup...');
-  const setupBtn = page.getByText('Match Setup');
-  await setupBtn.first().click();
-  await page.waitForTimeout(600);
-  console.log('Capturing 02_setup_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '02_setup_screen.png') });
-
-  // Start game from setup
-  const startBtn = page.getByText('DEAL CARDS & START MATCH');
-  await startBtn.first().click();
-  await page.waitForTimeout(1200);
-
-  // 3. Game Table Screen
-  console.log('Capturing 03_game_table_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '03_game_table_screen.png') });
-
-  // 4. Rules Screen (via header button)
-  console.log('Opening Rules...');
-  const rulesBtn = page.getByLabel('Open Rules');
-  await rulesBtn.first().click();
-  await page.waitForTimeout(600);
-  console.log('Capturing 04_rules_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '04_rules_screen.png') });
-
-  // Back to table
-  const backBtn = page.getByText('BACK');
-  await backBtn.first().click();
-  await page.waitForTimeout(600);
-
-  // 5. Scoreboard Screen
-  console.log('Opening Scoreboard...');
-  const scoreBtn = page.getByLabel('Open Scoreboard');
-  await scoreBtn.first().click();
-  await page.waitForTimeout(600);
-  console.log('Capturing 05_scoreboard_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '05_scoreboard_screen.png') });
-
-  // Back to home & open History
-  console.log('Navigating to History...');
-  await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(600);
-
-  // Seed a sample completed match into localStorage for visual demonstration
+async function seedHistory(page) {
   await page.evaluate(() => {
     const sampleRecord = {
       id: 'match-demo-1',
@@ -123,51 +61,88 @@ async function run() {
       localStorage.setItem('@outlast502_match_history', JSON.stringify([sampleRecord]));
     } catch (e) {}
   });
+}
 
-  const historyBtn = page.getByText('Match History');
-  await historyBtn.first().click();
-  await page.waitForTimeout(2000);
-  console.log('Capturing 06_history_screen.png (390x844)');
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '06_history_screen.png') });
-
-  await context.close();
-
-  // Cycle 2: Large flagship mobile viewport (430x932 @2x - iPhone 14/15/16 Pro Max)
-  console.log('\n--- Cycle 2: Large Viewport (430x932) ---');
-  const maxContext = await browser.newContext({
-    viewport: { width: 430, height: 932 },
+async function captureViewport(browser, viewport) {
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
   });
-  const maxPage = await maxContext.newPage();
-  await maxPage.goto('http://localhost:8086', { waitUntil: 'networkidle' });
-  await maxPage.waitForTimeout(800);
+  const page = await context.newPage();
+  const tag = viewport.name;
 
-  // Quick Play into game table
-  const quickPlayBtn = maxPage.getByText('QUICK PLAY');
-  await quickPlayBtn.first().click();
-  await maxPage.waitForTimeout(1200);
-  console.log('Capturing 03_game_table_screen_430x932.png');
-  await maxPage.screenshot({ path: path.join(SCREENSHOTS_DIR, '03_game_table_screen_430x932.png') });
+  await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(900);
+  console.log(`Capturing home (${tag})`);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `01_home_screen_${tag}.png`) });
 
-  await maxContext.close();
+  console.log(`Capturing setup (${tag})`);
+  await page.getByText('THE TABLE').first().click();
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `02_setup_screen_${tag}.png`) });
 
-  // Desktop check (1280x800)
-  console.log('\n--- Desktop Responsiveness Check (1280x800) ---');
-  const deskContext = await browser.newContext({
+  console.log(`Capturing game table (${tag})`);
+  await page.getByText(/DEAL THE CARDS/).first().click();
+  await page.waitForTimeout(1400);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `03_game_table_screen_${tag}.png`) });
+
+  console.log(`Capturing rules (${tag})`);
+  await page.getByLabel('Open Rules').first().click();
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `04_rules_screen_${tag}.png`) });
+
+  console.log(`Capturing scoreboard (${tag})`);
+  await page.getByText('BACK').first().click();
+  await page.waitForTimeout(600);
+  await page.getByLabel('Open Scoreboard').first().click();
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `05_scoreboard_screen_${tag}.png`) });
+
+  console.log(`Capturing history (${tag})`);
+  await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(600);
+  await seedHistory(page);
+  await page.getByText('THE ARCHIVE').first().click();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `06_history_screen_${tag}.png`) });
+
+  await context.close();
+}
+
+async function captureDesktop(browser) {
+  const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
     deviceScaleFactor: 1,
   });
-  const deskPage = await deskContext.newPage();
-  await deskPage.goto('http://localhost:8086', { waitUntil: 'networkidle' });
-  await deskPage.waitForTimeout(800);
-  const deskQuickPlay = deskPage.getByText('QUICK PLAY');
-  await deskQuickPlay.first().click();
-  await deskPage.waitForTimeout(1200);
-  console.log('Capturing 03_game_table_desktop.png');
-  await deskPage.screenshot({ path: path.join(SCREENSHOTS_DIR, '03_game_table_desktop.png') });
-  await deskContext.close();
+  const page = await context.newPage();
+  await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(900);
+  console.log('Capturing desktop home');
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '01_home_screen_desktop.png') });
+
+  console.log('Capturing desktop game table');
+  await page.getByText('TAKE A SEAT').first().click();
+  await page.waitForTimeout(1400);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '03_game_table_screen_desktop.png') });
+  await context.close();
+}
+
+async function run() {
+  server.listen(8086);
+  console.log('Static test server listening on http://localhost:8086');
+
+  const browser = await chromium.launch({
+    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    headless: true,
+  });
+
+  for (const viewport of VIEWPORTS) {
+    await captureViewport(browser, viewport);
+  }
+
+  await captureDesktop(browser);
 
   await browser.close();
   server.close();

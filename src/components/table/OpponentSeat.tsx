@@ -3,19 +3,19 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Player } from '../../types/game';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
-import { Shield, Skull, Layers, Flame } from 'lucide-react-native';
+import { Shield, Skull, Flame } from 'lucide-react-native';
 
 interface OpponentSeatProps {
   player: Player;
   isCurrentTurn: boolean;
 }
 
-const AVATAR_GRADIENTS = [
-  { bg: '#1e3a8a', ring: '#60a5fa' },
-  { bg: '#065f46', ring: '#34d399' },
-  { bg: '#701a75', ring: '#e879f9' },
-  { bg: '#78350f', ring: '#fbbf24' },
-  { bg: '#312e81', ring: '#818cf8' },
+const SEAT_TONES = [
+  { bg: '#173B2E', ring: '#C6A460' },
+  { bg: '#4A1D26', ring: '#C9A36A' },
+  { bg: '#263B2A', ring: '#D8C08A' },
+  { bg: '#1D2D38', ring: '#B9A27A' },
+  { bg: '#3A2A1E', ring: '#D0B47C' },
 ];
 
 export const OpponentSeat: React.FC<OpponentSeatProps> = ({
@@ -23,7 +23,7 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
   isCurrentTurn,
 }) => {
   const turnPulse = useRef(new Animated.Value(0)).current;
-  const avatarStyle = AVATAR_GRADIENTS[player.avatarSeed % AVATAR_GRADIENTS.length] || AVATAR_GRADIENTS[0];
+  const tone = SEAT_TONES[player.avatarSeed % SEAT_TONES.length] || SEAT_TONES[0];
 
   useEffect(() => {
     let loop: Animated.CompositeAnimation | null = null;
@@ -32,12 +32,12 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
         Animated.sequence([
           Animated.timing(turnPulse, {
             toValue: 1,
-            duration: 800,
+            duration: 1000,
             useNativeDriver: true,
           }),
           Animated.timing(turnPulse, {
             toValue: 0,
-            duration: 800,
+            duration: 1000,
             useNativeDriver: true,
           }),
         ])
@@ -51,296 +51,319 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
     };
   }, [isCurrentTurn, turnPulse]);
 
+  const activeGlow = turnPulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.35, 0.95],
+  });
+
   const activeScale = turnPulse.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.04],
+    outputRange: [1, 1.035],
   });
 
-  const activeGlowOpacity = turnPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.4, 0.9],
-  });
-
-  // Calculate visual card fan (display up to 4 mini cards fanned behind)
   const miniCardsCount = Math.min(player.hand.length, 4);
   const miniCards = Array.from({ length: miniCardsCount });
+  const isDanger = player.cumulativeScore >= 400 && !player.isEliminated;
 
   return (
     <Animated.View
       style={[
         styles.container,
-        isCurrentTurn && styles.activeTurnContainer,
+        isCurrentTurn && styles.activeContainer,
         player.isEliminated && styles.eliminatedContainer,
         isCurrentTurn && { transform: [{ scale: activeScale }] },
       ]}
     >
-      {/* Mini Card Fan Behind Avatar */}
+      {isCurrentTurn && (
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.activeTopRule, { opacity: activeGlow }]}
+        />
+      )}
+
+      {/* Small fan of card backs behind the portrait */}
       {!player.isEliminated && player.hand.length > 0 && (
-        <View style={styles.miniCardFanContainer} pointerEvents="none">
-          {miniCards.map((_, i) => {
-            const rot = (i - (miniCardsCount - 1) / 2) * 8;
+        <View style={styles.fanContainer} pointerEvents="none">
+          {miniCards.map((_, index) => {
+            const rotation = (index - (miniCardsCount - 1) / 2) * 10;
             return (
               <View
-                key={i}
+                key={index}
                 style={[
                   styles.miniCardBack,
                   {
-                    transform: [{ rotate: `${rot}deg` }],
-                    left: 28 + (i - (miniCardsCount - 1) / 2) * 4,
+                    transform: [{ rotate: `${rotation}deg` }],
+                    left: 21 + (index - (miniCardsCount - 1) / 2) * 4,
+                    zIndex: index,
                   },
                 ]}
-              />
+              >
+                <View style={styles.miniCardDiamond} />
+              </View>
             );
           })}
         </View>
       )}
 
-      {/* Top Row: Avatar & Status */}
-      <View style={styles.topRow}>
+      <View style={styles.avatarWrap}>
         <View
           style={[
-            styles.avatarCircle,
-            { backgroundColor: avatarStyle.bg, borderColor: avatarStyle.ring },
-            isCurrentTurn && styles.avatarActiveRing,
+            styles.avatarOuter,
+            { borderColor: player.isEliminated ? 'rgba(198,164,96,0.18)' : tone.ring },
           ]}
         >
-          <Text style={styles.avatarInitial}>
-            {player.name.charAt(0).toUpperCase()}
-          </Text>
-
-          {isCurrentTurn && (
-            <Animated.View
-              style={[
-                styles.turnPulseAura,
-                { opacity: activeGlowOpacity },
-              ]}
-            />
-          )}
+          <View style={[styles.avatar, { backgroundColor: tone.bg }]}>
+            <Text style={styles.avatarInitial}>
+              {player.name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
         </View>
 
-        {/* Turn / Status Tag */}
-        {player.isEliminated ? (
-          <View style={styles.eliminatedTag}>
-            <Skull size={10} color={Colors.crimsonLight} />
-          </View>
-        ) : player.immuneThisRound ? (
-          <View style={styles.immuneTag}>
-            <Shield size={10} color="#fbbf24" />
-          </View>
-        ) : isCurrentTurn ? (
-          <View style={styles.activePill}>
-            <Text style={styles.activePillText}>THINKING</Text>
-          </View>
-        ) : player.cumulativeScore >= 400 ? (
-          <View style={styles.dangerTag}>
-            <Flame size={10} color={Colors.crimsonLight} />
-          </View>
-        ) : null}
+        {isCurrentTurn && (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.turnRing, { opacity: activeGlow }]}
+          />
+        )}
       </View>
 
-      {/* Name */}
-      <Text
-        style={[
-          styles.nameText,
-          isCurrentTurn && styles.nameActiveText,
-          player.isEliminated && styles.nameEliminatedText,
-        ]}
-        numberOfLines={1}
-      >
-        {player.name}
-      </Text>
+      <View style={styles.nameRow}>
+        <Text
+          style={[
+            styles.nameText,
+            isCurrentTurn && styles.nameActiveText,
+            player.isEliminated && styles.nameEliminatedText,
+          ]}
+          numberOfLines={1}
+        >
+          {player.name}
+        </Text>
+        {player.immuneThisRound && !player.isEliminated && (
+          <Shield size={8} color={Colors.brassLight} style={{ marginLeft: 2 }} />
+        )}
+        {player.isEliminated && (
+          <Skull size={8} color={Colors.crimsonLight} style={{ marginLeft: 2 }} />
+        )}
+        {isDanger && (
+          <Flame size={8} color={Colors.crimsonLight} style={{ marginLeft: 2 }} />
+        )}
+      </View>
 
-      {/* Score & Cards */}
-      <View style={styles.bottomRow}>
+      <View style={styles.statsRow}>
         <Text
           style={[
             styles.scoreText,
-            player.cumulativeScore >= 400 && styles.scoreDanger,
+            isDanger && styles.scoreDanger,
             player.isEliminated && styles.scoreEliminated,
           ]}
         >
-          {player.isEliminated ? 'OUT' : `${player.cumulativeScore}p`}
+          {player.isEliminated ? 'OUT' : `${player.cumulativeScore}`}
+          {!player.isEliminated && <Text style={styles.unit}> PTS</Text>}
         </Text>
 
         {!player.isEliminated && (
-          <View style={styles.cardCountGroup}>
-            <Layers size={9.5} color={Colors.playableBlue} style={{ marginRight: 2 }} />
+          <View style={styles.cardStat}>
+            <View style={styles.cardGlyph}>
+              <View style={styles.cardGlyphInner} />
+            </View>
             <Text style={styles.cardCountText}>{player.hand.length}</Text>
           </View>
         )}
       </View>
+
+      {isCurrentTurn && (
+        <Animated.Text style={[styles.toActText, { opacity: activeGlow }]}>
+          TO ACT
+        </Animated.Text>
+      )}
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgba(11, 18, 34, 0.92)',
-    borderColor: 'rgba(56, 189, 248, 0.18)',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 7,
-    paddingVertical: 5,
-    marginHorizontal: 3,
-    width: 82,
+    flex: 1,
+    maxWidth: 96,
+    minWidth: 56,
+    marginHorizontal: 2,
+    paddingTop: 10,
+    paddingBottom: 4,
+    paddingHorizontal: 2,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 3,
-    elevation: 3,
+    borderRadius: 6,
     position: 'relative',
   },
-  miniCardFanContainer: {
+  activeContainer: {
+    backgroundColor: 'rgba(198, 164, 96, 0.07)',
+  },
+  eliminatedContainer: {
+    opacity: 0.45,
+  },
+  activeTopRule: {
     position: 'absolute',
-    top: -6,
+    top: 0,
+    left: 8,
+    right: 8,
+    height: 1,
+    backgroundColor: Colors.brassLight,
+    shadowColor: Colors.brass,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 4,
+  },
+  fanContainer: {
+    position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
-    height: 18,
+    height: 20,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 0,
   },
   miniCardBack: {
     position: 'absolute',
-    width: 12,
-    height: 16,
-    backgroundColor: '#070c18',
-    borderColor: 'rgba(56, 189, 248, 0.35)',
-    borderWidth: 0.5,
-    borderRadius: 2,
-  },
-  activeTurnContainer: {
-    borderColor: Colors.playableBlue,
-    backgroundColor: 'rgba(20, 32, 58, 0.98)',
-    shadowColor: Colors.playableBlue,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  eliminatedContainer: {
-    opacity: 0.4,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    backgroundColor: 'rgba(8, 12, 20, 0.8)',
-  },
-  topRow: {
-    flexDirection: 'row',
+    top: 1,
+    width: 13,
+    height: 19,
+    backgroundColor: Colors.emerald,
+    borderColor: 'rgba(198, 164, 96, 0.55)',
+    borderWidth: 0.6,
+    borderRadius: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
+  },
+  miniCardDiamond: {
+    width: 5,
+    height: 5,
+    borderWidth: 0.5,
+    borderColor: 'rgba(198, 164, 96, 0.7)',
+    transform: [{ rotate: '45deg' }],
+  },
+  avatarWrap: {
     position: 'relative',
-    marginBottom: 3,
+    marginTop: 2,
     zIndex: 1,
   },
-  avatarCircle: {
+  avatarOuter: {
+    width: 31,
+    height: 31,
+    borderRadius: 15.5,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.inkSoft,
+  },
+  avatar: {
     width: 25,
     height: 25,
     borderRadius: 12.5,
-    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
   },
-  avatarActiveRing: {
-    borderColor: Colors.playableBlue,
+  avatarInitial: {
+    color: Colors.ivory,
+    fontSize: 11,
+    fontFamily: Typography.titleSmall.fontFamily,
+    fontWeight: '700',
   },
-  turnPulseAura: {
+  turnRing: {
     position: 'absolute',
     top: -3,
     left: -3,
     right: -3,
     bottom: -3,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: Colors.playableBlue,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: Colors.brassLight,
+    shadowColor: Colors.brass,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
   },
-  avatarInitial: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: '900',
-  },
-  activePill: {
-    position: 'absolute',
-    right: -2,
-    top: -2,
-    backgroundColor: '#0284c7',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 4,
-  },
-  activePillText: {
-    color: '#ffffff',
-    fontSize: 7,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  eliminatedTag: {
-    position: 'absolute',
-    right: -2,
-    top: -2,
-    backgroundColor: 'rgba(220, 38, 38, 0.3)',
-    padding: 2,
-    borderRadius: 4,
-  },
-  immuneTag: {
-    position: 'absolute',
-    right: -2,
-    top: -2,
-    backgroundColor: 'rgba(251, 191, 36, 0.25)',
-    padding: 2,
-    borderRadius: 4,
-    borderWidth: 0.5,
-    borderColor: '#fbbf24',
-  },
-  dangerTag: {
-    position: 'absolute',
-    right: -2,
-    top: -2,
-    backgroundColor: 'rgba(239, 68, 68, 0.25)',
-    padding: 2,
-    borderRadius: 4,
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+    maxWidth: '100%',
   },
   nameText: {
+    ...Typography.micro,
     color: Colors.textSecondary,
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 7.6,
+    letterSpacing: 0.9,
     textAlign: 'center',
     maxWidth: '100%',
   },
   nameActiveText: {
-    color: '#ffffff',
-    fontWeight: '800',
+    color: Colors.ivory,
   },
   nameEliminatedText: {
     color: Colors.textMuted,
     textDecorationLine: 'line-through',
   },
-  bottomRow: {
+  statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 2,
+    justifyContent: 'center',
+    marginTop: 1,
   },
   scoreText: {
-    color: Colors.silverLight,
-    fontSize: 9.5,
-    fontWeight: '800',
+    ...Typography.serifBody,
+    color: Colors.brassLight,
+    fontSize: 11,
+    lineHeight: 13,
+    fontWeight: '700',
+  },
+  unit: {
+    fontSize: 6,
+    color: Colors.textMuted,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   scoreDanger: {
     color: Colors.crimsonLight,
   },
   scoreEliminated: {
     color: Colors.textMuted,
+    fontSize: 8,
+    letterSpacing: 0.6,
   },
-  cardCountGroup: {
+  cardStat: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: 7,
+  },
+  cardGlyph: {
+    width: 7,
+    height: 9,
+    borderWidth: 0.6,
+    borderColor: 'rgba(198, 164, 96, 0.55)',
+    borderRadius: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 3,
+  },
+  cardGlyphInner: {
+    width: 3,
+    height: 3,
+    borderWidth: 0.5,
+    borderColor: 'rgba(198, 164, 96, 0.65)',
+    transform: [{ rotate: '45deg' }],
   },
   cardCountText: {
-    color: Colors.playableBlue,
-    fontSize: 9.5,
-    fontWeight: '800',
+    ...Typography.bodySmall,
+    color: Colors.ivoryMuted,
+    fontSize: 8.5,
+    lineHeight: 10,
+    fontWeight: '600',
+  },
+  toActText: {
+    ...Typography.micro,
+    color: Colors.brassLight,
+    fontSize: 6.2,
+    letterSpacing: 1.1,
+    marginTop: 1,
   },
 });

@@ -41,10 +41,10 @@ export const Button: React.FC<ButtonProps> = ({
   const handlePressIn = () => {
     if (disabled || loading) return;
     Animated.spring(scaleAnim, {
-      toValue: 0.96,
+      toValue: 0.975,
       useNativeDriver: true,
       speed: 40,
-      bounciness: 3,
+      bounciness: 2,
     }).start();
   };
 
@@ -54,7 +54,7 @@ export const Button: React.FC<ButtonProps> = ({
       toValue: 1,
       useNativeDriver: true,
       speed: 30,
-      bounciness: 5,
+      bounciness: 4,
     }).start();
   };
 
@@ -67,10 +67,11 @@ export const Button: React.FC<ButtonProps> = ({
   const getContainerStyle = (): ViewStyle => {
     switch (variant) {
       case 'cobalt':
-      case 'gold': // Alias gold to cobalt in Midnight theme for consistency
-        return styles.cobaltContainer;
+        return styles.primaryContainer;
+      case 'gold':
+        return styles.goldContainer;
       case 'emerald':
-        return styles.midnightContainer;
+        return styles.emeraldContainer;
       case 'crimson':
         return styles.crimsonContainer;
       case 'outline':
@@ -83,10 +84,11 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextStyle = (): TextStyle => {
     switch (variant) {
       case 'cobalt':
+        return styles.primaryText;
       case 'gold':
-        return styles.cobaltText;
+        return styles.goldText;
       case 'emerald':
-        return styles.midnightText;
+        return styles.emeraldText;
       case 'crimson':
         return styles.crimsonText;
       case 'outline':
@@ -136,10 +138,7 @@ export const Button: React.FC<ButtonProps> = ({
         ]}
       >
         {loading ? (
-          <ActivityIndicator
-            size="small"
-            color="#ffffff"
-          />
+          <ActivityIndicator size="small" color={Colors.brassLight} />
         ) : (
           <View style={styles.contentRow}>
             {icon && <View style={styles.iconWrapper}>{icon}</View>}
@@ -163,7 +162,7 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   baseContainer: {
-    borderRadius: 8,
+    borderRadius: 3,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -178,54 +177,65 @@ const styles = StyleSheet.create({
   },
   baseText: {
     ...Typography.bodyMedium,
-    fontWeight: '700',
+    fontWeight: '600',
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 1.1,
   },
-  cobaltContainer: {
-    backgroundColor: Colors.cobalt,
-    borderColor: Colors.cobaltLight,
-    shadowColor: Colors.cobalt,
+  primaryContainer: {
+    backgroundColor: Colors.emeraldMid,
+    borderColor: Colors.brass,
+    shadowColor: Colors.brass,
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
     elevation: 4,
   },
-  cobaltText: {
-    color: '#ffffff',
-    fontWeight: '800',
-    letterSpacing: 0.8,
+  primaryText: {
+    color: Colors.brassLight,
+    fontWeight: '700',
+    letterSpacing: 1.6,
   },
-  midnightContainer: {
-    backgroundColor: Colors.surfaceElevated,
-    borderColor: Colors.borderSubtle,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 2,
+  goldContainer: {
+    backgroundColor: Colors.brass,
+    borderColor: Colors.brassLight,
+    shadowColor: Colors.brass,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.28,
+    shadowRadius: 7,
+    elevation: 4,
   },
-  midnightText: {
-    color: Colors.textPrimary,
+  goldText: {
+    color: Colors.inkBlack,
+    fontWeight: '700',
+    letterSpacing: 1.6,
+  },
+  emeraldContainer: {
+    backgroundColor: 'rgba(13, 42, 33, 0.7)',
+    borderColor: 'rgba(198, 164, 96, 0.4)',
+  },
+  emeraldText: {
+    color: Colors.ivory,
+    fontWeight: '600',
   },
   crimsonContainer: {
-    backgroundColor: Colors.crimson,
-    borderColor: Colors.crimsonLight,
+    backgroundColor: Colors.burgundy,
+    borderColor: 'rgba(198, 164, 96, 0.55)',
   },
   crimsonText: {
-    color: '#ffffff',
+    color: Colors.ivory,
     fontWeight: '700',
   },
   outlineContainer: {
     backgroundColor: 'transparent',
-    borderColor: Colors.borderSubtle,
+    borderColor: 'rgba(198, 164, 96, 0.5)',
   },
   outlineText: {
-    color: Colors.textAccent,
+    color: Colors.brassLight,
+    fontWeight: '600',
   },
   subtleContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderColor: 'transparent',
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(198, 164, 96, 0.16)',
   },
   subtleText: {
     color: Colors.textSecondary,
@@ -235,26 +245,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   smallText: {
-    fontSize: 12,
-    letterSpacing: 0.3,
+    fontSize: 10.5,
+    letterSpacing: 0.9,
   },
   mediumContainer: {
     paddingVertical: 11,
     paddingHorizontal: 16,
   },
   mediumText: {
-    fontSize: 13,
+    fontSize: 12.5,
   },
   largeContainer: {
-    paddingVertical: 14,
+    paddingVertical: 15,
     paddingHorizontal: 22,
   },
   largeText: {
-    fontSize: 14.5,
-    letterSpacing: 0.8,
+    fontSize: 13,
+    letterSpacing: 1.4,
   },
   disabledContainer: {
-    opacity: 0.45,
+    opacity: 0.4,
     shadowOpacity: 0,
     elevation: 0,
   },

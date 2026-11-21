@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
-import { BarChart3, BookOpen, Zap, Clock } from 'lucide-react-native';
+import { BarChart3, BookOpen } from 'lucide-react-native';
+import { Monogram, BrassDiamond } from '../common/Deco';
 
 interface TableHeaderProps {
   roundNumber: number;
@@ -13,6 +14,25 @@ interface TableHeaderProps {
   onOpenRules: () => void;
 }
 
+const toRoman = (value: number): string => {
+  const numerals: Array<[number, string]> = [
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I'],
+  ];
+  let remaining = Math.max(1, Math.floor(value));
+  let result = '';
+  numerals.forEach(([amount, numeral]) => {
+    while (remaining >= amount) {
+      result += numeral;
+      remaining -= amount;
+    }
+  });
+  return result;
+};
+
 export const TableHeader: React.FC<TableHeaderProps> = ({
   roundNumber,
   activePlayerName,
@@ -20,73 +40,79 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onOpenScoreboard,
   onOpenRules,
 }) => {
-  const turnPulse = useRef(new Animated.Value(1)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    turnPulse.setValue(0.88);
-    Animated.spring(turnPulse, {
-      toValue: 1,
-      speed: 25,
-      bounciness: 6,
-      useNativeDriver: true,
-    }).start();
-  }, [isMyTurn, activePlayerName, turnPulse]);
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+
+  const pulseOpacity = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.35, 1],
+  });
+
+  const turnLabel = isMyTurn ? 'YOUR TURN' : `${activePlayerName.toUpperCase()} TO ACT`;
 
   return (
     <View style={styles.container}>
-      {/* Brand & Round Info */}
       <View style={styles.leftCol}>
-        <Text style={styles.gameTitle}>OUTLAST 502</Text>
-        <Text style={styles.roundText}>ROUND {roundNumber}</Text>
+        <Monogram size={28} />
+        <View style={styles.roundBlock}>
+          <Text style={styles.gameTitle}>OUTLAST 502</Text>
+          <Text style={styles.roundText}>ROUND {toRoman(roundNumber)}</Text>
+        </View>
       </View>
 
-      {/* Turn Banner with Spring Pulse */}
-      <Animated.View
-        style={[
-          styles.turnBanner,
-          isMyTurn ? styles.myTurnBanner : styles.otherTurnBanner,
-          { transform: [{ scale: turnPulse }] },
-        ]}
-      >
-        {isMyTurn ? (
-          <Zap size={11} color={Colors.playableBlue} style={{ marginRight: 5 }} />
-        ) : (
-          <Clock size={11} color={Colors.textMuted} style={{ marginRight: 5 }} />
-        )}
+      <Animated.View style={styles.turnBlock}>
+        <Animated.View style={{ opacity: isMyTurn ? pulseOpacity : 0.5 }}>
+          <BrassDiamond size={5} filled={isMyTurn} />
+        </Animated.View>
         <Text
-          style={[
-            styles.turnBannerText,
-            isMyTurn ? styles.myTurnBannerText : styles.otherTurnBannerText,
-          ]}
+          style={[styles.turnText, isMyTurn && styles.turnTextActive]}
+          numberOfLines={1}
         >
-          {isMyTurn ? 'YOUR TURN' : `${activePlayerName.toUpperCase()}'S TURN`}
+          {turnLabel}
         </Text>
       </Animated.View>
 
-      {/* Top Action Buttons (Scoreboard & Rules) */}
       <View style={styles.rightCol}>
         <TouchableOpacity
           style={styles.iconBtn}
-          activeOpacity={0.75}
+          activeOpacity={0.7}
           onPress={() => {
             triggerHaptic('light');
             onOpenScoreboard();
           }}
           accessibilityLabel="Open Scoreboard"
         >
-          <BarChart3 size={15} color={Colors.silverLight} />
+          <BarChart3 size={14} color={Colors.brassLight} />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconBtn}
-          activeOpacity={0.75}
+          activeOpacity={0.7}
           onPress={() => {
             triggerHaptic('light');
             onOpenRules();
           }}
           accessibilityLabel="Open Rules"
         >
-          <BookOpen size={15} color={Colors.silverLight} />
+          <BookOpen size={14} color={Colors.brassLight} />
         </TouchableOpacity>
       </View>
     </View>
@@ -98,65 +124,61 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(8, 12, 20, 0.95)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(59, 130, 246, 0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.18)',
   },
   leftCol: {
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 118,
+  },
+  roundBlock: {
+    marginLeft: 8,
   },
   gameTitle: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 11,
+    ...Typography.micro,
+    color: Colors.brassLight,
+    fontSize: 7.5,
     letterSpacing: 1.6,
   },
   roundText: {
-    ...Typography.bodySmall,
-    fontSize: 9.5,
+    ...Typography.micro,
     color: Colors.textMuted,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    fontSize: 7,
+    letterSpacing: 1.2,
+    marginTop: 2,
   },
-  turnBanner: {
+  turnBlock: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4.5,
-    borderRadius: 6,
-    borderWidth: 1,
+    justifyContent: 'center',
   },
-  myTurnBanner: {
-    backgroundColor: 'rgba(37, 99, 235, 0.18)',
-    borderColor: 'rgba(59, 130, 246, 0.5)',
-  },
-  otherTurnBanner: {
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  turnBannerText: {
-    ...Typography.badge,
-    fontSize: 9.5,
-  },
-  myTurnBannerText: {
-    color: Colors.playableBlue,
-  },
-  otherTurnBannerText: {
+  turnText: {
+    ...Typography.micro,
     color: Colors.textSecondary,
+    fontSize: 7.5,
+    letterSpacing: 1.4,
+    marginLeft: 6,
+  },
+  turnTextActive: {
+    color: Colors.brassLight,
   },
   rightCol: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    width: 118,
   },
   iconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(203, 213, 225, 0.15)',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.35)',
+    backgroundColor: 'rgba(198, 164, 96, 0.05)',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 8,

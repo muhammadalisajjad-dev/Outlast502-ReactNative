@@ -261,20 +261,45 @@ export const TableMotionOverlay: React.FC<TableMotionOverlayProps> = ({
             },
           ]}
         >
+          <View
+            style={[
+              styles.bannerAccent,
+              specialEvent.type === 'victory' && { backgroundColor: Colors.brass },
+              specialEvent.type === 'penalty' && {
+                backgroundColor: Colors.crimsonLight,
+              },
+              specialEvent.type === 'jack' && { backgroundColor: Colors.brass },
+              specialEvent.type === 'skip' && {
+                backgroundColor: Colors.ivoryMuted,
+              },
+            ]}
+            pointerEvents="none"
+          />
+
           <View style={styles.bannerIconBox}>
-            {specialEvent.type === 'victory' && <Crown size={22} color="#fbbf24" />}
-            {specialEvent.type === 'penalty' && <Flame size={22} color="#f87171" />}
-            {specialEvent.type === 'jack' && <Sparkles size={22} color="#60a5fa" />}
-            {specialEvent.type === 'skip' && <Zap size={22} color="#38bdf8" />}
+            {specialEvent.type === 'victory' && (
+              <Crown size={20} color={Colors.brassLight} />
+            )}
+            {specialEvent.type === 'penalty' && (
+              <Flame size={20} color={Colors.crimsonLight} />
+            )}
+            {specialEvent.type === 'jack' && (
+              <Sparkles size={20} color={Colors.brassLight} />
+            )}
+            {specialEvent.type === 'skip' && (
+              <Zap size={20} color={Colors.ivorySoft} />
+            )}
           </View>
           <View style={styles.bannerTextBox}>
             <Text
               style={[
                 styles.bannerTitle,
-                specialEvent.type === 'victory' && { color: '#fbbf24' },
-                specialEvent.type === 'penalty' && { color: '#f87171' },
-                specialEvent.type === 'jack' && { color: '#60a5fa' },
-                specialEvent.type === 'skip' && { color: '#38bdf8' },
+                specialEvent.type === 'victory' && { color: Colors.brassLight },
+                specialEvent.type === 'penalty' && {
+                  color: Colors.crimsonLight,
+                },
+                specialEvent.type === 'jack' && { color: Colors.brassLight },
+                specialEvent.type === 'skip' && { color: Colors.ivory },
               ]}
             >
               {specialEvent.title}
@@ -316,56 +341,63 @@ const styles = StyleSheet.create({
   },
   specialBannerCard: {
     position: 'absolute',
-    top: '32%',
+    top: '24%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1.5,
+    paddingLeft: 18,
+    paddingRight: 16,
+    paddingVertical: 11,
+    borderRadius: 3,
+    borderWidth: 1,
+    backgroundColor: 'rgba(7, 19, 15, 0.97)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 12,
-    maxWidth: '85%',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,
+    shadowRadius: 12,
+    elevation: 14,
+    maxWidth: '86%',
+    overflow: 'hidden',
+  },
+  bannerAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 2,
   },
   bannerVictory: {
-    backgroundColor: 'rgba(15, 23, 42, 0.96)',
-    borderColor: '#fbbf24',
-    shadowColor: '#f59e0b',
+    borderColor: 'rgba(198, 164, 96, 0.7)',
+    shadowColor: Colors.brass,
   },
   bannerPenalty: {
-    backgroundColor: 'rgba(24, 10, 10, 0.96)',
-    borderColor: '#ef4444',
-    shadowColor: '#dc2626',
+    borderColor: 'rgba(196, 85, 95, 0.7)',
+    shadowColor: Colors.crimson,
   },
   bannerJack: {
-    backgroundColor: 'rgba(10, 20, 45, 0.96)',
-    borderColor: '#3b82f6',
-    shadowColor: '#2563eb',
+    borderColor: 'rgba(198, 164, 96, 0.6)',
+    shadowColor: Colors.brass,
   },
   bannerSkip: {
-    backgroundColor: 'rgba(10, 25, 40, 0.96)',
-    borderColor: '#38bdf8',
-    shadowColor: '#0ea5e9',
+    borderColor: 'rgba(242, 232, 213, 0.3)',
+    shadowColor: '#000',
   },
   bannerIconBox: {
-    marginRight: 10,
+    marginRight: 12,
   },
   bannerTextBox: {
     flexShrink: 1,
   },
   bannerTitle: {
-    ...Typography.titleSmall,
+    ...Typography.serifSubheading,
     fontSize: 13,
-    fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    lineHeight: 16,
   },
   bannerSubtitle: {
-    ...Typography.bodySmall,
-    color: Colors.silverLight,
-    fontSize: 11,
-    marginTop: 1,
+    ...Typography.serifItalic,
+    color: Colors.ivoryMuted,
+    fontSize: 10.5,
+    lineHeight: 14,
+    marginTop: 2,
   },
 });

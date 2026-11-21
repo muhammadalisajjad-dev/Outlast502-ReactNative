@@ -23,6 +23,14 @@ import { getNextActivePlayerIndex } from './turn';
 const BOT_NAMES = ['Marcus', 'Sophia', 'Elena', 'Liam', 'Zoe'];
 
 /**
+ * Possessive form for log copy. The human seat is usually named "You", where
+ * the mechanical `${name}'s` would read "You's".
+ */
+function possessiveName(name: string): string {
+  return name.trim().toLowerCase() === 'you' ? 'Your' : `${name}'s`;
+}
+
+/**
  * Initializes a new match with 2 to 6 players.
  */
 export function initMatch(
@@ -145,7 +153,7 @@ export function initRound(state: GameState, rng: () => number = Math.random): Ga
     declaredSuit: null,
     pendingPenalty: INITIAL_PENALTY_STATE,
     logs: [
-      `Round ${roundNumber} started. Neutral opening card: ${openingCard.rank} of ${openingCard.suit}. ${currentPlayers[starterIndex].name}'s turn.`,
+      `Round ${roundNumber} started. Neutral opening card: ${openingCard.rank} of ${openingCard.suit}. ${possessiveName(currentPlayers[starterIndex].name)} turn.`,
       ...state.logs,
     ],
   };

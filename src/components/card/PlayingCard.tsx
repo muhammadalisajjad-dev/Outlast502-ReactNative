@@ -7,10 +7,19 @@ import {
   ViewStyle,
   Animated,
 } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect, Line, G, Path, Circle } from 'react-native-svg';
 import { Card, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
+
+export const CARD_SIZES = {
+  mini: { width: 34, height: 48, borderRadius: 3 },
+  normal: { width: 70, height: 100, borderRadius: 5 },
+  large: { width: 96, height: 138, borderRadius: 7 },
+} as const;
+
+export type CardSize = keyof typeof CARD_SIZES;
 
 interface PlayingCardProps {
   card?: Card;
@@ -18,10 +27,107 @@ interface PlayingCardProps {
   playable?: boolean;
   selected?: boolean;
   onPress?: () => void;
-  size?: 'normal' | 'mini' | 'large';
+  size?: CardSize;
   style?: ViewStyle;
   testID?: string;
 }
+
+const CardBackArt: React.FC<{ size: CardSize }> = ({ size }) => {
+  const isMini = size === 'mini';
+  const lattice = Array.from({ length: 12 }).map((_, index) => index * 9);
+
+  return (
+    <>
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 70 100"
+        preserveAspectRatio="none"
+        style={StyleSheet.absoluteFill}
+      >
+        <Defs>
+          <LinearGradient id="card-back-gradient" x1="0" y1="0" x2="0.8" y2="1">
+            <Stop offset="0" stopColor={Colors.emeraldLight} stopOpacity={1} />
+            <Stop offset="0.55" stopColor={Colors.emerald} stopOpacity={1} />
+            <Stop offset="1" stopColor={Colors.inkBlack} stopOpacity={1} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="70" height="100" fill="url(#card-back-gradient)" />
+        <G stroke={Colors.brass} strokeOpacity={0.18} strokeWidth={0.55}>
+          {lattice.map(value => (
+            <Line key={`d1-${value}`} x1={value} y1={0} x2={0} y2={value} />
+          ))}
+          {lattice.map(value => (
+            <Line key={`d2-${value}`} x1={70 - value} y1={0} x2={70} y2={value} />
+          ))}
+          {lattice.map(value => (
+            <Line key={`d3-${value}`} x1={value} y1={100} x2={0} y2={100 - value} />
+          ))}
+          {lattice.map(value => (
+            <Line key={`d4-${value}`} x1={70 - value} y1={100} x2={70} y2={100 - value} />
+          ))}
+        </G>
+
+        <Rect
+          x={3.5}
+          y={3.5}
+          width={63}
+          height={93}
+          rx={2}
+          fill="none"
+          stroke={Colors.brass}
+          strokeOpacity={0.55}
+          strokeWidth={0.8}
+        />
+        <Rect
+          x={6.5}
+          y={6.5}
+          width={57}
+          height={87}
+          rx={1}
+          fill="none"
+          stroke={Colors.brass}
+          strokeOpacity={0.2}
+          strokeWidth={0.5}
+        />
+
+        <Path
+          d="M35 22 L55 50 L35 78 L15 50 Z"
+          fill={Colors.emeraldDeep}
+          fillOpacity={0.82}
+          stroke={Colors.brass}
+          strokeOpacity={0.7}
+          strokeWidth={0.8}
+        />
+        <Path
+          d="M35 27 L50 50 L35 73 L20 50 Z"
+          fill="none"
+          stroke={Colors.brass}
+          strokeOpacity={0.38}
+          strokeWidth={0.5}
+        />
+        <Circle cx={35} cy={50} r={11.5} fill={Colors.inkBlack} fillOpacity={0.35} />
+      </Svg>
+
+      <View style={styles.backMonogramWrap} pointerEvents="none">
+        <Text
+          style={[
+            styles.backMonogram,
+            isMini && { fontSize: 7, letterSpacing: 0.3 },
+          ]}
+        >
+          502
+        </Text>
+      </View>
+
+      {/* Tiny brass corner diamonds */}
+      <View style={[styles.backCorner, styles.backCornerTL, isMini && styles.backCornerMini]} />
+      <View style={[styles.backCorner, styles.backCornerTR, isMini && styles.backCornerMini]} />
+      <View style={[styles.backCorner, styles.backCornerBL, isMini && styles.backCornerMini]} />
+      <View style={[styles.backCorner, styles.backCornerBR, isMini && styles.backCornerMini]} />
+    </>
+  );
+};
 
 export const PlayingCard: React.FC<PlayingCardProps> = ({
   card,
@@ -36,6 +142,9 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const isRed = card ? SUIT_COLORS[card.suit] === 'red' : false;
   const suitSymbol = card ? SUIT_SYMBOLS[card.suit] : '';
   const suitColor = isRed ? Colors.cardRedSuit : Colors.cardBlackSuit;
+  const dims = CARD_SIZES[size];
+  const isMini = size === 'mini';
+  const isLarge = size === 'large';
 
   const handlePress = () => {
     if (!playable && !onPress) return;
@@ -45,33 +154,18 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     }
   };
 
-  const getDimensions = () => {
-    switch (size) {
-      case 'mini':
-        return { width: 34, height: 48, borderRadius: 4 };
-      case 'large':
-        return { width: 86, height: 124, borderRadius: 8 };
-      case 'normal':
-      default:
-        return { width: 66, height: 96, borderRadius: 6 };
-    }
-  };
-
-  const dims = getDimensions();
   const liftAnim = useRef(new Animated.Value(playable ? 1 : 0)).current;
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
-  // Lift animation when playable / selected
   useEffect(() => {
     Animated.spring(liftAnim, {
       toValue: selected ? 2 : playable ? 1 : 0,
-      speed: 30,
-      bounciness: 6,
+      speed: 28,
+      bounciness: 5,
       useNativeDriver: true,
     }).start();
   }, [playable, selected, liftAnim]);
 
-  // Subtle breathing pulse for playable cards
   useEffect(() => {
     let anim: Animated.CompositeAnimation | null = null;
     if (playable) {
@@ -79,12 +173,12 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
         Animated.sequence([
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 1200,
+            duration: 1600,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnim, {
             toValue: 0,
-            duration: 1200,
+            duration: 1600,
             useNativeDriver: true,
           }),
         ])
@@ -100,149 +194,118 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 
   const translateY = liftAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [0, -9, -16],
+    outputRange: [0, -8, -15],
   });
 
   const scale = liftAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [1, 1.03, 1.07],
+    outputRange: [1, 1.025, 1.06],
   });
 
-  const playableGlowOpacity = pulseAnim.interpolate({
+  const haloOpacity = pulseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.35, 0.85],
+    outputRange: [0.32, 0.85],
   });
 
   if (faceDown || !card) {
     return (
       <View
         style={[
-          styles.cardBase,
-          styles.cardFaceDown,
-          dims,
+          styles.cardShadowWrap,
+          { width: dims.width, height: dims.height },
           style,
         ]}
       >
-        <View style={styles.cardBackPattern}>
-          <View style={styles.cardBackInnerFrame}>
-            <View style={styles.cardBackCornerTopLeft}>
-              <Text style={styles.cardBackMiniSuit}>♠</Text>
-            </View>
-            <View style={styles.cardBackCornerBottomRight}>
-              <Text style={styles.cardBackMiniSuit}>♦</Text>
-            </View>
-            <View style={styles.cardBackDiamond}>
-              <View style={styles.cardBackDiamondInner}>
-                <Text style={styles.cardBackText}>502</Text>
-              </View>
-            </View>
+        <View
+          style={[
+            styles.cardBase,
+            styles.cardFaceDown,
+            dims,
+            { width: dims.width, height: dims.height },
+          ]}
+        >
+          <View style={[styles.backPaper, { borderRadius: dims.borderRadius - 1 }]}>
+            <CardBackArt size={size} />
           </View>
         </View>
       </View>
     );
   }
 
-  const isMini = size === 'mini';
-  const isLarge = size === 'large';
-
-  // High-impact Special Badges
   let specialBadge: { label: string; bg: string; textCol: string; borderCol: string } | null = null;
   if (card.rank === '7' && card.suit === 'hearts') {
-    specialBadge = { label: 'WIN 7♥', bg: '#991b1b', textCol: '#fef08a', borderCol: '#f59e0b' };
+    specialBadge = { label: 'WIN', bg: Colors.burgundy, textCol: Colors.brassLight, borderCol: Colors.brass };
   } else if (card.rank === 'J') {
-    specialBadge = { label: 'WILD', bg: '#1d4ed8', textCol: '#ffffff', borderCol: '#60a5fa' };
+    specialBadge = { label: 'WILD', bg: Colors.emeraldMid, textCol: Colors.ivory, borderCol: Colors.brass };
   } else if (card.rank === 'A' && card.suit === 'spades') {
-    specialBadge = { label: '+5 ATK', bg: '#b91c1c', textCol: '#ffffff', borderCol: '#f87171' };
+    specialBadge = { label: '+5', bg: Colors.burgundy, textCol: Colors.ivory, borderCol: Colors.brass };
   } else if (card.rank === '2') {
-    specialBadge = { label: '+2 ATK', bg: '#b45309', textCol: '#ffffff', borderCol: '#fbbf24' };
+    specialBadge = { label: '+2', bg: '#7A4A1C', textCol: Colors.ivory, borderCol: Colors.brass };
   } else if (card.rank === '8') {
-    specialBadge = { label: 'SKIP', bg: '#1e293b', textCol: '#38bdf8', borderCol: '#0ea5e9' };
+    specialBadge = { label: 'SKIP', bg: Colors.emeraldDeep, textCol: Colors.brassLight, borderCol: Colors.brass };
   }
+
+  const rankSize = isMini ? 10.5 : isLarge ? 19 : 15;
+  const suitSize = isMini ? 9 : isLarge ? 14 : 11.5;
+  const centerSuitSize = isMini ? 15 : isLarge ? 44 : 31;
 
   return (
     <Animated.View
-      style={{
-        transform: [{ translateY }, { scale }],
-        zIndex: selected ? 10 : playable ? 5 : 1,
-      }}
+      style={[
+        styles.cardShadowWrap,
+        {
+          width: dims.width,
+          height: dims.height,
+          transform: [{ translateY }, { scale }],
+          zIndex: selected ? 12 : playable ? 6 : 1,
+        },
+        style,
+      ]}
     >
+      {playable && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.playableHalo,
+            {
+              opacity: haloOpacity,
+              borderRadius: dims.borderRadius + 3,
+            },
+          ]}
+        />
+      )}
+
       <TouchableOpacity
         testID={testID}
-        activeOpacity={playable ? 0.8 : 1}
+        activeOpacity={playable ? 0.82 : 1}
         onPress={handlePress}
         disabled={!onPress}
         style={[
           styles.cardBase,
-          dims,
+          { width: dims.width, height: dims.height, borderRadius: dims.borderRadius },
           playable && styles.cardPlayable,
           selected && styles.cardSelected,
-          style,
         ]}
       >
-        {/* Subtle breathing glow ring for playable cards */}
-        {playable && (
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.playableGlowRing,
-              { opacity: playableGlowOpacity, borderRadius: dims.borderRadius },
-            ]}
-          />
-        )}
+        <View
+          style={[
+            styles.paper,
+            { borderRadius: Math.max(dims.borderRadius - 1, 1) },
+          ]}
+        >
+          <View style={styles.paperSheen} pointerEvents="none" />
+          <View style={styles.paperShade} pointerEvents="none" />
 
-        {/* Inner hairline border with authentic linen styling */}
-        <View style={[styles.innerCardBorder, { borderRadius: dims.borderRadius - 2 }]}>
-          {/* Top-Left Corner Index */}
-          <View style={styles.cornerIndexTop}>
-            <Text
-              style={[
-                Typography.cardRank,
-                {
-                  color: suitColor,
-                  fontSize: isMini ? 10.5 : isLarge ? 18 : 14.5,
-                  lineHeight: isMini ? 11 : isLarge ? 19 : 15.5,
-                },
-              ]}
-            >
-              {card.rank}
-            </Text>
-            <Text
-              style={[
-                Typography.cardSuit,
-                {
-                  color: suitColor,
-                  fontSize: isMini ? 9.5 : isLarge ? 13.5 : 11.5,
-                  lineHeight: isMini ? 10 : isLarge ? 14 : 12,
-                },
-              ]}
-            >
-              {suitSymbol}
-            </Text>
-          </View>
-
-          {/* Center Watermark Pip */}
-          <View style={styles.centerEmblem}>
-            <Text
-              style={{
-                color: suitColor,
-                fontSize: isMini ? 15 : isLarge ? 40 : 29,
-                opacity: isMini ? 0.88 : 0.82,
-              }}
-            >
-              {suitSymbol}
-            </Text>
-          </View>
-
-          {/* Bottom-Right Corner Index (Inverted) */}
-          {!isMini && (
-            <View style={styles.cornerIndexBottom}>
+          <View style={styles.innerFrame}>
+            {/* Top-left index */}
+            <View style={styles.cornerIndexTop}>
               <Text
                 style={[
                   Typography.cardRank,
                   {
                     color: suitColor,
-                    fontSize: isLarge ? 18 : 14.5,
-                    lineHeight: isLarge ? 19 : 15.5,
+                    fontSize: rankSize,
+                    lineHeight: rankSize + 1,
                   },
                 ]}
               >
@@ -253,35 +316,105 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
                   Typography.cardSuit,
                   {
                     color: suitColor,
-                    fontSize: isLarge ? 13.5 : 11.5,
-                    lineHeight: isLarge ? 14 : 12,
+                    fontSize: suitSize,
+                    lineHeight: suitSize + 1,
                   },
                 ]}
               >
                 {suitSymbol}
               </Text>
             </View>
-          )}
 
-          {/* Special Card Badge */}
-          {specialBadge && !isMini && (
-            <View
-              style={[
-                styles.specialBadge,
-                {
-                  backgroundColor: specialBadge.bg,
-                  borderColor: specialBadge.borderCol,
-                },
-              ]}
-            >
-              <Text style={[styles.specialBadgeText, { color: specialBadge.textCol }]}>
-                {specialBadge.label}
+            {/* Centre deco emblem */}
+            <View style={styles.centerEmblem} pointerEvents="none">
+              {!isMini && (
+                <View
+                  style={[
+                    styles.emblemDiamond,
+                    {
+                      width: isLarge ? 58 : 43,
+                      height: isLarge ? 58 : 43,
+                      borderColor: isRed
+                        ? 'rgba(158, 47, 56, 0.24)'
+                        : 'rgba(19, 32, 27, 0.18)',
+                    },
+                  ]}
+                />
+              )}
+              <Text
+                style={{
+                  color: suitColor,
+                  fontSize: centerSuitSize,
+                  lineHeight: centerSuitSize + 2,
+                  opacity: isMini ? 0.9 : 0.88,
+                  textShadowColor: 'rgba(0,0,0,0.08)',
+                  textShadowOffset: { width: 0, height: 1 },
+                  textShadowRadius: 1,
+                }}
+              >
+                {suitSymbol}
               </Text>
+              {isLarge && (
+                <View style={styles.emblemRuleRow}>
+                  <View style={styles.emblemRule} />
+                  <View style={styles.emblemDot} />
+                  <View style={styles.emblemRule} />
+                </View>
+              )}
             </View>
-          )}
 
-          {/* Subtle diagonal sheen highlight */}
-          <View style={styles.cardSheen} pointerEvents="none" />
+            {/* Bottom-right index */}
+            {!isMini && (
+              <View style={styles.cornerIndexBottom}>
+                <Text
+                  style={[
+                    Typography.cardRank,
+                    {
+                      color: suitColor,
+                      fontSize: rankSize,
+                      lineHeight: rankSize + 1,
+                    },
+                  ]}
+                >
+                  {card.rank}
+                </Text>
+                <Text
+                  style={[
+                    Typography.cardSuit,
+                    {
+                      color: suitColor,
+                      fontSize: suitSize,
+                      lineHeight: suitSize + 1,
+                    },
+                  ]}
+                >
+                  {suitSymbol}
+                </Text>
+              </View>
+            )}
+
+            {specialBadge && !isMini && (
+              <View
+                style={[
+                  styles.specialTab,
+                  {
+                    backgroundColor: specialBadge.bg,
+                    borderColor: specialBadge.borderCol,
+                  },
+                ]}
+              >
+                <Text style={[styles.specialTabText, { color: specialBadge.textCol }]}>
+                  {specialBadge.label}
+                </Text>
+              </View>
+            )}
+
+            {/* Fine deco corner ticks */}
+            <View style={[styles.cornerTick, styles.cornerTickTL]} />
+            <View style={[styles.cornerTick, styles.cornerTickTR]} />
+            <View style={[styles.cornerTick, styles.cornerTickBL]} />
+            <View style={[styles.cornerTick, styles.cornerTickBR]} />
+          </View>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -289,121 +422,62 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 };
 
 const styles = StyleSheet.create({
+  cardShadowWrap: {
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.42,
+    shadowRadius: 7,
+    elevation: 6,
+  },
   cardBase: {
     backgroundColor: Colors.cardIvory,
-    borderColor: '#e2dcd0',
+    borderColor: '#D7C7A6',
     borderWidth: 1,
-    padding: 2.5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 4,
-    elevation: 4,
-    position: 'relative',
+    padding: 3,
     overflow: 'hidden',
   },
-  playableGlowRing: {
-    position: 'absolute',
-    top: -2,
-    left: -2,
-    right: -2,
-    bottom: -2,
-    borderWidth: 2,
-    borderColor: Colors.playableBlue,
+  paper: {
+    flex: 1,
+    backgroundColor: Colors.cardIvoryInner,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  innerCardBorder: {
+  paperSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '42%',
+    backgroundColor: 'rgba(255, 255, 255, 0.34)',
+  },
+  paperShade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '28%',
+    backgroundColor: 'rgba(176, 150, 108, 0.08)',
+  },
+  innerFrame: {
     flex: 1,
     borderWidth: 0.75,
-    borderColor: 'rgba(0, 0, 0, 0.09)',
-    backgroundColor: '#fefdfa',
-    justifyContent: 'space-between',
+    borderColor: 'rgba(138, 108, 57, 0.34)',
     padding: 3,
+    justifyContent: 'space-between',
     position: 'relative',
     overflow: 'hidden',
-  },
-  cardFaceDown: {
-    backgroundColor: '#070d18',
-    borderColor: 'rgba(56, 189, 248, 0.35)',
-    borderWidth: 1.5,
-    padding: 3,
-  },
-  cardBackPattern: {
-    flex: 1,
-    backgroundColor: '#0a1222',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
-    padding: 2.5,
-  },
-  cardBackInnerFrame: {
-    flex: 1,
-    borderWidth: 0.5,
-    borderColor: 'rgba(251, 191, 36, 0.3)',
-    borderRadius: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  cardBackCornerTopLeft: {
-    position: 'absolute',
-    top: 2,
-    left: 2,
-  },
-  cardBackCornerBottomRight: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-  },
-  cardBackMiniSuit: {
-    fontSize: 7,
-    color: 'rgba(251, 191, 36, 0.45)',
-  },
-  cardBackDiamond: {
-    width: '64%',
-    height: '64%',
-    borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.5)',
-    transform: [{ rotate: '45deg' }],
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
-  },
-  cardBackDiamondInner: {
-    width: '80%',
-    height: '80%',
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardBackText: {
-    color: '#fbbf24',
-    fontWeight: '900',
-    fontSize: 9,
-    letterSpacing: 0.8,
-    transform: [{ rotate: '-45deg' }],
-  },
-  cardPlayable: {
-    borderColor: Colors.playableBlue,
-    borderWidth: 1.5,
-    shadowColor: Colors.playableBlue,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
-    elevation: 7,
-  },
-  cardSelected: {
-    borderColor: Colors.goldLight,
-    borderWidth: 2,
   },
   cornerIndexTop: {
     alignItems: 'center',
     alignSelf: 'flex-start',
+    zIndex: 2,
   },
   cornerIndexBottom: {
     alignItems: 'center',
     alignSelf: 'flex-end',
     transform: [{ rotate: '180deg' }],
+    zIndex: 2,
   },
   centerEmblem: {
     position: 'absolute',
@@ -414,32 +488,142 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  specialBadge: {
+  emblemDiamond: {
+    position: 'absolute',
+    borderWidth: 0.8,
+    transform: [{ rotate: '45deg' }],
+  },
+  emblemRuleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 3,
+    width: 34,
+  },
+  emblemRule: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(138, 108, 57, 0.5)',
+  },
+  emblemDot: {
+    width: 3,
+    height: 3,
+    marginHorizontal: 3,
+    backgroundColor: 'rgba(138, 108, 57, 0.7)',
+    transform: [{ rotate: '45deg' }],
+  },
+  specialTab: {
     position: 'absolute',
     top: 2,
     right: 2,
     paddingHorizontal: 4,
     paddingVertical: 1,
-    borderRadius: 3,
-    borderWidth: 0.75,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 0.6,
+    borderRadius: 1,
+    zIndex: 3,
   },
-  specialBadgeText: {
-    fontSize: 7.5,
-    fontWeight: '900',
-    letterSpacing: 0.3,
+  specialTabText: {
+    fontSize: 6.5,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
-  cardSheen: {
+  cornerTick: {
+    position: 'absolute',
+    width: 5,
+    height: 5,
+    borderColor: 'rgba(138, 108, 57, 0.55)',
+  },
+  cornerTickTL: {
+    top: 1,
+    left: 1,
+    borderTopWidth: 0.8,
+    borderLeftWidth: 0.8,
+  },
+  cornerTickTR: {
+    top: 1,
+    right: 1,
+    borderTopWidth: 0.8,
+    borderRightWidth: 0.8,
+  },
+  cornerTickBL: {
+    bottom: 1,
+    left: 1,
+    borderBottomWidth: 0.8,
+    borderLeftWidth: 0.8,
+  },
+  cornerTickBR: {
+    bottom: 1,
+    right: 1,
+    borderBottomWidth: 0.8,
+    borderRightWidth: 0.8,
+  },
+  playableHalo: {
+    position: 'absolute',
+    top: -3,
+    left: -3,
+    right: -3,
+    bottom: -3,
+    borderWidth: 1.2,
+    borderColor: Colors.brassLight,
+    shadowColor: Colors.brass,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.75,
+    shadowRadius: 9,
+    elevation: 8,
+  },
+  cardPlayable: {
+    borderColor: Colors.brassLight,
+    borderWidth: 1.2,
+  },
+  cardSelected: {
+    borderColor: Colors.brassLight,
+    borderWidth: 1.5,
+  },
+  cardFaceDown: {
+    backgroundColor: Colors.emeraldDeep,
+    borderColor: 'rgba(198, 164, 96, 0.65)',
+    borderWidth: 1,
+    padding: 3,
+  },
+  backPaper: {
+    flex: 1,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: Colors.emerald,
+  },
+  backMonogramWrap: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    transform: [{ skewY: '-15deg' }],
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  backMonogram: {
+    fontFamily: Typography.titleSmall.fontFamily,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: Colors.brassLight,
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  backCorner: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.65)',
+    transform: [{ rotate: '45deg' }],
+  },
+  backCornerMini: {
+    width: 2.5,
+    height: 2.5,
+  },
+  backCornerTL: { top: 6, left: 6 },
+  backCornerTR: { top: 6, right: 6 },
+  backCornerBL: { bottom: 6, left: 6 },
+  backCornerBR: { bottom: 6, right: 6 },
 });

@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { useGame } from '../context/GameContext';
@@ -26,9 +20,10 @@ import {
 import { Card } from '../types/card';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
-import { Sparkles, Flame } from 'lucide-react-native';
+import { Flame } from 'lucide-react-native';
 import { triggerHaptic } from '../utils/haptics';
 import { soundManager } from '../utils/sound';
+import { DecoBackdrop, FeltSurface, BrassDiamond } from '../components/common/Deco';
 
 interface GameScreenProps {
   onOpenScoreboard: () => void;
@@ -63,6 +58,27 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const prevRoundRef = useRef<number | null>(null);
   const prevTopDiscardRef = useRef<string | null>(null);
   const tableShakeAnim = useRef(new Animated.Value(0)).current;
+  const ambientAnim = useRef(new Animated.Value(0)).current;
+
+  // Soft ambient light breathing across the table.
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ambientAnim, {
+          toValue: 1,
+          duration: 4200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ambientAnim, {
+          toValue: 0,
+          duration: 4200,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [ambientAnim]);
 
   // Dealing animation on new match / new round
   useEffect(() => {
@@ -86,51 +102,55 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     if (!topCard || topCard.id === prevTopDiscardRef.current) return;
     prevTopDiscardRef.current = topCard.id;
 
-    // Detect 7 of Hearts instant round victory
+    // The opening card is placed by the dealer, not played; do not announce
+    // its power as if a seat had just activated it.
+    if (gameState.discardPile.length <= 1) {
+      setSpecialEvent(null);
+      return;
+    }
+
     if (topCard.rank === '7' && topCard.suit === 'hearts') {
       setSpecialEvent({
-        title: '7 OF HEARTS INSTANT WIN!',
-        subtitle: 'Round completed immediately with 0 points!',
+        title: 'THE SEVEN OF HEARTS',
+        subtitle: 'The round closes instantly. Zero points.',
         type: 'victory',
       });
       triggerHaptic('success');
       soundManager.playVictoryChime();
     } else if (topCard.rank === '2' || (topCard.rank === 'A' && topCard.suit === 'spades')) {
-      // Detect Penalties (+2 or +5)
       const penaltyCards = topCard.rank === '2' ? 2 : 5;
       setSpecialEvent({
-        title: `PENALTY ATTACK: +${penaltyCards} CARDS!`,
-        subtitle: `Next player must counter or draw ${gameState.pendingPenalty.cardsOwed} cards`,
+        title: `PENALTY: ${penaltyCards} CARDS`,
+        subtitle: `The table owes ${gameState.pendingPenalty.cardsOwed} cards unless answered.`,
         type: 'penalty',
       });
       triggerHaptic('warning');
       soundManager.playPenalty();
 
-      // Table impact shake
       Animated.sequence([
-        Animated.timing(tableShakeAnim, { toValue: 5, duration: 40, useNativeDriver: true }),
-        Animated.timing(tableShakeAnim, { toValue: -5, duration: 50, useNativeDriver: true }),
-        Animated.timing(tableShakeAnim, { toValue: 3, duration: 40, useNativeDriver: true }),
+        Animated.timing(tableShakeAnim, { toValue: 4, duration: 40, useNativeDriver: true }),
+        Animated.timing(tableShakeAnim, { toValue: -4, duration: 50, useNativeDriver: true }),
+        Animated.timing(tableShakeAnim, { toValue: 2, duration: 40, useNativeDriver: true }),
         Animated.timing(tableShakeAnim, { toValue: 0, duration: 40, useNativeDriver: true }),
       ]).start();
     } else if (topCard.rank === '8') {
-      // Detect 8 Skip
       setSpecialEvent({
-        title: 'TURN SKIPPED!',
-        subtitle: 'An 8 bypassed the next player',
+        title: 'TURN SKIPPED',
+        subtitle: 'The eight passes the turn onward.',
         type: 'skip',
       });
       triggerHaptic('light');
     } else if (topCard.rank === 'J') {
-      // Detect Jack Wild
       setSpecialEvent({
-        title: 'JACK DECLARED!',
+        title: 'THE JACK IS WILD',
         subtitle: gameState.declaredSuit
-          ? `Demanded suit: ${gameState.declaredSuit.toUpperCase()}`
-          : 'Demanding a new suit',
+          ? `${gameState.declaredSuit.toUpperCase()} is demanded.`
+          : 'A suit is demanded.',
         type: 'jack',
       });
       triggerHaptic('medium');
+    } else {
+      setSpecialEvent(null);
     }
 
     const clearTimer = setTimeout(() => {
@@ -145,7 +165,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     const active = gameState.players[gameState.activePlayerIndex];
     if (!active || active.isHuman || active.isEliminated) return;
 
-    // Check if the most recent log is from a bot
     const lastLog = gameState.logs[0];
     if (lastLog && !lastLog.startsWith('You')) {
       if (lastLog.includes('played')) {
@@ -165,8 +184,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   if (!gameState) {
     return (
       <View style={styles.safeArea}>
+        <DecoBackdrop variant="table" />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>INITIALIZING MATCH...</Text>
+          <Text style={styles.loadingText}>SETTING THE TABLE…</Text>
         </View>
       </View>
     );
@@ -174,6 +194,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
   const activePlayer = gameState.players[gameState.activePlayerIndex];
   const opponents = gameState.players.filter(p => !p.isHuman);
+  const humanPlayer = gameState.players.find(p => p.isHuman);
   const topDiscard = gameState.discardPile[gameState.discardPile.length - 1] || null;
   const recentLog = gameState.logs.length > 0 ? gameState.logs[0] : '';
   const latestRoundResult =
@@ -184,7 +205,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const canDraw = isMyTurn && !gameState.pendingPenalty.active;
   const insets = useResponsiveInsets();
 
-  // Animated Player Play Card
   const handlePlayCardAnimated = (card: Card) => {
     if (card.rank === 'J' && !gameState.declaredSuit) {
       playCard(card);
@@ -200,7 +220,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     }, 180);
   };
 
-  // Animated Player Draw Card
   const handleDrawCardAnimated = () => {
     setFlyingAction({ from: 'deck', to: 'hand' });
     triggerHaptic('medium');
@@ -211,137 +230,168 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     }, 180);
   };
 
+  const statusText = gameState.pendingPenalty.active
+    ? `PENALTY · ${gameState.pendingPenalty.cardsOwed} CARDS OWED`
+    : gameState.declaredSuit
+    ? `${gameState.declaredSuit.toUpperCase()} DEMANDED`
+    : `${gameState.drawPile.length} CARDS IN THE DECK`;
+
   return (
     <View style={styles.safeArea}>
       <StatusBar style="light" />
+      <DecoBackdrop variant="table" />
 
-      {/* Top Header with safe area insets */}
-      <View style={{ paddingTop: insets.top, backgroundColor: 'rgba(7, 11, 20, 0.98)' }}>
-        <TableHeader
-          roundNumber={gameState.roundNumber}
-          activePlayerName={activePlayer ? activePlayer.name : ''}
-          isMyTurn={isMyTurn}
-          onOpenScoreboard={onOpenScoreboard}
-          onOpenRules={onOpenRules}
-        />
-      </View>
+      <View style={styles.gameColumn}>
+        <View style={{ paddingTop: insets.top }}>
+          <TableHeader
+            roundNumber={gameState.roundNumber}
+            activePlayerName={activePlayer ? activePlayer.name : ''}
+            isMyTurn={isMyTurn}
+            onOpenScoreboard={onOpenScoreboard}
+            onOpenRules={onOpenRules}
+          />
+        </View>
 
-      {/* Opponents Row */}
-      <View style={styles.opponentsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.opponentsScroll}
-        >
-          {opponents.map(opp => (
-            <OpponentSeat
-              key={opp.id}
-              player={opp}
-              isCurrentTurn={opp.id === activePlayer?.id}
+        {/* The club rail: opponents seated along the top of the table */}
+        <View style={styles.opponentsContainer}>
+          <View style={styles.opponentsRow}>
+            {opponents.map(opp => (
+              <OpponentSeat
+                key={opp.id}
+                player={opp}
+                isCurrentTurn={opp.id === activePlayer?.id}
+              />
+            ))}
+          </View>
+          <View style={styles.opponentsRail} />
+        </View>
+
+        {/* Central felt table */}
+        <View style={styles.tableFelt}>
+          <Animated.View
+            style={[
+              styles.feltBorderFrame,
+              { transform: [{ translateX: tableShakeAnim }] },
+            ]}
+          >
+            <FeltSurface />
+
+            <View style={styles.innerHairline} pointerEvents="none" />
+
+            {/* Brass corner brackets */}
+            <View style={[styles.brassBracket, styles.bracketTopLeft]} />
+            <View style={[styles.brassBracket, styles.bracketTopRight]} />
+            <View style={[styles.brassBracket, styles.bracketBottomLeft]} />
+            <View style={[styles.brassBracket, styles.bracketBottomRight]} />
+
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.ambientRing,
+                {
+                  opacity: ambientAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.05, 0.14],
+                  }),
+                  transform: [
+                    {
+                      scale: ambientAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.04],
+                      }),
+                    },
+                  ],
+                },
+              ]}
             />
-          ))}
-        </ScrollView>
-      </View>
 
-      {/* Central Felt Table */}
-      <View style={styles.tableFelt}>
-        {/* Table Felt Rail Border with Impact Shake */}
-        <Animated.View
-          style={[
-            styles.feltBorderFrame,
-            { transform: [{ translateX: tableShakeAnim }] },
-          ]}
-        >
-          {/* Brass Corner Brackets */}
-          <View style={[styles.brassBracket, styles.bracketTopLeft]} />
-          <View style={[styles.brassBracket, styles.bracketTopRight]} />
-          <View style={[styles.brassBracket, styles.bracketBottomLeft]} />
-          <View style={[styles.brassBracket, styles.bracketBottomRight]} />
-
-          {/* Table Ambient Center Lighting Highlight */}
-          <View style={styles.tableCenterAura} pointerEvents="none" />
-
-          {/* Inner hairline gold ring */}
-          <View style={styles.innerFeltBorder}>
-            {/* Felt Table Center Watermark */}
+            {/* Felt watermark */}
             <View style={styles.feltWatermark} pointerEvents="none">
-              <Text style={styles.watermarkSuits}>♠  ♥  ♦  ♣</Text>
-              <Text style={styles.watermarkTitle}>OUTLAST 502</Text>
-              <View style={styles.watermarkRing} />
-            </View>
-
-            {/* Recent Action Banner */}
-            {recentLog ? (
-              <View style={styles.logBanner}>
-                {gameState.pendingPenalty.active ? (
-                  <Flame size={12} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
-                ) : (
-                  <Sparkles size={11} color={Colors.playableBlue} style={{ marginRight: 6 }} />
-                )}
-                <Text style={styles.logText} numberOfLines={1}>
-                  {recentLog}
-                </Text>
+              <Text style={styles.watermarkTitle}>502</Text>
+              <View style={styles.watermarkSuits}>
+                <Text style={styles.watermarkSuit}>♠</Text>
+                <Text style={styles.watermarkSuit}>♥</Text>
+                <Text style={styles.watermarkSuit}>♦</Text>
+                <Text style={styles.watermarkSuit}>♣</Text>
               </View>
-            ) : <View style={{ height: 26 }} />}
-
-            {/* Center Piles (Draw & Discard) */}
-            <View style={styles.centerPilesRow}>
-              <DrawPile
-                count={gameState.drawPile.length}
-                canDraw={canDraw}
-                onDraw={handleDrawCardAnimated}
-              />
-
-              <View style={styles.pileSeparator} />
-
-              <DiscardPile
-                topCard={topDiscard}
-                declaredSuit={gameState.declaredSuit}
-                count={gameState.discardPile.length}
-              />
             </View>
 
-            {/* Motion Overlay Layer for dealing & flying cards */}
+            <View style={styles.tableContent}>
+              {/* Recent action, set as an editorial line rather than a pill */}
+              <View style={styles.actionRow}>
+                <View style={styles.actionLine} />
+                {gameState.pendingPenalty.active ? (
+                  <Flame size={10} color={Colors.crimsonLight} style={{ marginHorizontal: 6 }} />
+                ) : (
+                  <BrassDiamond size={4} style={{ marginHorizontal: 7 }} />
+                )}
+                <Text
+                  style={[
+                    styles.actionText,
+                    gameState.pendingPenalty.active && styles.actionTextDanger,
+                  ]}
+                  numberOfLines={2}
+                >
+                  {recentLog || 'THE TABLE IS SET'}
+                </Text>
+                <View style={styles.actionLine} />
+              </View>
+
+              {/* Draw and discard */}
+              <View style={styles.centerPilesRow}>
+                <DrawPile
+                  count={gameState.drawPile.length}
+                  canDraw={canDraw}
+                  onDraw={handleDrawCardAnimated}
+                />
+
+                <View style={styles.pileDivider}>
+                  <View style={styles.pileDividerLine} />
+                  <BrassDiamond size={5} />
+                  <View style={styles.pileDividerLine} />
+                </View>
+
+                <DiscardPile
+                  topCard={topDiscard}
+                  declaredSuit={gameState.declaredSuit}
+                  count={gameState.discardPile.length}
+                />
+              </View>
+
+              <View style={styles.tableFooterStatus}>
+                <Text style={styles.tableFooterText}>{statusText}</Text>
+              </View>
+            </View>
+
             <TableMotionOverlay
               isDealing={isDealing}
               flyingAction={flyingAction}
               specialEvent={specialEvent}
             />
+          </Animated.View>
+        </View>
 
-            {/* Subtle table footer guideline */}
-            <View style={styles.tableFooterStatus}>
-              <Text style={styles.tableFooterText}>
-                {gameState.pendingPenalty.active
-                  ? `⚡ PENALTY ACTIVE · ${gameState.pendingPenalty.cardsOwed} CARDS OWED`
-                  : gameState.declaredSuit
-                  ? `SUIT DEMANDED · ${gameState.declaredSuit.toUpperCase()}`
-                  : `STANDARD SHEDDING · DECK: ${gameState.drawPile.length}`}
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
+        {isMyTurn && gameState.pendingPenalty.active && (
+          <PenaltyModal
+            pendingPenalty={gameState.pendingPenalty}
+            hasCounterCard={hasCounterToPenalty}
+            onAcceptPenalty={acceptPenalty}
+          />
+        )}
+
+        {/* Player hand */}
+        <View style={[styles.playerHandSection, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+          <CardHand
+            hand={myPlayerHand}
+            playableCardIds={playableCardIds}
+            onCardPress={handlePlayCardAnimated}
+            isMyTurn={isMyTurn}
+            playerScore={humanPlayer?.cumulativeScore}
+            playerName={humanPlayer?.name}
+          />
+        </View>
       </View>
 
-      {/* Pending Penalty Alert Banner */}
-      {isMyTurn && gameState.pendingPenalty.active && (
-        <PenaltyModal
-          pendingPenalty={gameState.pendingPenalty}
-          hasCounterCard={hasCounterToPenalty}
-          onAcceptPenalty={acceptPenalty}
-        />
-      )}
-
-      {/* Human Player Hand Area with bottom safe area inset */}
-      <View style={[styles.playerHandSection, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <CardHand
-          hand={myPlayerHand}
-          playableCardIds={playableCardIds}
-          onCardPress={handlePlayCardAnimated}
-          isMyTurn={isMyTurn}
-        />
-      </View>
-
-      {/* Modals */}
       <JackSuitModal
         visible={Boolean(pendingJackCard)}
         onSelectSuit={confirmJackSuit}
@@ -368,7 +418,13 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#060a12',
+    backgroundColor: Colors.ink,
+  },
+  gameColumn: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,
@@ -376,91 +432,99 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 12,
-    letterSpacing: 1.5,
+    ...Typography.labelUpper,
+    color: Colors.brassLight,
+    fontSize: 9,
+    letterSpacing: 2.4,
   },
   opponentsContainer: {
-    paddingVertical: 6,
-    backgroundColor: 'rgba(7, 11, 20, 0.98)',
-    borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(56, 189, 248, 0.15)',
+    paddingTop: 2,
+    paddingBottom: 2,
   },
-  opponentsScroll: {
+  opponentsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-evenly',
     paddingHorizontal: 8,
-    alignItems: 'center',
+  },
+  opponentsRail: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 22,
+    marginTop: 2,
+    backgroundColor: 'rgba(198, 164, 96, 0.16)',
   },
   tableFelt: {
     flex: 1,
-    padding: 8,
-    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingTop: 7,
+    paddingBottom: 3,
   },
   feltBorderFrame: {
     flex: 1,
-    backgroundColor: '#0b1426',
+    backgroundColor: Colors.emeraldDeep,
     borderRadius: 22,
-    borderWidth: 4,
-    borderColor: '#04070e',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 164, 96, 0.38)',
     overflow: 'hidden',
     position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.55,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  innerHairline: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    borderRadius: 18,
+    borderWidth: 0.6,
+    borderColor: 'rgba(198, 164, 96, 0.14)',
+    zIndex: 2,
   },
   brassBracket: {
     position: 'absolute',
-    width: 14,
-    height: 14,
-    borderColor: '#f59e0b',
-    zIndex: 5,
+    width: 15,
+    height: 15,
+    borderColor: 'rgba(198, 164, 96, 0.7)',
+    zIndex: 4,
   },
   bracketTopLeft: {
-    top: 4,
-    left: 4,
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    top: 8,
+    left: 8,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
   },
   bracketTopRight: {
-    top: 4,
-    right: 4,
-    borderTopWidth: 2,
-    borderRightWidth: 2,
+    top: 8,
+    right: 8,
+    borderTopWidth: 1,
+    borderRightWidth: 1,
   },
   bracketBottomLeft: {
-    bottom: 4,
-    left: 4,
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
+    bottom: 8,
+    left: 8,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
   },
   bracketBottomRight: {
-    bottom: 4,
-    right: 4,
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
+    bottom: 8,
+    right: 8,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
   },
-  tableCenterAura: {
+  ambientRing: {
     position: 'absolute',
-    top: '20%',
-    left: '15%',
-    right: '15%',
-    bottom: '20%',
+    top: '16%',
+    left: '16%',
+    right: '16%',
+    bottom: '16%',
     borderRadius: 999,
-    backgroundColor: 'rgba(56, 189, 248, 0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.03)',
-  },
-  innerFeltBorder: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.15)',
-    borderRadius: 18,
-    padding: 8,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'relative',
+    borderColor: Colors.brass,
+    zIndex: 1,
   },
   feltWatermark: {
     position: 'absolute',
@@ -472,61 +536,54 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 0,
   },
-  watermarkSuits: {
-    color: 'rgba(251, 191, 36, 0.04)',
-    fontSize: 26,
-    letterSpacing: 8,
-    marginBottom: 4,
-  },
   watermarkTitle: {
-    ...Typography.badge,
-    color: 'rgba(251, 191, 36, 0.04)',
-    fontSize: 16,
+    fontFamily: Typography.displayTitle.fontFamily,
+    fontSize: 72,
+    fontWeight: '400',
     letterSpacing: 4,
+    color: 'rgba(198, 164, 96, 0.045)',
+    lineHeight: 78,
   },
-  watermarkRing: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.03)',
+  watermarkSuits: {
+    flexDirection: 'row',
+    marginTop: 2,
   },
-  tableFooterStatus: {
-    paddingHorizontal: 10,
-    paddingVertical: 3.5,
-    backgroundColor: 'rgba(7, 11, 20, 0.85)',
-    borderRadius: 10,
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.2)',
+  watermarkSuit: {
+    fontSize: 13,
+    color: 'rgba(198, 164, 96, 0.06)',
+    marginHorizontal: 7,
   },
-  tableFooterText: {
-    ...Typography.badge,
-    fontSize: 8.5,
-    color: Colors.textMuted,
-    letterSpacing: 0.8,
+  tableContent: {
+    flex: 1,
+    paddingHorizontal: 11,
+    paddingTop: 12,
+    paddingBottom: 9,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 3,
   },
-  logBanner: {
+  actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(7, 11, 20, 0.92)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
-    maxWidth: '92%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
+    width: '100%',
+    paddingHorizontal: 2,
   },
-  logText: {
-    color: Colors.textSecondary,
-    fontSize: 10.5,
-    fontWeight: '700',
+  actionLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(198, 164, 96, 0.18)',
+  },
+  actionText: {
+    ...Typography.micro,
+    color: Colors.ivoryMuted,
+    fontSize: 7.2,
+    letterSpacing: 0.9,
+    lineHeight: 10,
+    maxWidth: '86%',
     textAlign: 'center',
+  },
+  actionTextDanger: {
+    color: Colors.crimsonLight,
   },
   centerPilesRow: {
     flexDirection: 'row',
@@ -534,17 +591,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 'auto',
   },
-  pileSeparator: {
+  pileDivider: {
     width: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pileDividerLine: {
+    width: StyleSheet.hairlineWidth,
+    height: 26,
+    backgroundColor: 'rgba(198, 164, 96, 0.2)',
+  },
+  tableFooterStatus: {
+    alignItems: 'center',
+    paddingBottom: 2,
+  },
+  tableFooterText: {
+    ...Typography.micro,
+    fontSize: 6.8,
+    color: Colors.textMuted,
+    letterSpacing: 1.4,
   },
   playerHandSection: {
-    backgroundColor: 'rgba(7, 11, 20, 0.98)',
-    borderTopWidth: 1.5,
-    borderTopColor: 'rgba(56, 189, 248, 0.25)',
+    backgroundColor: Colors.inkSoft,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(198, 164, 96, 0.22)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
     elevation: 8,
   },
 });

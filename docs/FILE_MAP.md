@@ -8,10 +8,10 @@ This document catalogues every file in the project, explaining its exact respons
 
 | File | Purpose | Key Contents / Exports |
 | :--- | :--- | :--- |
-| `package.json` | Project manifest and dependencies | Expo 52+, React Native 0.76+, React 19, TypeScript, Jest |
+| `package.json` | Project manifest and dependencies | Expo ~58, React Native 0.88, React 19, TypeScript, Jest, Playwright (dev) |
 | `tsconfig.json` | TypeScript configuration | Strict type checking, path aliases, JSX settings |
-| `app.json` | Expo application manifest | App name, slug, orientation (portrait), bundle identifiers, splash & icon config |
-| `App.tsx` | Main application entry point | Root navigation / screen switcher wrapped in `GameProvider` |
+| `app.json` | Expo application manifest | App name, slug, portrait orientation, dark interface style and ink background, icon/adaptive-icon config |
+| `App.tsx` | Main application entry point | Root navigation / screen switcher wrapped in `GameProvider`; web-only brass keyboard focus styling |
 | `README.md` | Primary project documentation | Project description, setup instructions, rules summary, and rubric alignment |
 | `PROJECT_STATUS.md` | Continuous status tracker | Phase-by-phase completion log, verified criteria, and test results |
 | `AGENTS.md` | Agent roles and conventions | Architecture decisions and conventions for AI assistants working on this repo |
@@ -75,20 +75,22 @@ This document catalogues every file in the project, explaining its exact respons
 
 | File | Purpose | Key Exports |
 | :--- | :--- | :--- |
-| `src/components/card/PlayingCard.tsx` | Custom ivory playing card component with suit artwork, badges, and interaction | `PlayingCard` |
-| `src/components/card/CardHand.tsx` | Responsive scrolling/fanned hand displaying playable glows | `CardHand` |
-| `src/components/table/EmeraldTable.tsx` | Rich green felt table surface layout with center piles and player seats | `EmeraldTable` |
-| `src/components/table/DiscardPile.tsx` | Discard stack with top face-up card and active declared suit indicator | `DiscardPile` |
-| `src/components/table/DrawPile.tsx` | Face-down deck with card count indicator and draw trigger | `DrawPile` |
-| `src/components/table/OpponentSeat.tsx` | Opponent avatar, active turn indicator, remaining card count, and score | `OpponentSeat` |
-| `src/components/table/TableMotionOverlay.tsx` | Animated card dealing sequence, flying card trajectories (hand/draw/discard), and special card announcement banners | `TableMotionOverlay` |
-| `src/components/table/TableHeader.tsx` | Round status, match info, and game controls | `TableHeader` |
-| `src/components/modals/JackSuitModal.tsx` | Modal dialog for choosing suit after playing a Jack | `JackSuitModal` |
-| `src/components/modals/PenaltyModal.tsx` | Banner/modal detailing pending penalty and required response | `PenaltyModal` |
-| `src/components/modals/RoundOverModal.tsx` | Round results summary, hand points breakdown, and immunity badge | `RoundOverModal` |
-| `src/components/modals/GameOverModal.tsx` | Final game podium, match winner, and replay options | `GameOverModal` |
-| `src/components/common/Button.tsx` | Custom gold/emerald styled button component | `Button` |
-| `src/components/common/Badge.tsx` | Status pill badges for scores, penalties, and suits | `Badge` |
+| `src/components/card/PlayingCard.tsx` | Ivory deco card face with suit artwork, special-card tabs, emerald lattice back and badges | `PlayingCard`, `CARD_SIZES` |
+| `src/components/card/CardHand.tsx` | Adaptive fanned hand with rotation/arc, playable highlights, card count and score header | `CardHand` |
+| `src/components/table/DrawPile.tsx` | Layered face-down deck with card-count badge, draw trigger and active aura | `DrawPile` |
+| `src/components/table/DiscardPile.tsx` | Discard stack with top face-up card, declared-suit lozenge and play-count badge | `DiscardPile` |
+| `src/components/table/OpponentSeat.tsx` | Opponent medallion, mini card fan, active-turn glow, score and remaining-card count | `OpponentSeat` |
+| `src/components/table/TableHeader.tsx` | Monogram, Roman round numeral, turn indicator, circular scoreboard/rules buttons | `TableHeader` |
+| `src/components/table/TableMotionOverlay.tsx` | Staggered deal sequence, flying-card trajectories, Art Deco special-event banners | `TableMotionOverlay` |
+| `src/components/modals/JackSuitModal.tsx` | Suit declaration picker shown after a Jack | `JackSuitModal` |
+| `src/components/modals/PenaltyModal.tsx` | Inline burgundy penalty ticket with counter guidance and draw action | `PenaltyModal` |
+| `src/components/modals/RoundOverModal.tsx` | Round winner, forced-penalty notice and per-player score ledger | `RoundOverModal` |
+| `src/components/modals/GameOverModal.tsx` | Champion showcase, final standings ledger and replay/menu actions | `GameOverModal` |
+| `src/components/common/Button.tsx` | Emerald/brass/burgundy/outline/subtle button variants with press spring | `Button` |
+| `src/components/common/Deco.tsx` | Shared Art Deco primitives: backdrop, felt surface, monogram, ornament divider, diamond, club header, ledger section | `DecoBackdrop`, `FeltSurface`, `Monogram`, `OrnamentDivider`, `BrassDiamond`, `ClubHeader`, `LedgerSection`, `ClubScreen` |
+| `src/components/common/DecoModal.tsx` | Shared dialog shell with clipped corners, double brass hairline and restrained entrance | `DecoModal` |
+| `src/components/common/ScreenTransition.tsx` | Restrained fade/settle transition used between screens | `ScreenTransition` |
+| `src/components/common/Badge.tsx` | Status pill badges (currently unused by the redesigned screens; retained as a utility) | `Badge` |
 
 ---
 
@@ -96,12 +98,12 @@ This document catalogues every file in the project, explaining its exact respons
 
 | File | Purpose | Key Exports |
 | :--- | :--- | :--- |
-| `src/screens/HomeScreen.tsx` | Main landing screen with branding, game modes, and navigation | `HomeScreen` |
-| `src/screens/SetupScreen.tsx` | Match setup screen allowing 2–6 player selection and difficulty/names | `SetupScreen` |
-| `src/screens/GameScreen.tsx` | Active portrait gameplay table screen | `GameScreen` |
-| `src/screens/ScoreboardScreen.tsx` | Multi-round cumulative score table with elimination markers | `ScoreboardScreen` |
-| `src/screens/HistoryScreen.tsx` | Score history viewer for Firebase / local saved matches | `HistoryScreen` |
-| `src/screens/RulesScreen.tsx` | In-app quick reference for rules, scoring table, and card actions | `RulesScreen` |
+| `src/screens/HomeScreen.tsx` | Club masthead hero with floating house-card fan, primary invitation and Roman-numeral ledger navigation | `HomeScreen` |
+| `src/screens/SetupScreen.tsx` | Guest-list setup: host identity, 2–6 seat tiles, seating-order roster and start action | `SetupScreen` |
+| `src/screens/GameScreen.tsx` | Full-bleed atmospheric table: opponent rail, felt frame, center piles, inline penalty ticket and player hand | `GameScreen` |
+| `src/screens/ScoreboardScreen.tsx` | Editorial survival standings with debt progress lines and round-by-round ledger | `ScoreboardScreen` |
+| `src/screens/HistoryScreen.tsx` | Archive of local/cloud saved matches with sync notice and clear action | `HistoryScreen` |
+| `src/screens/RulesScreen.tsx` | In-app rule book: object, deal/turn, powers, scoring and elimination sections | `RulesScreen` |
 
 ---
 
@@ -111,8 +113,8 @@ This document catalogues every file in the project, explaining its exact respons
 | :--- | :--- | :--- |
 | `src/services/storage.ts` | Local persistence using AsyncStorage for offline match records | `saveMatchHistory()`, `getMatchHistory()`, `clearMatchHistory()` |
 | `src/services/firebase.ts` | Optional Firebase Firestore sync for score-history bonus | `syncMatchToFirebase()`, `fetchFirebaseLeaderboard()`, `isFirebaseAvailable()` |
-| `src/theme/colors.ts` | Color tokens: emerald table, gold foil, ivory card, crimson alerts | `Colors` |
-| `src/theme/typography.ts` | Standardized typography sizes and font weights | `Typography` |
+| `src/theme/colors.ts` | Art Deco club palette: ink/emerald foundations, warm ivory paper, brass foil, burgundy consequence | `Colors` |
+| `src/theme/typography.ts` | Serif display + sans label type system using platform fonts | `Typography`, `Fonts` |
 | `src/utils/haptics.ts` | Tactile and audio feedback helper | `triggerHaptic()` |
 | `src/utils/sound.ts` | Procedural Web Audio API sound synthesizer for card deals, snaps, draws, penalties, and victory chimes | `playCardSnap()`, `playCardDeal()`, `playCardDraw()`, `playPenalty()`, `playVictoryChime()`, `playClick()` |
 
@@ -129,3 +131,12 @@ This document catalogues every file in the project, explaining its exact respons
 | `tests/elimination.test.ts` | 502 threshold, round winner immunity, simultaneous elimination tie-break |
 | `tests/engine.test.ts` | Full round simulations, final 2 / final A♠ penalty forced draw, draw pile recycling |
 | `tests/ai.test.ts` | Bot move validation, legal play guarantee, penalty answering |
+
+---
+
+## 11. Visual Verification Scripts (`/scripts`)
+
+| File | Purpose |
+| :--- | :--- |
+| `scripts/capture_screenshots.js` | Serves the exported web bundle and captures Home, Setup, Game Table, Rules, Scoreboard and History at 360×800, 375×812, 390×844, 412×915, 430×932 and desktop 1280×800 with Chromium. |
+| `scripts/interaction_smoke.js` | Playwright smoke test: starts a match, plays a legal card (including the Jack suit path), navigates Scoreboard/Rules, verifies 2-seat and 6-seat layouts, and fails on browser console/page errors. |

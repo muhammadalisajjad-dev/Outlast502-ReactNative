@@ -1,16 +1,11 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-} from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Suit, SUITS, SUIT_NAMES, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
+import { DecoModal } from '../common/DecoModal';
+import { OrnamentDivider } from '../common/Deco';
 
 interface JackSuitModalProps {
   visible: boolean;
@@ -21,113 +16,77 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
   visible,
   onSelectSuit,
 }) => {
-  const popAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible) {
-      popAnim.setValue(0);
-      Animated.spring(popAnim, {
-        toValue: 1,
-        speed: 25,
-        bounciness: 5,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, popAnim]);
-
   const handleSelect = (suit: Suit) => {
     triggerHaptic('medium');
     onSelectSuit(suit);
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <Animated.View
-          style={[
-            styles.modalCard,
-            {
-              transform: [
-                {
-                  scale: popAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.9, 1],
-                  }),
-                },
-              ],
-              opacity: popAnim,
-            },
-          ]}
-        >
-          <Text style={styles.title}>JACK DECLARED</Text>
-          <Text style={styles.subtitle}>
-            Select a suit to demand from the next player:
-          </Text>
+    <DecoModal visible={visible} maxWidth={330}>
+      <Text style={styles.kicker}>THE JACK IS WILD</Text>
+      <Text style={styles.title}>Name the Suit</Text>
+      <Text style={styles.subtitle}>
+        The next player must follow your demand, answer with a Jack or 7♥, or draw.
+      </Text>
 
-          <View style={styles.grid}>
-            {SUITS.map(suit => {
-              const isRed = SUIT_COLORS[suit] === 'red';
-              return (
-                <TouchableOpacity
-                  key={suit}
-                  testID={`suit-select-${suit}`}
-                  activeOpacity={0.78}
-                  style={styles.suitButton}
-                  onPress={() => handleSelect(suit)}
-                >
-                  <Text
-                    style={[
-                      styles.suitSymbol,
-                      { color: isRed ? Colors.cardRedSuit : Colors.cardBlackSuit },
-                    ]}
-                  >
-                    {SUIT_SYMBOLS[suit]}
-                  </Text>
-                  <Text style={styles.suitName}>{SUIT_NAMES[suit].toUpperCase()}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Animated.View>
+      <OrnamentDivider compact style={styles.divider} />
+
+      <View style={styles.grid}>
+        {SUITS.map(suit => {
+          const isRed = SUIT_COLORS[suit] === 'red';
+          return (
+            <TouchableOpacity
+              key={suit}
+              testID={`suit-select-${suit}`}
+              activeOpacity={0.78}
+              style={styles.suitButton}
+              onPress={() => handleSelect(suit)}
+            >
+              <Text
+                style={[
+                  styles.suitSymbol,
+                  { color: isRed ? Colors.cardRedSuit : Colors.cardBlackSuit },
+                ]}
+              >
+                {SUIT_SYMBOLS[suit]}
+              </Text>
+              <Text style={styles.suitName}>{SUIT_NAMES[suit].toUpperCase()}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-    </Modal>
+    </DecoModal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: Colors.overlayDark,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: Colors.surfaceDark,
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1.5,
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
+  kicker: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 7,
+    letterSpacing: 2.2,
+    textAlign: 'center',
   },
   title: {
-    ...Typography.titleSmall,
-    color: Colors.silverLight,
-    letterSpacing: 1.5,
-    marginBottom: 4,
+    ...Typography.serifHeading,
+    color: Colors.ivory,
+    fontSize: 23,
+    textAlign: 'center',
+    marginTop: 3,
   },
   subtitle: {
-    ...Typography.bodySmall,
+    ...Typography.serifItalic,
     color: Colors.textSecondary,
+    fontSize: 12.5,
+    lineHeight: 18,
     textAlign: 'center',
-    marginBottom: 16,
+    marginTop: 5,
+  },
+  divider: {
+    width: 160,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 12,
   },
   grid: {
     flexDirection: 'row',
@@ -136,29 +95,30 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   suitButton: {
-    width: '48%',
-    backgroundColor: Colors.cardIvory,
+    width: '48.5%',
+    backgroundColor: Colors.cardIvoryInner,
     borderColor: Colors.cardBorder,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderWidth: 0.8,
+    borderRadius: 3,
+    paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 9,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
     elevation: 2,
   },
   suitSymbol: {
     fontSize: 30,
-    lineHeight: 34,
-    marginBottom: 2,
+    lineHeight: 33,
+    marginBottom: 1,
   },
   suitName: {
-    ...Typography.badge,
+    ...Typography.micro,
     color: Colors.cardBlackSuit,
-    fontSize: 9.5,
+    fontSize: 7,
+    letterSpacing: 1.4,
   },
 });

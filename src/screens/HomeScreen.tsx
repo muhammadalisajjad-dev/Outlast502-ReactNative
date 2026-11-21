@@ -1,176 +1,276 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Animated,
+  useWindowDimensions,
 } from 'react-native';
 import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { useGame } from '../context/GameContext';
+import { PlayingCard } from '../components/card/PlayingCard';
 import {
-  Play,
-  Users,
-  BarChart3,
-  History,
-  BookOpen,
-  Shield,
-  Zap,
-  Sparkles,
-  Layers,
-} from 'lucide-react-native';
+  DecoBackdrop,
+  Monogram,
+  OrnamentDivider,
+  BrassDiamond,
+} from '../components/common/Deco';
+import { ChevronRight } from 'lucide-react-native';
+import { triggerHaptic } from '../utils/haptics';
+import { soundManager } from '../utils/sound';
 
 interface HomeScreenProps {
   onNavigate: (screen: 'game' | 'setup' | 'scoreboard' | 'history' | 'rules') => void;
 }
 
+const MENU_ITEMS: Array<{
+  numeral: string;
+  title: string;
+  caption: string;
+  target: 'setup' | 'scoreboard' | 'history' | 'rules';
+}> = [
+  {
+    numeral: 'I',
+    title: 'THE TABLE',
+    caption: 'Choose two to six seats',
+    target: 'setup',
+  },
+  {
+    numeral: 'II',
+    title: 'THE STANDINGS',
+    caption: 'Live survival ledger',
+    target: 'scoreboard',
+  },
+  {
+    numeral: 'III',
+    title: 'THE ARCHIVE',
+    caption: 'Past matches, kept',
+    target: 'history',
+  },
+  {
+    numeral: 'IV',
+    title: 'HOUSE RULES',
+    caption: 'Powers, penalties and points',
+    target: 'rules',
+  },
+];
+
+const SEVEN_OF_HEARTS = { id: 'home-seven-hearts', suit: 'hearts' as const, rank: '7' as const };
+const ACE_OF_SPADES = { id: 'home-ace-spades', suit: 'spades' as const, rank: 'A' as const };
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const { startMatch } = useGame();
   const insets = useResponsiveInsets();
+  const { width, height } = useWindowDimensions();
+  const compact = width < 380 || height < 780;
+
+  const floatA = useRef(new Animated.Value(0)).current;
+  const floatB = useRef(new Animated.Value(0)).current;
+  const floatC = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const makeLoop = (value: Animated.Value, duration: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(value, {
+            toValue: 1,
+            duration,
+            useNativeDriver: true,
+          }),
+          Animated.timing(value, {
+            toValue: 0,
+            duration,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+    const loops = [
+      makeLoop(floatA, 3800),
+      makeLoop(floatB, 4600),
+      makeLoop(floatC, 4200),
+    ];
+    loops.forEach(loop => loop.start());
+    return () => loops.forEach(loop => loop.stop());
+  }, [floatA, floatB, floatC]);
 
   const handleQuickPlay = () => {
+    soundManager.playClick();
+    triggerHaptic('light');
     startMatch(4, 'You');
     onNavigate('game');
   };
 
+  const handleMenu = (target: 'setup' | 'scoreboard' | 'history' | 'rules') => {
+    soundManager.playClick();
+    triggerHaptic('light');
+    onNavigate(target);
+  };
+
+  const titleSize = compact ? 34 : 42;
+  const titleSpacing = compact ? 4 : 6;
+  const fanScale = compact ? 0.9 : 1;
+
   return (
-    <View style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Editorial Brand Crest */}
-        <View style={styles.brandContainer}>
-          <View style={styles.insigniaPill}>
-            <Text style={[styles.suitGlyph, { color: Colors.cardBlackSuit }]}>♠</Text>
-            <Text style={[styles.suitGlyph, { color: Colors.cardRedSuit }]}>♥</Text>
-            <View style={styles.crestShield}>
-              <Text style={styles.crestText}>502</Text>
+    <View style={styles.safeArea}>
+      <DecoBackdrop variant="home" />
+
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingTop: insets.top + 10,
+            paddingBottom: Math.max(insets.bottom + 18, 28),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Club masthead */}
+        <View style={styles.topBar}>
+          <View style={styles.topBarLeft}>
+            <Monogram size={30} shape="diamond" />
+            <View style={styles.clubBlock}>
+              <Text style={styles.clubName}>PRIVATE CARD CLUB</Text>
+              <Text style={styles.clubEst}>EST. MMXXVI</Text>
             </View>
-            <Text style={[styles.suitGlyph, { color: Colors.cardRedSuit }]}>♦</Text>
-            <Text style={[styles.suitGlyph, { color: Colors.cardBlackSuit }]}>♣</Text>
           </View>
-
-          <Text style={styles.logoTitle}>OUTLAST</Text>
-          <View style={styles.badgeRow}>
-            <View style={styles.silverLine} />
-            <Text style={styles.logoSubtitle}>HIGH-STAKES CARD SHEDDING</Text>
-            <View style={styles.silverLine} />
+          <View style={styles.topBarRight}>
+            <BrassDiamond size={4} />
+            <Text style={styles.membership}>NO. 502</Text>
           </View>
-
-          <Text style={styles.tagline}>
-            Shed every card. Deflect brutal penalties. Outsurvive opponents before reaching 502 points.
-          </Text>
         </View>
 
-        {/* Hero Quick Play CTA */}
-        <View style={styles.heroSection}>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <Text style={styles.eyebrow}>THE HOUSE OF</Text>
+
+          <Text
+            style={[
+              styles.title,
+              { fontSize: titleSize, letterSpacing: titleSpacing },
+            ]}
+          >
+            OUTLAST
+          </Text>
+
+          <View style={styles.fiveOhTwoRow}>
+            <View style={styles.fiveOhTwoLine} />
+            <Text style={styles.fiveOhTwo}>502</Text>
+            <View style={styles.fiveOhTwoLine} />
+          </View>
+
+          <Text style={styles.subtitle}>A GAME OF NERVE & NUMBERS</Text>
+
+          <OrnamentDivider style={styles.heroOrnament} />
+
+          <Text style={styles.tagline}>
+            Shed every card. Survive every penalty. Be the last seated when the deck runs dry.
+          </Text>
+
+          {/* Fanned house hand */}
+          <View style={[styles.cardFan, { transform: [{ scale: fanScale }] }]}>
+            <Animated.View
+              style={[
+                styles.fanCard,
+                styles.fanLeft,
+                {
+                  transform: [
+                    { translateX: -56 },
+                    { translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [4, -4] }) },
+                    { rotate: '-13deg' },
+                  ],
+                },
+              ]}
+            >
+              <PlayingCard card={ACE_OF_SPADES} size="normal" />
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                styles.fanCard,
+                styles.fanCenter,
+                {
+                  transform: [
+                    { translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [-3, 4] }) },
+                  ],
+                },
+              ]}
+            >
+              <PlayingCard card={SEVEN_OF_HEARTS} size="normal" />
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                styles.fanCard,
+                styles.fanRight,
+                {
+                  transform: [
+                    { translateX: 56 },
+                    { translateY: floatC.interpolate({ inputRange: [0, 1], outputRange: [4, -4] }) },
+                    { rotate: '13deg' },
+                  ],
+                },
+              ]}
+            >
+              <PlayingCard faceDown size="normal" />
+            </Animated.View>
+          </View>
+        </View>
+
+        {/* Primary invitation */}
+        <View style={styles.actions}>
           <Button
-            title="QUICK PLAY (4 PLAYERS)"
-            icon={<Play size={16} color="#ffffff" fill="#ffffff" />}
+            title="TAKE A SEAT"
             variant="cobalt"
             size="large"
             onPress={handleQuickPlay}
-            style={styles.heroPlayBtn}
-            textStyle={styles.heroPlayBtnText}
+            style={styles.primaryButton}
+            textStyle={styles.primaryButtonText}
           />
-        </View>
-
-        {/* 2-Column Balanced Navigation Grid */}
-        <View style={styles.gridSection}>
           <TouchableOpacity
-            style={styles.gridCard}
-            activeOpacity={0.75}
-            onPress={() => onNavigate('setup')}
+            activeOpacity={0.7}
+            onPress={() => handleMenu('setup')}
+            style={styles.secondaryAction}
           >
-            <View style={styles.cardIconBox}>
-              <Users size={18} color={Colors.cobaltLight} />
+            <Text style={styles.secondaryText}>CHOOSE YOUR TABLE</Text>
+            <View style={styles.secondaryMeta}>
+              <BrassDiamond size={3.5} />
+              <Text style={styles.secondaryMetaText}>2–6 PLAYERS</Text>
             </View>
-            <Text style={styles.gridCardTitle}>Match Setup</Text>
-            <Text style={styles.gridCardSub}>2–6 Players & Bots</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.gridCard}
-            activeOpacity={0.75}
-            onPress={() => onNavigate('scoreboard')}
-          >
-            <View style={styles.cardIconBox}>
-              <BarChart3 size={18} color={Colors.cobaltLight} />
-            </View>
-            <Text style={styles.gridCardTitle}>Scoreboard</Text>
-            <Text style={styles.gridCardSub}>Standings & Survival</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.gridCard}
-            activeOpacity={0.75}
-            onPress={() => onNavigate('history')}
-          >
-            <View style={styles.cardIconBox}>
-              <History size={18} color={Colors.cobaltLight} />
-            </View>
-            <Text style={styles.gridCardTitle}>Match History</Text>
-            <Text style={styles.gridCardSub}>Local & Cloud Logs</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.gridCard}
-            activeOpacity={0.75}
-            onPress={() => onNavigate('rules')}
-          >
-            <View style={styles.cardIconBox}>
-              <BookOpen size={18} color={Colors.cobaltLight} />
-            </View>
-            <Text style={styles.gridCardTitle}>Official Rules</Text>
-            <Text style={styles.gridCardSub}>Cards & Penalties</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Tactical Intel Overview Card */}
-        <View style={styles.tacticalCard}>
-          <Text style={styles.tacticalTitle}>TACTICAL OVERVIEW</Text>
-
-          <View style={styles.tacticalRow}>
-            <View style={styles.tacticalIconWrap}>
-              <Layers size={14} color={Colors.cobaltLight} />
-            </View>
-            <View style={styles.tacticalContent}>
-              <Text style={styles.tacticalHeading}>Shedding Mechanics</Text>
-              <Text style={styles.tacticalBody}>
-                Play 1 card matching the discard by suit or rank, or draw 1 card to end your turn.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.tacticalRow}>
-            <View style={styles.tacticalIconWrap}>
-              <Zap size={14} color={Colors.amberLight} />
-            </View>
-            <View style={styles.tacticalContent}>
-              <Text style={styles.tacticalHeading}>Brutal Counter-Stacking</Text>
-              <Text style={styles.tacticalBody}>
-                Counter a 2 with another 2 (+2 stack), A♠ with any Ace, and 8 with another 8 skip.
-              </Text>
-            </View>
-          </View>
-
-          <View style={[styles.tacticalRow, { marginBottom: 0 }]}>
-            <View style={styles.tacticalIconWrap}>
-              <Shield size={14} color={Colors.silver} />
-            </View>
-            <View style={styles.tacticalContent}>
-              <Text style={styles.tacticalHeading}>502 Point Survival</Text>
-              <Text style={styles.tacticalBody}>
-                Cards left in hand count as penalty points. 502 points eliminates a player, unless protected as round winner.
-              </Text>
-            </View>
-          </View>
+        {/* Club ledger navigation */}
+        <View style={styles.menu}>
+          {MENU_ITEMS.map((item, index) => (
+            <TouchableOpacity
+              key={item.target}
+              activeOpacity={0.65}
+              onPress={() => handleMenu(item.target)}
+              style={[styles.menuRow, index === 0 && styles.menuRowFirst]}
+            >
+              <Text style={styles.menuNumeral}>{item.numeral}</Text>
+              <View style={styles.menuTextBlock}>
+                <Text style={styles.menuTitle}>{item.title}</Text>
+                <Text style={styles.menuCaption}>{item.caption}</Text>
+              </View>
+              <ChevronRight size={14} color="rgba(198, 164, 96, 0.55)" />
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Footer info */}
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Standard 52-Card Deck · 502 Point Limit · v1.0</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>52 CARDS · 7 IN HAND · ONE SURVIVOR</Text>
+          <View style={styles.footerDiamonds}>
+            <BrassDiamond size={3} />
+            <BrassDiamond size={3} style={{ marginHorizontal: 5 }} />
+            <BrassDiamond size={3} />
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -180,197 +280,217 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.tableDeep,
+    backgroundColor: Colors.ink,
   },
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 32,
-    alignItems: 'center',
-  },
-  brandContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
     width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
+    paddingHorizontal: 22,
   },
-  insigniaPill: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(250, 248, 243, 0.95)',
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.18)',
   },
-  suitGlyph: {
-    fontSize: 16,
-    marginHorizontal: 4,
+  topBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  crestShield: {
-    backgroundColor: '#0c172a',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 4,
-    marginHorizontal: 6,
-    borderWidth: 0.5,
-    borderColor: Colors.cobaltLight,
+  clubBlock: {
+    marginLeft: 10,
   },
-  crestText: {
-    color: Colors.silverLight,
-    fontWeight: '900',
-    fontSize: 9.5,
-    letterSpacing: 0.5,
+  clubName: {
+    ...Typography.micro,
+    color: Colors.ivory,
+    fontSize: 7.4,
+    letterSpacing: 1.8,
   },
-  logoTitle: {
-    ...Typography.displayTitle,
-    color: '#ffffff',
-    letterSpacing: 4,
+  clubEst: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 6.2,
+    letterSpacing: 1.4,
+    marginTop: 2,
+  },
+  topBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  membership: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 6.4,
+    letterSpacing: 1.4,
+    marginLeft: 6,
+  },
+  hero: {
+    alignItems: 'center',
+    paddingTop: 26,
+  },
+  eyebrow: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 7.5,
+    letterSpacing: 3.4,
+    marginBottom: 4,
+  },
+  title: {
+    fontFamily: Typography.displayTitle.fontFamily,
+    fontWeight: '400',
+    color: Colors.ivory,
     textAlign: 'center',
+    lineHeight: 52,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
-  badgeRow: {
+  fiveOhTwoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  fiveOhTwoLine: {
+    width: 34,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(198, 164, 96, 0.5)',
+  },
+  fiveOhTwo: {
+    fontFamily: Typography.displayTitle.fontFamily,
+    fontSize: 22,
+    fontWeight: '400',
+    letterSpacing: 4,
+    color: Colors.brassLight,
+    marginHorizontal: 12,
+  },
+  subtitle: {
+    ...Typography.micro,
+    color: Colors.textSecondary,
+    fontSize: 7.4,
+    letterSpacing: 2.6,
+    marginTop: 8,
+  },
+  heroOrnament: {
+    width: 210,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  tagline: {
+    ...Typography.serifItalic,
+    color: Colors.textSecondary,
+    fontSize: 13.5,
+    lineHeight: 20,
+    textAlign: 'center',
+    maxWidth: 300,
+    marginTop: 6,
+  },
+  cardFan: {
+    width: 250,
+    height: 132,
+    marginTop: 12,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  fanCard: {
+    position: 'absolute',
+    top: 14,
+  },
+  fanLeft: {
+    zIndex: 1,
+  },
+  fanCenter: {
+    top: 0,
+    zIndex: 3,
+  },
+  fanRight: {
+    zIndex: 2,
+  },
+  actions: {
+    marginTop: 4,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    width: '100%',
+    paddingVertical: 16,
+  },
+  primaryButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 2.6,
+  },
+  secondaryAction: {
+    marginTop: 14,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  secondaryText: {
+    ...Typography.micro,
+    color: Colors.brassLight,
+    fontSize: 8,
+    letterSpacing: 2,
+  },
+  secondaryMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 4,
-    marginBottom: 10,
-    width: '85%',
   },
-  silverLine: {
-    flex: 1,
-    height: 0.5,
-    backgroundColor: 'rgba(203, 213, 225, 0.3)',
+  secondaryMetaText: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 6.5,
+    letterSpacing: 1.4,
+    marginLeft: 5,
   },
-  logoSubtitle: {
-    ...Typography.displaySubtitle,
-    color: Colors.silverLight,
-    marginHorizontal: 8,
+  menu: {
+    marginTop: 22,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(198, 164, 96, 0.18)',
   },
-  tagline: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    maxWidth: 320,
-    lineHeight: 18,
-  },
-  heroSection: {
-    width: '100%',
-    marginBottom: 16,
-  },
-  heroPlayBtn: {
-    width: '100%',
-    paddingVertical: 15,
-    borderRadius: 10,
-  },
-  heroPlayBtnText: {
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: 1.2,
-  },
-  gridSection: {
+  menuRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 20,
-  },
-  gridCard: {
-    width: '48%',
-    backgroundColor: 'rgba(13, 21, 39, 0.85)',
-    borderColor: 'rgba(56, 189, 248, 0.15)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+    paddingVertical: 13,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.14)',
   },
-  gridCardTitle: {
-    ...Typography.titleSmall,
-    color: Colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 2,
+  menuRowFirst: {},
+  menuNumeral: {
+    ...Typography.serifBody,
+    color: Colors.brass,
+    fontSize: 10,
+    letterSpacing: 1,
+    width: 28,
   },
-  gridCardSub: {
+  menuTextBlock: {
+    flex: 1,
+  },
+  menuTitle: {
+    ...Typography.labelUpper,
+    color: Colors.ivory,
+    fontSize: 9.5,
+    letterSpacing: 2.2,
+  },
+  menuCaption: {
     ...Typography.bodySmall,
     color: Colors.textMuted,
-    fontSize: 10.5,
-  },
-  tacticalCard: {
-    width: '100%',
-    backgroundColor: 'rgba(8, 12, 20, 0.92)',
-    borderColor: 'rgba(56, 189, 248, 0.18)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 20,
-  },
-  tacticalTitle: {
-    ...Typography.labelUpper,
-    color: Colors.cobaltLight,
     fontSize: 10,
-    letterSpacing: 1.5,
-    marginBottom: 12,
+    marginTop: 2,
   },
-  tacticalRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  tacticalIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  footer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-    marginTop: 1,
-  },
-  tacticalContent: {
-    flex: 1,
-  },
-  tacticalHeading: {
-    ...Typography.bodySmall,
-    color: Colors.textPrimary,
-    fontWeight: '700',
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  tacticalBody: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  footerRow: {
-    alignItems: 'center',
-    paddingVertical: 6,
+    marginTop: 26,
   },
   footerText: {
-    ...Typography.bodySmall,
-    color: Colors.textMuted,
-    fontSize: 10,
-    letterSpacing: 0.5,
+    ...Typography.micro,
+    color: 'rgba(201, 185, 154, 0.5)',
+    fontSize: 6.2,
+    letterSpacing: 1.8,
+  },
+  footerDiamonds: {
+    flexDirection: 'row',
+    marginTop: 9,
   },
 });

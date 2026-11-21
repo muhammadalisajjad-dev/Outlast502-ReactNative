@@ -6,7 +6,7 @@ OUTLAST 502 is a premium, high-stakes mobile card shedding game built with React
 
 ## 🌟 Key Features
 - **Official 502 Rules**: Precise implementation of card effects, penalty stacking, wild cards, and scoring based on [502-game.vercel.app](https://502-game.vercel.app/).
-- **Original Luxury Aesthetic**: Deep emerald felt game table, warm ivory playing cards, gold foil accents, and polished mobile-first responsive layout.
+- **Original Art Deco Aesthetic**: A private card club in deep ink and emerald, with warm ivory cards, restrained brass detailing and burgundy consequence accents on a responsive mobile-first layout.
 - **2 to 6 Players**: Dynamic table configuration supporting 1 human player against 1 to 5 intelligent computer opponents.
 - **Decoupled Game Engine**: Pure TypeScript logic isolated from the UI, with comprehensive unit test coverage.
 - **Bonus Score History**: Persistent match history with offline AsyncStorage and optional Firebase Firestore synchronization.
@@ -71,9 +71,23 @@ npm run web
 
 ---
 
+## 📸 Visual Verification
+
+The redesigned UI is rendered from the production web bundle and inspected with Playwright:
+
+```bash
+npx expo export --platform web
+node scripts/capture_screenshots.js   # screenshots/ + screenshots/final/
+node scripts/interaction_smoke.js     # legal play, Jack path, 2P/6P tables, console-error check
+```
+
+Evidence is curated in `screenshots/final/` (home, setup, 2P/4P/6P table, action state, rules, scoreboard, history, all four dialogs and desktop). See `PROJECT_STATUS.md` for the verified test/build results and current limitations.
+
+---
+
 ## 🏆 Project Rubric Coverage
 - **Game rules and logic (25 pts)**: Complete standard and edge-case mechanics, verified by automated unit tests.
-- **UI/UX (20 pts)**: Original luxury emerald table theme, responsive portrait layout, smooth card transitions.
+- **UI/UX (20 pts)**: Original Art Deco club theme (ink/emerald/ivory/brass/burgundy), adaptive portrait layout, smooth card transitions and a multi-viewport visual audit.
 - **React Native implementation (15 pts)**: Modern Expo architecture, functional components, TypeScript typing.
 - **Game state management (15 pts)**: Predictable state machine with decoupled engine and React Context.
 - **Error handling and stability (5 pts)**: Resilient empty-deck recycling, input sanitization, offline-first fallback.

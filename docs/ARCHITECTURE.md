@@ -5,7 +5,7 @@ OUTLAST 502 enforces strict separation of concerns between:
 1. **Core Game Engine**: Pure, deterministic, platform-agnostic TypeScript functions and state reducers. Zero React or React Native dependencies. Fully testable in Node.js via Jest.
 2. **Game State Management**: Predictable state transitions, action dispatchers, event logging, and turn progression hooks.
 3. **Computer Opponent (AI) Logic**: Deterministic, rule-compliant decision engine supporting multi-level heuristics (conservative vs aggressive card shedding).
-4. **Presentation Layer (React Native / Expo)**: Custom-designed, premium mobile UI with emerald table layout, warm ivory cards, gold accents, animated transitions, modal dialogs, scoreboard, and haptic feedback.
+4. **Presentation Layer (React Native / Expo)**: Custom Art Deco club UI with ink/emerald atmospheric backdrops, warm ivory cards, restrained brass detailing, animated transitions, modal dialogs, scoreboard, and haptic feedback.
 5. **Persistence & Firebase Integration**: Abstracted storage interface supporting local offline persistence with optional cloud sync to Google Cloud Firestore.
 
 ---
@@ -34,36 +34,44 @@ Outlast502/
 │   │   └── GameContext.tsx     # React state container exposing game state & dispatches
 │   ├── components/
 │   │   ├── card/
-│   │   │   ├── PlayingCard.tsx  # Warm ivory card component with suit glyphs & badges
-│   │   │   └── CardHand.tsx     # Responsive fanned/scrolling player hand
+│   │   │   ├── PlayingCard.tsx  # Ivory deco faces, special tabs, lattice backs
+│   │   │   └── CardHand.tsx     # Adaptive rotation/arc hand with score header
 │   │   ├── table/
-│   │   │   ├── EmeraldTable.tsx # Forest green felt surface with leather rails
-│   │   │   ├── DiscardPile.tsx  # Central discard pile with top card & suit indicator
-│   │   │   ├── DrawPile.tsx     # Face-down deck with card counter badge
-│   │   │   ├── OpponentSeat.tsx # Opponent avatar, active turn glow, card count
-│   │   │   └── TableHeader.tsx  # Round number, active suit badge, menu button
+│   │   │   ├── DrawPile.tsx     # Layered deck with count badge and draw trigger
+│   │   │   ├── DiscardPile.tsx  # Top card stack with declared-suit lozenge
+│   │   │   ├── OpponentSeat.tsx # Brass-ring medallion, mini fan, turn glow
+│   │   │   ├── TableHeader.tsx  # Monogram, Roman round, circular icon buttons
+│   │   │   └── TableMotionOverlay.tsx # Deal/fly animations + event banners
 │   │   ├── modals/
 │   │   │   ├── JackSuitModal.tsx# Suit declaration picker after Jack
-│   │   │   ├── PenaltyModal.tsx # Pending penalty alert & response actions
-│   │   │   ├── RoundOverModal.tsx# Round score breakdown & immunity banner
-│   │   │   └── GameOverModal.tsx # Match podium & winner announcement
+│   │   │   ├── PenaltyModal.tsx # Inline burgundy penalty ticket
+│   │   │   ├── RoundOverModal.tsx# Round winner and score ledger
+│   │   │   └── GameOverModal.tsx # Champion showcase and final standings
 │   │   └── common/
-│   │       ├── Button.tsx       # Gold/emerald styled touchable button
-│   │       └── Badge.tsx        # Status pill badges
+│   │       ├── Button.tsx       # Emerald/brass/burgundy/outline/subtle variants
+│   │       ├── Deco.tsx         # Backdrop, felt, monogram, ornament, header, ledger
+│   │       ├── DecoModal.tsx    # Shared clipped-corner dialog shell
+│   │       ├── ScreenTransition.tsx # Fade/settle screen entrance
+│   │       └── Badge.tsx        # Status pill badges (retained utility)
 │   ├── screens/
-│   │   ├── HomeScreen.tsx       # Start screen, play button, history, rules
-│   │   ├── SetupScreen.tsx      # Player count selector (2-6), bot names
-│   │   ├── GameScreen.tsx       # Full portrait game table screen
-│   │   ├── ScoreboardScreen.tsx # Multi-round cumulative score grid
-│   │   └── HistoryScreen.tsx    # Firebase / local match history records
+│   │   ├── HomeScreen.tsx       # Club masthead hero and ledger navigation
+│   │   ├── SetupScreen.tsx      # Guest list, 2-6 seats, seating order
+│   │   ├── GameScreen.tsx       # Atmospheric table, opponent rail, hand
+│   │   ├── ScoreboardScreen.tsx # Survival standings and round ledger
+│   │   ├── HistoryScreen.tsx    # Local/cloud match archive
+│   │   └── RulesScreen.tsx      # Rule book with scoring and powers
 │   ├── services/
 │   │   ├── storage.ts           # Local score storage (AsyncStorage)
-│   │   └── firebase.ts          # Firebase Firestore score history service
+│   │   └── firebase.ts          # Optional Firestore score history service
 │   ├── theme/
-│   │   ├── colors.ts            # Emerald green, warm ivory, antique gold, crimson
-│   │   └── typography.ts        # Clean serif/sans hierarchy
+│   │   ├── colors.ts            # Ink, emerald, ivory, brass, burgundy tokens
+│   │   └── typography.ts        # Serif display / sans label hierarchy
 │   └── utils/
-│       └── sound.ts             # Audio / haptics abstraction
+│       ├── sound.ts             # Procedural Web Audio sound synthesizer
+│       └── haptics.ts           # Platform haptic feedback helper
+├── scripts/
+│   ├── capture_screenshots.js   # Static server + Playwright viewport captures
+│   └── interaction_smoke.js     # Legal play/Jack/scoreboard/rules smoke test
 ├── tests/
 │   ├── deck.test.ts
 │   ├── rules.test.ts

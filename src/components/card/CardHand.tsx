@@ -9,18 +9,10 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Card } from '../../types/card';
-import { PlayingCard } from './PlayingCard';
+import { PlayingCard, CARD_SIZES } from './PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
-import { Sparkles, Layers } from 'lucide-react-native';
-
-// Card dimensions must match PlayingCard size="normal" dimensions
-const CARD_WIDTH = 66;
-const CARD_HEIGHT = 96;
-// Minimum visible strip of each overlapped card (rank + suit in top-left corner)
-const MIN_VISIBLE_STRIP = 28;
-// Maximum overlap - never obscure more than this
-const MAX_OVERLAP = CARD_WIDTH - MIN_VISIBLE_STRIP; // 38
+import { BrassDiamond } from '../common/Deco';
 
 interface CardHandProps {
   hand: Card[];
@@ -28,7 +20,13 @@ interface CardHandProps {
   onCardPress: (card: Card) => void;
   isMyTurn: boolean;
   style?: ViewStyle;
+  playerScore?: number;
+  playerName?: string;
 }
+
+const CARD_WIDTH = CARD_SIZES.normal.width;
+const MIN_VISIBLE_STRIP = 30;
+const MAX_OVERLAP = CARD_WIDTH - MIN_VISIBLE_STRIP;
 
 export const CardHand: React.FC<CardHandProps> = ({
   hand,
@@ -36,8 +34,10 @@ export const CardHand: React.FC<CardHandProps> = ({
   onCardPress,
   isMyTurn,
   style,
+  playerScore,
+  playerName,
 }) => {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const playableCount = hand.filter(c => playableCardIds.has(c.id)).length;
   const dealAnim = useRef(new Animated.Value(0)).current;
 
@@ -45,62 +45,70 @@ export const CardHand: React.FC<CardHandProps> = ({
     dealAnim.setValue(0);
     Animated.spring(dealAnim, {
       toValue: 1,
-      speed: 16,
-      bounciness: 4,
+      speed: 17,
+      bounciness: 3,
       useNativeDriver: true,
     }).start();
   }, [hand.length, dealAnim]);
 
-  // Compute adaptive overlap so the entire hand fits within screen width.
-  // Available horizontal space = screen width minus side padding (2×16) and scroll indicator margin.
-  const availableWidth = screenWidth - 32;
+  const compact = screenWidth < 380 || screenHeight < 760;
+  // Leave room for the rotated cards at both edges so the fan never clips.
+  const availableWidth = Math.min(screenWidth - 48, 520);
   const count = hand.length;
 
-  let overlapOffset = 0; // negative marginLeft applied to cards after the first
+  let overlapOffset = 0;
   if (count > 1) {
-    // Total width if no overlap: count * CARD_WIDTH
-    // With overlap: CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlap)
-    // Solve for overlap so total fits in availableWidth:
-    //   CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlap) <= availableWidth
-    //   (CARD_WIDTH - overlap) <= (availableWidth - CARD_WIDTH) / (count - 1)
-    //   overlap >= CARD_WIDTH - (availableWidth - CARD_WIDTH) / (count - 1)
     const neededOverlap = CARD_WIDTH - (availableWidth - CARD_WIDTH) / (count - 1);
     overlapOffset = Math.min(Math.max(neededOverlap, 0), MAX_OVERLAP);
   }
 
-  // If the hand still can't fit (very large hands), enable horizontal scroll
-  const totalFanWidth = count > 1
-    ? CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlapOffset)
-    : CARD_WIDTH;
+  const totalFanWidth =
+    count > 1
+      ? CARD_WIDTH + (count - 1) * (CARD_WIDTH - overlapOffset)
+      : CARD_WIDTH;
   const needsScroll = totalFanWidth > availableWidth;
+
+  const mid = (count - 1) / 2;
+  const rotationFactor = count > 1 ? Math.min(6, 22 / (count - 1)) : 0;
+  const arcDepth = compact ? 7 : 11;
 
   return (
     <View style={[styles.container, style]}>
       <View style={styles.headerRow}>
-        <View style={styles.titleGroup}>
-          <Layers size={13} color={Colors.textAccent} style={{ marginRight: 6 }} />
-          <Text style={styles.handTitle}>
-            HAND ({hand.length})
+        <View style={styles.handIdentity}>
+          <Text style={styles.handKicker}>
+            {playerName && playerName.trim().toLowerCase() !== 'you'
+              ? `${playerName.toUpperCase()}'S HAND`
+              : 'YOUR HAND'}
           </Text>
+          <View style={styles.countGroup}>
+            <Text style={styles.handCount}>{hand.length}</Text>
+            <Text style={styles.handCountLabel}>CARDS</Text>
+          </View>
         </View>
 
-        {isMyTurn && (
-          <View style={styles.hintGroup}>
-            {playableCount > 0 ? (
-              <>
-                <Sparkles size={12} color={Colors.playableBlue} style={{ marginRight: 4 }} />
-                <Text style={styles.turnHintPlayable}>
-                  {playableCount} playable {playableCount === 1 ? 'card' : 'cards'}
+        <View style={styles.headerRight}>
+          {isMyTurn ? (
+            playableCount > 0 ? (
+              <View style={styles.hintRow}>
+                <BrassDiamond size={5} filled />
+                <Text style={styles.hintPlayable}>
+                  {playableCount} {playableCount === 1 ? 'PLAY' : 'PLAYS'} AVAILABLE
                 </Text>
-              </>
+              </View>
             ) : (
-              <Text style={styles.turnHintDraw}>
-                No matches — tap deck to draw
-              </Text>
-            )}
-          </View>
-        )}
+              <Text style={styles.hintDraw}>NO MATCH · TAP DECK TO DRAW</Text>
+            )
+          ) : (
+            <Text style={styles.hintWaiting}>AWAITING YOUR TURN</Text>
+          )}
+          {typeof playerScore === 'number' && (
+            <Text style={styles.scoreLine}>{playerScore} PTS</Text>
+          )}
+        </View>
       </View>
+
+      <View style={styles.railLine} pointerEvents="none" />
 
       <Animated.View
         style={{
@@ -108,38 +116,41 @@ export const CardHand: React.FC<CardHandProps> = ({
             {
               translateY: dealAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [24, 0],
+                outputRange: [22, 0],
               }),
             },
           ],
           opacity: dealAnim.interpolate({
             inputRange: [0, 1],
-            outputRange: [0.3, 1],
+            outputRange: [0.25, 1],
           }),
         }}
       >
         <ScrollView
           horizontal
           scrollEnabled={needsScroll}
-          showsHorizontalScrollIndicator={needsScroll}
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
             styles.scrollContent,
-            // When scrolling, left-align; when fitting, centre
             needsScroll ? styles.scrollContentLeft : styles.scrollContentCentered,
           ]}
         >
           {hand.map((card, index) => {
             const isPlayable = isMyTurn && playableCardIds.has(card.id);
+            const rotation = (index - mid) * rotationFactor;
+            const arc = Math.pow(Math.abs(index - mid) / Math.max(mid, 1), 2) * arcDepth;
+
             return (
               <View
                 key={card.id}
                 style={[
                   styles.cardWrapper,
-                  // Raise playable cards slightly so they're visually accessible
                   isPlayable && styles.cardWrapperPlayable,
                   index > 0 && { marginLeft: -overlapOffset },
-                  // Stagger z-index so later cards render on top (last card fully visible)
-                  { zIndex: index + 1 },
+                  {
+                    zIndex: index + 1,
+                    transform: [{ rotate: `${rotation}deg` }, { translateY: arc }],
+                  },
                 ]}
               >
                 <PlayingCard
@@ -153,9 +164,6 @@ export const CardHand: React.FC<CardHandProps> = ({
             );
           })}
         </ScrollView>
-        {needsScroll && (
-          <Text style={styles.scrollHint}>← scroll to see all cards →</Text>
-        )}
       </Animated.View>
     </View>
   );
@@ -163,66 +171,101 @@ export const CardHand: React.FC<CardHandProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 8,
+    paddingTop: 9,
+    paddingBottom: 2,
     width: '100%',
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 4,
+    alignItems: 'flex-end',
+    paddingHorizontal: 18,
+    marginBottom: 2,
   },
-  titleGroup: {
+  handIdentity: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
   },
-  handTitle: {
+  handKicker: {
     ...Typography.labelUpper,
-    color: Colors.silverLight,
+    color: Colors.brassLight,
+    fontSize: 8.5,
+    letterSpacing: 2,
+    marginRight: 10,
   },
-  hintGroup: {
+  countGroup: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  handCount: {
+    ...Typography.numeral,
+    fontSize: 17,
+    color: Colors.ivory,
+    lineHeight: 19,
+    marginRight: 4,
+  },
+  handCountLabel: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 7.5,
+    letterSpacing: 1.4,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  hintRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  turnHintPlayable: {
-    ...Typography.bodySmall,
-    color: Colors.playableBlue,
-    fontWeight: '700',
-    fontSize: 11,
+  hintPlayable: {
+    ...Typography.micro,
+    color: Colors.brassLight,
+    fontSize: 8,
+    letterSpacing: 1.4,
+    marginLeft: 5,
   },
-  turnHintDraw: {
-    ...Typography.bodySmall,
+  hintDraw: {
+    ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 11,
+    fontSize: 7.8,
+    letterSpacing: 1.2,
+  },
+  hintWaiting: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 7.8,
+    letterSpacing: 1.2,
+  },
+  scoreLine: {
+    ...Typography.micro,
+    color: Colors.ivoryMuted,
+    fontSize: 7.5,
+    letterSpacing: 1.3,
+    marginTop: 3,
+  },
+  railLine: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 9,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(198, 164, 96, 0.2)',
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 14,
-    alignItems: 'flex-end', // bottom-align so elevated cards rise upward
+    paddingHorizontal: 13,
+    paddingTop: 18,
+    paddingBottom: 13,
+    alignItems: 'flex-end',
   },
-  scrollContentLeft: {
-    // scroll mode: left-aligned, natural flow
-  },
+  scrollContentLeft: {},
   scrollContentCentered: {
-    // fan mode: justify content to center of container
     flexGrow: 1,
     justifyContent: 'center',
   },
   cardWrapper: {
-    // zIndex set inline per card index
+    // transform and zIndex set inline per card
   },
   cardWrapperPlayable: {
-    // Extra bottom margin so the lift animation isn't clipped
     marginBottom: 4,
-  },
-  scrollHint: {
-    ...Typography.bodySmall,
-    color: Colors.textMuted,
-    fontSize: 10,
-    textAlign: 'center',
-    paddingBottom: 4,
-    letterSpacing: 0.5,
   },
 });

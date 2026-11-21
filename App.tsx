@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -71,6 +71,38 @@ function MainNavigator() {
 }
 
 export default function App() {
+  // Web-only: replace the browser's default white focus ring with a brass one
+  // so keyboard focus still reads clearly without breaking the club palette.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const styleId = 'outlast502-web-focus';
+    if (document.getElementById(styleId)) return;
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      *:focus { outline: none; }
+      html.keyboard-nav *:focus { outline: 1px solid rgba(198, 164, 96, 0.85); outline-offset: 2px; }
+    `;
+    document.head.appendChild(style);
+
+    const enableKeyboardNav = (event: KeyboardEvent) => {
+      if (event.key === 'Tab') {
+        document.documentElement.classList.add('keyboard-nav');
+      }
+    };
+    const disableKeyboardNav = () => {
+      document.documentElement.classList.remove('keyboard-nav');
+    };
+    window.addEventListener('keydown', enableKeyboardNav);
+    window.addEventListener('mousedown', disableKeyboardNav);
+    window.addEventListener('touchstart', disableKeyboardNav);
+    return () => {
+      window.removeEventListener('keydown', enableKeyboardNav);
+      window.removeEventListener('mousedown', disableKeyboardNav);
+      window.removeEventListener('touchstart', disableKeyboardNav);
+    };
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />

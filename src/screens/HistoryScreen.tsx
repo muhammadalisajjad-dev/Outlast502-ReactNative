@@ -11,12 +11,10 @@ import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { MatchRecord } from '../types/history';
 import { getMatchHistory, clearMatchHistory } from '../services/storage';
 import { fetchFirebaseHistory, isFirebaseConfigured } from '../services/firebase';
-import { Button } from '../components/common/Button';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { triggerHaptic } from '../utils/haptics';
 import {
-  ChevronLeft,
   Crown,
   Cloud,
   HardDrive,
@@ -26,6 +24,13 @@ import {
   Calendar,
   Layers,
 } from 'lucide-react-native';
+import {
+  DecoBackdrop,
+  ClubHeader,
+  LedgerSection,
+  OrnamentDivider,
+  BrassDiamond,
+} from '../components/common/Deco';
 
 interface HistoryScreenProps {
   onBack: () => void;
@@ -34,7 +39,6 @@ interface HistoryScreenProps {
 export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  // cloudActive is only true once we have confirmed a successful Firestore response
   const [cloudActive, setCloudActive] = useState<boolean>(false);
   const insets = useResponsiveInsets();
 
@@ -51,7 +55,6 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
             new Promise<MatchRecord[]>(resolve => setTimeout(() => resolve([]), 1500)),
           ]);
           if (cloud.length > 0) {
-            // Only set cloudActive if we actually received records from Firestore
             setCloudActive(true);
             const map = new Map<string, MatchRecord>();
             local.forEach(m => map.set(m.id, m));
@@ -61,7 +64,6 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
             );
             setMatches(merged);
           } else {
-            // Firebase is configured but returned no records; remain in local mode
             setCloudActive(false);
           }
         } catch (cloudErr) {
@@ -87,115 +89,121 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
 
   return (
     <View style={styles.safeArea}>
-      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
-          <Text style={styles.backBtnText}>BACK</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>MATCH HISTORY</Text>
-        <View style={{ width: 50 }} />
-      </View>
+      <DecoBackdrop variant="screen" />
+      <ClubHeader title="MATCH HISTORY" onBack={onBack} />
 
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+          { paddingBottom: Math.max(insets.bottom + 28, 40) },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Status Banner */}
-        <View style={styles.statusCard}>
-          <View style={styles.statusLeft}>
-            <View style={styles.statusTitleRow}>
+        <View style={styles.content}>
+          <Text style={styles.pageKicker}>THE ARCHIVE · RECORDS</Text>
+          <Text style={styles.pageTitle}>Match History</Text>
+          <Text style={styles.pageSub}>
+            Every champion, every debt, kept in the club ledger.
+          </Text>
+
+          <OrnamentDivider style={styles.divider} />
+
+          {/* Persistence status, set as a quiet club notice */}
+          <View style={styles.statusRow}>
+            <View style={styles.statusIcon}>
               {cloudActive ? (
-                <Cloud size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
+                <Cloud size={13} color={Colors.brassLight} />
               ) : (
-                <HardDrive size={14} color={Colors.silver} style={{ marginRight: 6 }} />
+                <HardDrive size={13} color={Colors.textSecondary} />
               )}
+            </View>
+            <View style={styles.statusTextBlock}>
               <Text style={styles.statusTitle}>
-                {cloudActive ? 'CLOUD PERSISTENCE ACTIVE' : 'LOCAL PERSISTENCE ENGINE'}
+                {cloudActive ? 'CLOUD LEDGER ACTIVE' : 'LOCAL LEDGER ACTIVE'}
+              </Text>
+              <Text style={styles.statusSubtitle}>
+                {cloudActive
+                  ? 'Firestore records retrieved · anonymous auth, user-scoped rules'
+                  : isFirebaseConfigured()
+                  ? 'Firebase configured · no cloud records yet, play a full match to sync'
+                  : 'AsyncStorage local storage · offline resilient'}
               </Text>
             </View>
-            <Text style={styles.statusSubtitle}>
-              {cloudActive
-                ? 'Firestore records retrieved — anonymous auth, user-scoped rules active'
-                : isFirebaseConfigured()
-                  ? 'Firebase configured — no Firestore records yet (play a full match to sync)'
-                  : 'AsyncStorage local storage active (offline resilient)'}
-            </Text>
+            <TouchableOpacity
+              onPress={loadHistory}
+              style={styles.refreshBtn}
+              activeOpacity={0.7}
+              accessibilityLabel="Refresh history"
+            >
+              <RefreshCw size={13} color={Colors.brassLight} />
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={loadHistory}
-            style={styles.refreshBtn}
-            activeOpacity={0.75}
-          >
-            <RefreshCw size={14} color={Colors.silverLight} />
-          </TouchableOpacity>
-        </View>
-
-        {loading ? (
-          <ActivityIndicator size="small" color={Colors.cobaltLight} style={{ marginTop: 40 }} />
-        ) : matches.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconBox}>
-              <Trophy size={28} color={Colors.silverLight} />
+          {loading ? (
+            <ActivityIndicator
+              size="small"
+              color={Colors.brassLight}
+              style={{ marginTop: 44 }}
+            />
+          ) : matches.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconBox}>
+                <Trophy size={24} color={Colors.brassLight} />
+              </View>
+              <Text style={styles.emptyTitle}>NO MATCHES RECORDED</Text>
+              <Text style={styles.emptySubtitle}>
+                Complete a match to record champion standings, final point totals, and cloud sync logs.
+              </Text>
             </View>
-            <Text style={styles.emptyTitle}>NO MATCHES RECORDED</Text>
-            <Text style={styles.emptySubtitle}>
-              Complete a match to record champion standings, final point totals, and cloud sync logs.
-            </Text>
-          </View>
-        ) : (
-          <>
-            {matches.map(m => {
-              const dateStr = new Date(m.timestamp).toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              });
+          ) : (
+            <LedgerSection
+              first
+              numeral="I"
+              title="RECORDED MATCHES"
+              subtitle={`${matches.length} ${matches.length === 1 ? 'entry' : 'entries'} in the book.`}
+            >
+              {matches.map(m => {
+                const dateStr = new Date(m.timestamp).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
 
-              return (
-                <View key={m.id} style={styles.matchCard}>
-                  <View style={styles.matchCardHeader}>
+                return (
+                  <View key={m.id} style={styles.matchEntry}>
                     <View style={styles.matchMetaRow}>
-                      <Calendar size={11} color={Colors.textMuted} style={{ marginRight: 4 }} />
+                      <Calendar size={9} color={Colors.textMuted} style={{ marginRight: 4 }} />
                       <Text style={styles.dateText}>{dateStr}</Text>
                       <Text style={styles.metaDot}>·</Text>
-                      <Layers size={11} color={Colors.textMuted} style={{ marginRight: 4 }} />
-                      <Text style={styles.roundsText}>{m.totalRounds} Rounds</Text>
+                      <Layers size={9} color={Colors.textMuted} style={{ marginRight: 4 }} />
+                      <Text style={styles.roundsText}>{m.totalRounds} ROUNDS</Text>
+                      <View style={styles.syncBadge}>
+                        {m.syncedToFirebase ? (
+                          <Cloud size={9} color={Colors.brassLight} style={{ marginRight: 3 }} />
+                        ) : (
+                          <HardDrive size={9} color={Colors.textMuted} style={{ marginRight: 3 }} />
+                        )}
+                        <Text
+                          style={[
+                            styles.syncText,
+                            m.syncedToFirebase && styles.syncTextCloud,
+                          ]}
+                        >
+                          {m.syncedToFirebase ? 'CLOUD' : 'LOCAL'}
+                        </Text>
+                      </View>
                     </View>
 
-                    <View style={styles.syncBadge}>
-                      {m.syncedToFirebase ? (
-                        <Cloud size={10} color={Colors.cobaltLight} style={{ marginRight: 4 }} />
-                      ) : (
-                        <HardDrive size={10} color={Colors.textMuted} style={{ marginRight: 4 }} />
-                      )}
-                      <Text
-                        style={[
-                          styles.syncText,
-                          m.syncedToFirebase && styles.syncTextCloud,
-                        ]}
-                      >
-                        {m.syncedToFirebase ? 'Cloud' : 'Local'}
-                      </Text>
+                    <View style={styles.championRow}>
+                      <Crown size={12} color={Colors.brassLight} style={{ marginRight: 6 }} />
+                      <Text style={styles.championName}>{m.winnerName}</Text>
+                      <BrassDiamond size={3.5} style={{ marginHorizontal: 7 }} />
+                      <Text style={styles.championLabel}>CHAMPION</Text>
                     </View>
-                  </View>
 
-                  {/* Champion Banner */}
-                  <View style={styles.championBox}>
-                    <Crown size={14} color={Colors.silverLight} style={{ marginRight: 6 }} />
-                    <Text style={styles.championName}>
-                      Champion: {m.winnerName}
-                    </Text>
-                  </View>
-
-                  {/* Final Player Scores */}
-                  <View style={styles.playerScoresRow}>
-                    {m.players.map((ps, idx) => {
-                      return (
-                        <View key={ps.playerId || idx} style={styles.playerScoreChip}>
+                    <View style={styles.playerScoresRow}>
+                      {m.players.map((ps, idx) => (
+                        <View key={ps.playerId || idx} style={styles.playerScoreCol}>
                           <Text style={styles.chipPlayerName} numberOfLines={1}>
                             {ps.name}
                           </Text>
@@ -205,26 +213,26 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
                               ps.isWinner && styles.chipScoreWinner,
                             ]}
                           >
-                            {ps.finalScore}p
+                            {ps.finalScore}
                           </Text>
                         </View>
-                      );
-                    })}
+                      ))}
+                    </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })}
 
-            <TouchableOpacity
-              onPress={handleClear}
-              style={styles.clearBtn}
-              activeOpacity={0.75}
-            >
-              <Trash2 size={13} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
-              <Text style={styles.clearBtnText}>CLEAR LOCAL HISTORY</Text>
-            </TouchableOpacity>
-          </>
-        )}
+              <TouchableOpacity
+                onPress={handleClear}
+                style={styles.clearBtn}
+                activeOpacity={0.7}
+              >
+                <Trash2 size={12} color={Colors.crimsonLight} style={{ marginRight: 6 }} />
+                <Text style={styles.clearBtnText}>CLEAR LOCAL HISTORY</Text>
+              </TouchableOpacity>
+            </LedgerSection>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -233,102 +241,103 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.tableDeep,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
-    backgroundColor: 'rgba(8, 12, 20, 0.95)',
-  },
-  backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  backBtnText: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  title: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 12,
-    letterSpacing: 1.8,
+    backgroundColor: Colors.ink,
   },
   container: {
-    padding: 18,
-    paddingBottom: 36,
+    paddingHorizontal: 20,
+    paddingTop: 18,
   },
-  statusCard: {
+  content: {
+    width: '100%',
+    maxWidth: 540,
+    alignSelf: 'center',
+  },
+  pageKicker: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 7.2,
+    letterSpacing: 2.6,
+  },
+  pageTitle: {
+    ...Typography.serifDisplay,
+    color: Colors.ivory,
+    fontSize: 32,
+    marginTop: 4,
+  },
+  pageSub: {
+    ...Typography.serifItalic,
+    color: Colors.textSecondary,
+    fontSize: 13.5,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  divider: {
+    marginTop: 16,
+    marginBottom: 18,
+  },
+  statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(13, 21, 39, 0.85)',
-    borderColor: 'rgba(56, 189, 248, 0.15)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 16,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.16)',
   },
-  statusLeft: {
+  statusIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.28)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  statusTextBlock: {
     flex: 1,
-    marginRight: 12,
-  },
-  statusTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 3,
+    marginRight: 10,
   },
   statusTitle: {
     ...Typography.labelUpper,
-    color: Colors.cobaltLight,
-    fontSize: 10,
-    letterSpacing: 1,
+    color: Colors.brassLight,
+    fontSize: 8,
+    letterSpacing: 1.6,
   },
   statusSubtitle: {
     ...Typography.bodySmall,
     color: Colors.textMuted,
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 10,
+    lineHeight: 14,
+    marginTop: 2,
   },
   refreshBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyContainer: {
-    paddingVertical: 48,
+    paddingVertical: 52,
     alignItems: 'center',
   },
   emptyIconBox: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderWidth: 1,
-    borderColor: Colors.borderSubtle,
+    borderWidth: 0.8,
+    borderColor: 'rgba(198, 164, 96, 0.4)',
+    backgroundColor: 'rgba(198, 164, 96, 0.04)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   emptyTitle: {
     ...Typography.labelUpper,
-    color: Colors.silverLight,
-    fontSize: 12,
-    letterSpacing: 1.5,
+    color: Colors.ivory,
+    fontSize: 9.5,
+    letterSpacing: 2,
     marginBottom: 6,
   },
   emptySubtitle: {
@@ -338,118 +347,101 @@ const styles = StyleSheet.create({
     maxWidth: 280,
     lineHeight: 17,
   },
-  matchCard: {
-    backgroundColor: 'rgba(13, 21, 39, 0.85)',
-    borderColor: 'rgba(56, 189, 248, 0.15)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-  },
-  matchCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingBottom: 6,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  matchEntry: {
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.13)',
   },
   matchMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
   },
   dateText: {
-    ...Typography.bodySmall,
+    ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 10.5,
+    fontSize: 6.6,
+    letterSpacing: 0.9,
   },
   metaDot: {
     color: Colors.textMuted,
     marginHorizontal: 6,
-    fontSize: 10,
+    fontSize: 8,
   },
   roundsText: {
-    ...Typography.bodySmall,
+    ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 10.5,
+    fontSize: 6.6,
+    letterSpacing: 0.9,
   },
   syncBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
+    marginLeft: 'auto',
   },
   syncText: {
-    fontSize: 9,
-    fontWeight: '700',
+    ...Typography.micro,
+    fontSize: 6.2,
+    letterSpacing: 0.8,
     color: Colors.textMuted,
   },
   syncTextCloud: {
-    color: Colors.cobaltLight,
+    color: Colors.brassLight,
   },
-  championBox: {
+  championRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderRadius: 6,
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.3)',
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    marginBottom: 9,
   },
   championName: {
-    ...Typography.bodySmall,
-    color: Colors.silverLight,
-    fontWeight: '800',
-    fontSize: 12.5,
+    ...Typography.serifSubheading,
+    color: Colors.brassLight,
+    fontSize: 18,
+  },
+  championLabel: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 6.2,
+    letterSpacing: 1.2,
   },
   playerScoresRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  playerScoreChip: {
-    backgroundColor: 'rgba(8, 12, 20, 0.85)',
-    borderRadius: 4,
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 6,
-    marginBottom: 6,
-    alignItems: 'center',
+  playerScoreCol: {
+    minWidth: 64,
+    marginRight: 14,
+    marginBottom: 4,
   },
   chipPlayerName: {
-    fontSize: 9.5,
+    ...Typography.micro,
     color: Colors.textMuted,
+    fontSize: 6.2,
+    letterSpacing: 0.8,
     marginBottom: 1,
   },
   chipScoreText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontFamily: Typography.numeral.fontFamily,
+    fontSize: 15,
     color: Colors.textSecondary,
   },
   chipScoreWinner: {
-    color: Colors.cobaltLight,
+    color: Colors.brassLight,
   },
   clearBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(185, 28, 28, 0.12)',
-    borderColor: 'rgba(239, 68, 68, 0.25)',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 11,
-    marginTop: 8,
+    borderWidth: 0.7,
+    borderColor: 'rgba(166, 61, 73, 0.45)',
+    paddingVertical: 10,
+    marginTop: 18,
+    borderRadius: 2,
   },
   clearBtnText: {
-    ...Typography.badge,
+    ...Typography.micro,
     color: Colors.crimsonLight,
-    fontSize: 10.5,
-    letterSpacing: 0.8,
+    fontSize: 7.5,
+    letterSpacing: 1.5,
   },
 });

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Animated } from 'react-native';
-import { PlayingCard } from '../card/PlayingCard';
+import { PlayingCard, CARD_SIZES } from '../card/PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
@@ -11,6 +11,8 @@ interface DrawPileProps {
   onDraw: () => void;
 }
 
+const LARGE = CARD_SIZES.large;
+
 export const DrawPile: React.FC<DrawPileProps> = ({
   count,
   canDraw,
@@ -19,7 +21,6 @@ export const DrawPile: React.FC<DrawPileProps> = ({
   const drawAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
-  // Breathing pulse when it's player's turn to draw
   useEffect(() => {
     let loop: Animated.CompositeAnimation | null = null;
     if (canDraw) {
@@ -27,12 +28,12 @@ export const DrawPile: React.FC<DrawPileProps> = ({
         Animated.sequence([
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 1100,
+            duration: 1400,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnim, {
             toValue: 0,
-            duration: 1100,
+            duration: 1400,
             useNativeDriver: true,
           }),
         ])
@@ -51,53 +52,51 @@ export const DrawPile: React.FC<DrawPileProps> = ({
     triggerHaptic('medium');
     Animated.sequence([
       Animated.timing(drawAnim, {
-        toValue: 0.93,
+        toValue: 0.94,
         duration: 70,
         useNativeDriver: true,
       }),
       Animated.spring(drawAnim, {
         toValue: 1,
-        speed: 30,
-        bounciness: 6,
+        speed: 28,
+        bounciness: 5,
         useNativeDriver: true,
       }),
     ]).start();
     onDraw();
   };
 
-  const drawGlowOpacity = pulseAnim.interpolate({
+  const auraOpacity = pulseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.4, 0.95],
+    outputRange: [0.3, 0.95],
   });
 
-  const drawGlowScale = pulseAnim.interpolate({
+  const auraScale = pulseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.03],
+    outputRange: [1, 1.025],
   });
 
   return (
     <Animated.View style={[styles.container, { transform: [{ scale: drawAnim }] }]}>
       <TouchableOpacity
         testID="draw-pile-btn"
-        activeOpacity={canDraw ? 0.78 : 1}
+        activeOpacity={canDraw ? 0.8 : 1}
         onPress={handlePress}
         disabled={!canDraw}
         style={styles.pileWrapper}
       >
-        {/* Layered Deck 3D Stepped Rims */}
-        {count > 3 && <View style={styles.deckLayer3} />}
-        {count > 2 && <View style={styles.deckLayer2} />}
-        {count > 1 && <View style={styles.deckLayer1} />}
+        {count > 3 && <View style={[styles.deckLayer, styles.deckLayer3]} />}
+        {count > 2 && <View style={[styles.deckLayer, styles.deckLayer2]} />}
+        {count > 1 && <View style={[styles.deckLayer, styles.deckLayer1]} />}
 
-        {/* Breathing aura when canDraw */}
         {canDraw && (
           <Animated.View
             pointerEvents="none"
             style={[
               styles.canDrawAura,
               {
-                opacity: drawGlowOpacity,
-                transform: [{ scale: drawGlowScale }],
+                opacity: auraOpacity,
+                transform: [{ scale: auraScale }],
               },
             ]}
           />
@@ -105,14 +104,16 @@ export const DrawPile: React.FC<DrawPileProps> = ({
 
         <PlayingCard faceDown size="large" />
 
-        {/* Deck Count Badge */}
         <View style={styles.badgeContainer}>
           <Text style={styles.badgeText}>{count}</Text>
         </View>
       </TouchableOpacity>
 
       <Text style={[styles.pileLabel, canDraw && styles.pileLabelActive]}>
-        {canDraw ? 'TAP TO DRAW (+1)' : 'DRAW PILE'}
+        {canDraw ? 'TAP TO DRAW' : 'THE DECK'}
+      </Text>
+      <Text style={styles.pileSubLabel}>
+        {canDraw ? '+1 CARD' : `${count} REMAIN`}
       </Text>
     </Animated.View>
   );
@@ -125,88 +126,89 @@ const styles = StyleSheet.create({
   },
   pileWrapper: {
     position: 'relative',
-    borderRadius: 8,
+    borderRadius: LARGE.borderRadius,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  deckLayer3: {
+  deckLayer: {
     position: 'absolute',
-    top: 4.5,
-    left: 4.5,
-    width: 86,
-    height: 124,
-    borderRadius: 8,
-    backgroundColor: '#050a12',
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.1)',
-  },
-  deckLayer2: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    width: 86,
-    height: 124,
-    borderRadius: 8,
-    backgroundColor: '#08101e',
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.18)',
+    width: LARGE.width,
+    height: LARGE.height,
+    borderRadius: LARGE.borderRadius,
+    backgroundColor: Colors.emeraldDeep,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.35)',
   },
   deckLayer1: {
-    position: 'absolute',
-    top: 1.5,
-    left: 1.5,
-    width: 86,
-    height: 124,
-    borderRadius: 8,
-    backgroundColor: '#0c1628',
-    borderWidth: 0.5,
-    borderColor: 'rgba(56, 189, 248, 0.28)',
+    top: 2,
+    left: 2,
+  },
+  deckLayer2: {
+    top: 4,
+    left: 4,
+    opacity: 0.8,
+  },
+  deckLayer3: {
+    top: 6,
+    left: 6,
+    opacity: 0.6,
   },
   canDrawAura: {
     position: 'absolute',
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.playableBlue,
-    shadowColor: Colors.playableBlue,
+    top: -5,
+    left: -5,
+    right: -5,
+    bottom: -5,
+    borderRadius: LARGE.borderRadius + 4,
+    borderWidth: 1.2,
+    borderColor: Colors.brassLight,
+    shadowColor: Colors.brass,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 10,
+    shadowRadius: 12,
     elevation: 8,
   },
   badgeContainer: {
     position: 'absolute',
-    bottom: -6,
-    right: -6,
-    backgroundColor: '#090f1a',
-    borderColor: 'rgba(56, 189, 248, 0.35)',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 7,
-    paddingVertical: 1.5,
+    bottom: -7,
+    right: -7,
+    minWidth: 22,
+    height: 18,
+    paddingHorizontal: 5,
+    backgroundColor: Colors.inkBlack,
+    borderColor: Colors.brass,
+    borderWidth: 0.8,
+    borderRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 4,
   },
   badgeText: {
-    color: Colors.silverLight,
-    fontSize: 9.5,
-    fontWeight: '800',
+    fontFamily: Typography.titleSmall.fontFamily,
+    color: Colors.brassLight,
+    fontSize: 11,
+    fontWeight: '700',
+    lineHeight: 13,
   },
   pileLabel: {
-    ...Typography.labelUpper,
+    ...Typography.micro,
     color: Colors.textMuted,
-    marginTop: 8,
-    fontSize: 9,
-    letterSpacing: 1,
+    marginTop: 11,
+    fontSize: 7.5,
+    letterSpacing: 1.8,
   },
   pileLabelActive: {
-    color: Colors.playableBlue,
-    fontWeight: '800',
+    color: Colors.brassLight,
+  },
+  pileSubLabel: {
+    ...Typography.micro,
+    color: 'rgba(198, 164, 96, 0.45)',
+    fontSize: 6.5,
+    letterSpacing: 1.2,
+    marginTop: 2,
   },
 });

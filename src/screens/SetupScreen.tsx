@@ -13,7 +13,13 @@ import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { useGame } from '../context/GameContext';
 import { triggerHaptic } from '../utils/haptics';
-import { ChevronLeft, Play, User, Bot, Shield, Users } from 'lucide-react-native';
+import {
+  DecoBackdrop,
+  ClubHeader,
+  LedgerSection,
+  OrnamentDivider,
+  BrassDiamond,
+} from '../components/common/Deco';
 
 interface SetupScreenProps {
   onBack: () => void;
@@ -27,6 +33,22 @@ const ALL_BOTS = [
   { name: 'Liam', role: 'Adaptive Shedder' },
   { name: 'Zoe', role: 'High-Stakes Gambler' },
 ];
+
+const SEAT_TONES = [
+  { bg: '#173B2E', ring: '#C6A460' },
+  { bg: '#4A1D26', ring: '#C9A36A' },
+  { bg: '#263B2A', ring: '#D8C08A' },
+  { bg: '#1D2D38', ring: '#B9A27A' },
+  { bg: '#3A2A1E', ring: '#D0B47C' },
+];
+
+const SEAT_LABELS: Record<number, string> = {
+  2: 'DUEL',
+  3: 'TRIO',
+  4: 'CLASSIC',
+  5: 'FIVE',
+  6: 'FULL HOUSE',
+};
 
 export const SetupScreen: React.FC<SetupScreenProps> = ({
   onBack,
@@ -51,143 +73,162 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
 
   return (
     <View style={styles.safeArea}>
-      <View style={[styles.headerRow, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
-          <Text style={styles.backBtnText}>BACK</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>MATCH SETUP</Text>
-        <View style={{ width: 50 }} />
-      </View>
+      <DecoBackdrop variant="screen" />
+      <ClubHeader title="MATCH SETUP" onBack={onBack} />
 
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { paddingBottom: Math.max(insets.bottom + 24, 36) },
+          { paddingBottom: Math.max(insets.bottom + 28, 40) },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Human Player Identity */}
-        <View style={styles.cardSection}>
-          <View style={styles.sectionHeader}>
-            <User size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
-            <Text style={styles.sectionLabel}>HOST IDENTITY</Text>
-          </View>
-          <Text style={styles.sectionHint}>
-            Your player moniker displayed on the table and recorded in scoreboard history.
+        <View style={styles.content}>
+          <Text style={styles.pageKicker}>PRIVATE TABLE · HOUSE RULES</Text>
+          <Text style={styles.pageTitle}>The Guest List</Text>
+          <Text style={styles.pageSub}>
+            Name the host, choose the number of seats, and take your place at the table.
           </Text>
 
-          <TextInput
-            value={playerName}
-            onChangeText={setPlayerName}
-            maxLength={16}
-            placeholder="Enter name"
-            placeholderTextColor={Colors.textMuted}
-            style={styles.textInput}
-          />
-        </View>
+          <OrnamentDivider style={styles.divider} />
 
-        {/* Player Count Selection */}
-        <View style={styles.cardSection}>
-          <View style={styles.sectionHeader}>
-            <Users size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
-            <Text style={styles.sectionLabel}>
-              TABLE SEATS ({playerCount} PLAYERS)
-            </Text>
-          </View>
-          <Text style={styles.sectionHint}>
-            1 Human Participant vs {playerCount - 1} Computer AI Opponents (2 to 6 seats).
-          </Text>
+          <LedgerSection
+            first
+            numeral="I"
+            title="HOST IDENTITY"
+            subtitle="The name that will be carved into the score ledger."
+          >
+            <TextInput
+              value={playerName}
+              onChangeText={setPlayerName}
+              maxLength={16}
+              placeholder="Enter name"
+              placeholderTextColor={Colors.textMuted}
+              style={styles.textInput}
+              selectionColor={Colors.brassLight}
+            />
+            <View style={styles.inputRule} />
+          </LedgerSection>
 
-          <View style={styles.selectorRow}>
-            {[2, 3, 4, 5, 6].map(count => {
-              const isSelected = count === playerCount;
-              return (
-                <TouchableOpacity
-                  key={count}
-                  onPress={() => handleSelectCount(count)}
-                  style={[
-                    styles.countPill,
-                    isSelected && styles.countPillSelected,
-                  ]}
-                  activeOpacity={0.8}
-                >
-                  <Text
+          <LedgerSection
+            numeral="II"
+            title="TABLE SEATS"
+            subtitle={`One human against ${playerCount - 1} automata. The house permits two to six seats.`}
+          >
+            <View style={styles.selectorRow}>
+              {[2, 3, 4, 5, 6].map(count => {
+                const isSelected = count === playerCount;
+                return (
+                  <TouchableOpacity
+                    key={count}
+                    onPress={() => handleSelectCount(count)}
                     style={[
-                      styles.countPillNumber,
-                      isSelected && styles.countPillNumberSelected,
+                      styles.countTile,
+                      isSelected && styles.countTileSelected,
                     ]}
+                    activeOpacity={0.75}
                   >
-                    {count}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.countPillLabel,
-                      isSelected && styles.countPillLabelSelected,
-                    ]}
-                  >
-                    {count === 2 ? 'Duel' : count === 4 ? 'Classic' : count === 6 ? 'Full' : `${count}P`}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Match Roster Preview */}
-        <View style={styles.cardSection}>
-          <Text style={styles.sectionLabel}>MATCH ROSTER PREVIEW</Text>
-          <Text style={styles.sectionHint}>
-            Table order progresses clockwise starting from host player in Round 1.
-          </Text>
-
-          {/* Host Item */}
-          <View style={[styles.rosterRow, styles.hostRosterRow]}>
-            <View style={styles.rosterAvatarBox}>
-              <Text style={styles.avatarLetter}>
-                {playerName.trim().charAt(0).toUpperCase() || 'Y'}
-              </Text>
+                    {isSelected && (
+                      <BrassDiamond
+                        size={4}
+                        filled
+                        style={styles.selectedDiamond}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.countNumber,
+                        isSelected && styles.countNumberSelected,
+                      ]}
+                    >
+                      {count}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.countLabel,
+                        isSelected && styles.countLabelSelected,
+                      ]}
+                    >
+                      {SEAT_LABELS[count]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-            <View style={styles.rosterDetails}>
-              <View style={styles.nameBadgeRow}>
-                <Text style={styles.rosterName}>{playerName.trim() || 'You'}</Text>
-                <View style={styles.hostPill}>
-                  <Text style={styles.hostPillText}>YOU · HOST</Text>
-                </View>
-              </View>
-              <Text style={styles.rosterSub}>Manual decision engine</Text>
-            </View>
-          </View>
+          </LedgerSection>
 
-          {/* Bots */}
-          {activeBots.map((bot, idx) => (
-            <View key={bot.name} style={styles.rosterRow}>
-              <View style={[styles.rosterAvatarBox, styles.botAvatarBox]}>
-                <Bot size={13} color={Colors.textMuted} />
+          <LedgerSection
+            numeral="III"
+            title="SEATING ORDER"
+            subtitle="Play proceeds clockwise from the host in the opening round."
+          >
+            <View style={styles.hostRow}>
+              <View
+                style={[
+                  styles.avatar,
+                  { backgroundColor: '#173B2E', borderColor: Colors.brass },
+                ]}
+              >
+                <Text style={styles.avatarLetter}>
+                  {playerName.trim().charAt(0).toUpperCase() || 'Y'}
+                </Text>
               </View>
               <View style={styles.rosterDetails}>
-                <View style={styles.nameBadgeRow}>
-                  <Text style={styles.rosterName}>{bot.name}</Text>
-                  <View style={styles.botPill}>
-                    <Text style={styles.botPillText}>SEAT {idx + 2}</Text>
-                  </View>
+                <View style={styles.nameLine}>
+                  <Text style={styles.rosterName}>{playerName.trim() || 'You'}</Text>
+                  <Text style={styles.hostLabel}>HOST</Text>
                 </View>
-                <Text style={styles.rosterSub}>{bot.role}</Text>
+                <Text style={styles.rosterRole}>Manual decision engine</Text>
               </View>
+              <Text style={styles.seatNumber}>SEAT I</Text>
             </View>
-          ))}
-        </View>
 
-        {/* Start Button */}
-        <Button
-          title={`DEAL CARDS & START MATCH (${playerCount}P)`}
-          icon={<Play size={16} color="#ffffff" fill="#ffffff" />}
-          variant="cobalt"
-          size="large"
-          onPress={handleStart}
-          style={styles.startBtn}
-          textStyle={styles.startBtnText}
-        />
+            {activeBots.map((bot, idx) => {
+              const tone = SEAT_TONES[(idx + 1) % SEAT_TONES.length];
+              return (
+                <View key={bot.name} style={styles.rosterRow}>
+                  <View
+                    style={[
+                      styles.avatar,
+                      { backgroundColor: tone.bg, borderColor: tone.ring },
+                    ]}
+                  >
+                    <Text style={styles.avatarLetter}>
+                      {bot.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.rosterDetails}>
+                    <View style={styles.nameLine}>
+                      <Text style={styles.rosterName}>{bot.name}</Text>
+                      <Text style={styles.botLabel}>AUTOMATON</Text>
+                    </View>
+                    <Text style={styles.rosterRole}>{bot.role}</Text>
+                  </View>
+                  <Text style={styles.seatNumber}>
+                    SEAT {['II', 'III', 'IV', 'V', 'VI'][idx]}
+                  </Text>
+                </View>
+              );
+            })}
+          </LedgerSection>
+
+          <Button
+            title={`DEAL THE CARDS · ${playerCount} SEATS`}
+            variant="gold"
+            size="large"
+            onPress={handleStart}
+            style={styles.startBtn}
+            textStyle={styles.startBtnText}
+          />
+
+          <View style={styles.houseNote}>
+            <BrassDiamond size={3.5} />
+            <Text style={styles.houseNoteText}>
+              THE HOUSE DEALS SEVEN CARDS TO EVERY SEAT
+            </Text>
+            <BrassDiamond size={3.5} />
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -196,205 +237,194 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.tableDeep,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
-    backgroundColor: 'rgba(8, 12, 20, 0.95)',
-  },
-  backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  backBtnText: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  headerTitle: {
-    ...Typography.badge,
-    color: Colors.silverLight,
-    fontSize: 12,
-    letterSpacing: 1.8,
+    backgroundColor: Colors.ink,
   },
   container: {
-    padding: 18,
-    paddingBottom: 36,
+    paddingHorizontal: 20,
+    paddingTop: 18,
   },
-  cardSection: {
-    backgroundColor: 'rgba(13, 21, 39, 0.85)',
-    borderColor: 'rgba(56, 189, 248, 0.15)',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
+  content: {
+    width: '100%',
+    maxWidth: 540,
+    alignSelf: 'center',
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
+  pageKicker: {
+    ...Typography.micro,
+    color: Colors.brass,
+    fontSize: 7.2,
+    letterSpacing: 2.6,
   },
-  sectionLabel: {
-    ...Typography.labelUpper,
-    color: Colors.cobaltLight,
-    fontSize: 11,
-    letterSpacing: 1.2,
+  pageTitle: {
+    ...Typography.serifDisplay,
+    color: Colors.ivory,
+    fontSize: 32,
+    marginTop: 4,
   },
-  sectionHint: {
-    ...Typography.bodySmall,
-    color: Colors.textMuted,
-    fontSize: 11,
-    marginBottom: 12,
-    lineHeight: 16,
+  pageSub: {
+    ...Typography.serifItalic,
+    color: Colors.textSecondary,
+    fontSize: 13.5,
+    lineHeight: 20,
+    marginTop: 4,
+    maxWidth: 420,
+  },
+  divider: {
+    marginTop: 16,
+    marginBottom: 18,
   },
   textInput: {
-    backgroundColor: 'rgba(8, 12, 20, 0.9)',
-    borderColor: Colors.borderSubtle,
-    borderWidth: 1,
-    borderRadius: 8,
-    color: Colors.textPrimary,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    fontSize: 14,
-    fontWeight: '600',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    color: Colors.ivory,
+    paddingHorizontal: 0,
+    paddingVertical: 8,
+    fontFamily: Typography.serifHeading.fontFamily,
+    fontSize: 22,
+    letterSpacing: 0.4,
+  },
+  inputRule: {
+    height: 1,
+    backgroundColor: 'rgba(198, 164, 96, 0.35)',
   },
   selectorRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    marginTop: 2,
   },
-  countPill: {
+  countTile: {
     flex: 1,
-    marginHorizontal: 3,
-    backgroundColor: 'rgba(8, 12, 20, 0.9)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 10,
+    marginHorizontal: 2.5,
+    minHeight: 62,
+    borderWidth: 0.7,
+    borderColor: 'rgba(198, 164, 96, 0.22)',
+    backgroundColor: 'rgba(198, 164, 96, 0.03)',
+    paddingVertical: 9,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
-  countPillSelected: {
-    backgroundColor: Colors.cobalt,
-    borderColor: Colors.cobaltLight,
+  countTileSelected: {
+    backgroundColor: 'rgba(18, 56, 44, 0.9)',
+    borderColor: Colors.brass,
   },
-  countPillNumber: {
-    fontSize: 16,
-    fontWeight: '800',
+  selectedDiamond: {
+    position: 'absolute',
+    top: 5,
+  },
+  countNumber: {
+    fontFamily: Typography.serifHeading.fontFamily,
+    fontSize: 21,
     color: Colors.textSecondary,
-    marginBottom: 2,
+    lineHeight: 24,
   },
-  countPillNumberSelected: {
-    color: '#ffffff',
+  countNumberSelected: {
+    color: Colors.brassLight,
   },
-  countPillLabel: {
-    fontSize: 9,
-    fontWeight: '700',
+  countLabel: {
+    ...Typography.micro,
     color: Colors.textMuted,
-    letterSpacing: 0.3,
+    fontSize: 5.6,
+    letterSpacing: 0.9,
+    marginTop: 2,
   },
-  countPillLabelSelected: {
-    color: '#ffffff',
+  countLabelSelected: {
+    color: Colors.brassLight,
+  },
+  hostRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 11,
+    paddingLeft: 9,
+    borderLeftWidth: 1.5,
+    borderLeftColor: Colors.brass,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.16)',
+    marginBottom: 2,
   },
   rosterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 11,
+    paddingLeft: 9,
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'transparent',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(198, 164, 96, 0.12)',
   },
-  hostRosterRow: {
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-    borderRadius: 6,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
+  avatar: {
+    width: 31,
+    height: 31,
+    borderRadius: 15.5,
     borderWidth: 1,
-    marginBottom: 4,
-  },
-  rosterAvatarBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.cobalt,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
-  },
-  botAvatarBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
+    marginRight: 11,
   },
   avatarLetter: {
-    color: '#ffffff',
+    color: Colors.ivory,
+    fontFamily: Typography.titleSmall.fontFamily,
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   rosterDetails: {
     flex: 1,
   },
-  nameBadgeRow: {
+  nameLine: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'baseline',
   },
   rosterName: {
+    ...Typography.serifSubheading,
+    color: Colors.ivory,
+    fontSize: 16,
+    marginRight: 8,
+  },
+  hostLabel: {
+    ...Typography.micro,
+    color: Colors.brassLight,
+    fontSize: 6.4,
+    letterSpacing: 1.2,
+  },
+  botLabel: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 6.2,
+    letterSpacing: 1.1,
+  },
+  rosterRole: {
     ...Typography.bodySmall,
-    color: Colors.textPrimary,
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  hostPill: {
-    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 4,
-    borderWidth: 0.5,
-    borderColor: Colors.cobaltLight,
-  },
-  hostPillText: {
-    fontSize: 8.5,
-    fontWeight: '800',
-    color: Colors.cobaltLight,
-    letterSpacing: 0.5,
-  },
-  botPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 4,
-  },
-  botPillText: {
-    fontSize: 8.5,
-    fontWeight: '700',
     color: Colors.textMuted,
-  },
-  rosterSub: {
-    fontSize: 10,
-    color: Colors.textMuted,
+    fontSize: 10.5,
     marginTop: 1,
   },
+  seatNumber: {
+    ...Typography.micro,
+    color: 'rgba(198, 164, 96, 0.6)',
+    fontSize: 6.2,
+    letterSpacing: 1.1,
+    marginLeft: 8,
+  },
   startBtn: {
-    marginTop: 6,
-    paddingVertical: 15,
+    marginTop: 28,
+    paddingVertical: 16,
   },
   startBtnText: {
-    fontSize: 13.5,
-    fontWeight: '900',
-    letterSpacing: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 2,
+  },
+  houseNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 18,
+  },
+  houseNoteText: {
+    ...Typography.micro,
+    color: 'rgba(201, 185, 154, 0.45)',
+    fontSize: 6.2,
+    letterSpacing: 1.5,
+    marginHorizontal: 9,
   },
 });
