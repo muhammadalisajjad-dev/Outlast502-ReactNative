@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
     width: 84,
     height: 122,
     borderRadius: 7,
-    backgroundColor: '#0a1726',
+    backgroundColor: '#090f1a',
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
   },
   deckLayer1: {
     position: 'absolute',
@@ -79,16 +79,16 @@ const styles = StyleSheet.create({
     width: 84,
     height: 122,
     borderRadius: 7,
-    backgroundColor: '#0c1e30',
+    backgroundColor: '#0c1424',
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.3)',
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
   canDrawGlow: {
-    shadowColor: Colors.gold,
+    shadowColor: Colors.cobaltGlow,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 6,
   },
   badgeContainer: {
     position: 'absolute',
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   badgeText: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 9.5,
     fontWeight: '800',
   },
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
   },
   pileLabelActive: {
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     fontWeight: '800',
   },
 });

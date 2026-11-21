@@ -33,7 +33,7 @@ export const CardHand: React.FC<CardHandProps> = ({
     <View style={[styles.container, style]}>
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
-          <Layers size={13} color={Colors.gold} style={{ marginRight: 6 }} />
+          <Layers size={13} color={Colors.textAccent} style={{ marginRight: 6 }} />
           <Text style={styles.handTitle}>
             HAND ({hand.length})
           </Text>
@@ -43,7 +43,7 @@ export const CardHand: React.FC<CardHandProps> = ({
           <View style={styles.hintGroup}>
             {playableCount > 0 ? (
               <>
-                <Sparkles size={12} color={Colors.playableMint} style={{ marginRight: 4 }} />
+                <Sparkles size={12} color={Colors.playableBlue} style={{ marginRight: 4 }} />
                 <Text style={styles.turnHintPlayable}>
                   {playableCount} playable {playableCount === 1 ? 'card' : 'cards'}
                 </Text>
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   titleGroup: {
     flexDirection: 'row',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   handTitle: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
   },
   hintGroup: {
     flexDirection: 'row',
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   turnHintPlayable: {
     ...Typography.bodySmall,
-    color: Colors.playableMint,
+    color: Colors.playableBlue,
     fontWeight: '700',
     fontSize: 11,
   },
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 14,
+    paddingTop: 12,
     paddingBottom: 14,
     alignItems: 'center',
   },

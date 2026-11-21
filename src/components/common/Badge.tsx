@@ -5,7 +5,7 @@ import { Typography } from '../../theme/typography';
 
 interface BadgeProps {
   label: string;
-  variant?: 'gold' | 'lime' | 'crimson' | 'neutral' | 'suit' | 'amber';
+  variant?: 'cobalt' | 'gold' | 'silver' | 'lime' | 'crimson' | 'neutral' | 'suit' | 'amber';
   icon?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
@@ -20,15 +20,21 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
     switch (variant) {
-      case 'gold':
+      case 'cobalt':
+      case 'gold': // Alias gold to cobalt
         return {
-          container: styles.goldContainer,
-          text: styles.goldText,
+          container: styles.cobaltContainer,
+          text: styles.cobaltText,
+        };
+      case 'silver':
+        return {
+          container: styles.silverContainer,
+          text: styles.silverText,
         };
       case 'lime':
         return {
-          container: styles.limeContainer,
-          text: styles.limeText,
+          container: styles.blueHighlightContainer,
+          text: styles.blueHighlightText,
         };
       case 'crimson':
         return {
@@ -81,29 +87,36 @@ const styles = StyleSheet.create({
     ...Typography.badge,
     fontSize: 9.5,
   },
-  goldContainer: {
-    backgroundColor: 'rgba(203, 178, 106, 0.12)',
+  cobaltContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
     borderColor: Colors.borderSubtle,
   },
-  goldText: {
-    color: Colors.goldLight,
+  cobaltText: {
+    color: Colors.textAccent,
   },
-  limeContainer: {
-    backgroundColor: 'rgba(52, 211, 153, 0.12)',
-    borderColor: 'rgba(52, 211, 153, 0.35)',
+  silverContainer: {
+    backgroundColor: 'rgba(203, 213, 225, 0.1)',
+    borderColor: 'rgba(203, 213, 225, 0.3)',
   },
-  limeText: {
-    color: Colors.playableMint,
+  silverText: {
+    color: Colors.silverLight,
+  },
+  blueHighlightContainer: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    borderColor: 'rgba(56, 189, 248, 0.35)',
+  },
+  blueHighlightText: {
+    color: Colors.playableBlue,
   },
   crimsonContainer: {
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     borderColor: 'rgba(239, 68, 68, 0.35)',
   },
   crimsonText: {
     color: Colors.crimsonLight,
   },
   amberContainer: {
-    backgroundColor: 'rgba(217, 119, 6, 0.12)',
+    backgroundColor: 'rgba(217, 119, 6, 0.15)',
     borderColor: 'rgba(217, 119, 6, 0.35)',
   },
   amberText: {

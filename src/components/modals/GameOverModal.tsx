@@ -46,7 +46,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.cardContainer}>
           <View style={styles.trophyIconBox}>
-            <Trophy size={28} color={Colors.goldLight} />
+            <Trophy size={28} color={Colors.silverLight} />
           </View>
           <Text style={styles.title}>MATCH COMPLETE</Text>
 
@@ -111,8 +111,8 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           <View style={styles.buttonRow}>
             <Button
               title="Play Again"
-              icon={<RotateCcw size={14} color="#13110a" />}
-              variant="gold"
+              icon={<RotateCcw size={14} color="#ffffff" />}
+              variant="cobalt"
               size="medium"
               onPress={onPlayAgain}
               style={{ flex: 1, marginRight: 8 }}
@@ -120,7 +120,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             <Button
               title="Main Menu"
               icon={<Home size={14} color={Colors.textPrimary} />}
-              variant="emerald"
+              variant="surface"
               size="medium"
               onPress={onGoHome}
               style={{ flex: 1 }}
@@ -159,24 +159,24 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(203, 178, 106, 0.15)',
+    backgroundColor: 'rgba(37, 99, 235, 0.15)',
     borderWidth: 1,
-    borderColor: Colors.borderSubtle,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
   title: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 11,
     letterSpacing: 2,
     marginBottom: 12,
   },
   winnerCard: {
     width: '100%',
-    backgroundColor: 'rgba(203, 178, 106, 0.12)',
-    borderColor: Colors.gold,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    borderColor: Colors.cobalt,
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 12,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   championLabel: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     fontSize: 9,
     letterSpacing: 1.5,
     marginBottom: 2,

@@ -46,7 +46,7 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
           <Text
             style={[
               styles.declaredText,
-              { color: SUIT_COLORS[declaredSuit] === 'red' ? Colors.crimsonLight : Colors.goldLight },
+              { color: SUIT_COLORS[declaredSuit] === 'red' ? Colors.crimsonLight : Colors.cobaltLight },
             ]}
           >
             {SUIT_SYMBOLS[declaredSuit]} {SUIT_NAMES[declaredSuit].toUpperCase()}
@@ -72,9 +72,9 @@ const styles = StyleSheet.create({
     width: 84,
     height: 122,
     borderRadius: 7,
-    backgroundColor: '#0a1710',
+    backgroundColor: Colors.cardMidnight,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.4)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     transform: [{ rotate: '4deg' }],
   },
   cardRotateWrapper: {
@@ -85,11 +85,11 @@ const styles = StyleSheet.create({
     height: 122,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: 'rgba(203, 178, 106, 0.25)',
+    borderColor: 'rgba(203, 213, 225, 0.2)',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    backgroundColor: 'rgba(8, 12, 20, 0.5)',
   },
   emptyText: {
     color: Colors.textMuted,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   badgeText: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 9.5,
     fontWeight: '800',
   },
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   declaredBadge: {
     marginTop: 4,
-    backgroundColor: 'rgba(8, 22, 16, 0.95)',
+    backgroundColor: 'rgba(13, 21, 39, 0.95)',
     borderWidth: 1,
     borderColor: Colors.borderSubtle,
     borderRadius: 4,

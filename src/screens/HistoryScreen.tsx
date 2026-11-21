@@ -37,27 +37,33 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
   const [cloudActive, setCloudActive] = useState<boolean>(false);
 
   const loadHistory = async () => {
-    setLoading(true);
     try {
       const local = await getMatchHistory();
       setMatches(local);
+      setLoading(false);
 
       if (isFirebaseConfigured()) {
         setCloudActive(true);
-        const cloud = await fetchFirebaseHistory();
-        if (cloud.length > 0) {
-          const map = new Map<string, MatchRecord>();
-          local.forEach(m => map.set(m.id, m));
-          cloud.forEach(m => map.set(m.id, { ...m, syncedToFirebase: true }));
-          const merged = Array.from(map.values()).sort(
-            (a, b) => b.timestamp - a.timestamp
-          );
-          setMatches(merged);
+        try {
+          const cloud = await Promise.race([
+            fetchFirebaseHistory(),
+            new Promise<MatchRecord[]>(resolve => setTimeout(() => resolve([]), 1500)),
+          ]);
+          if (cloud.length > 0) {
+            const map = new Map<string, MatchRecord>();
+            local.forEach(m => map.set(m.id, m));
+            cloud.forEach(m => map.set(m.id, { ...m, syncedToFirebase: true }));
+            const merged = Array.from(map.values()).sort(
+              (a, b) => b.timestamp - a.timestamp
+            );
+            setMatches(merged);
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud sync fetch skipped:', cloudErr);
         }
       }
     } catch (e) {
       console.warn('Error fetching history:', e);
-    } finally {
       setLoading(false);
     }
   };
@@ -76,7 +82,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.title}>MATCH HISTORY</Text>
@@ -89,9 +95,9 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
           <View style={styles.statusLeft}>
             <View style={styles.statusTitleRow}>
               {cloudActive ? (
-                <Cloud size={14} color={Colors.playableMint} style={{ marginRight: 6 }} />
+                <Cloud size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
               ) : (
-                <HardDrive size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+                <HardDrive size={14} color={Colors.silver} style={{ marginRight: 6 }} />
               )}
               <Text style={styles.statusTitle}>
                 {cloudActive ? 'CLOUD PERSISTENCE ACTIVE' : 'LOCAL PERSISTENCE ENGINE'}
@@ -109,16 +115,16 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
             style={styles.refreshBtn}
             activeOpacity={0.75}
           >
-            <RefreshCw size={14} color={Colors.goldLight} />
+            <RefreshCw size={14} color={Colors.silverLight} />
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator size="small" color={Colors.gold} style={{ marginTop: 40 }} />
+          <ActivityIndicator size="small" color={Colors.cobaltLight} style={{ marginTop: 40 }} />
         ) : matches.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconBox}>
-              <Trophy size={28} color={Colors.goldLight} />
+              <Trophy size={28} color={Colors.silverLight} />
             </View>
             <Text style={styles.emptyTitle}>NO MATCHES RECORDED</Text>
             <Text style={styles.emptySubtitle}>
@@ -147,7 +153,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
 
                     <View style={styles.syncBadge}>
                       {m.syncedToFirebase ? (
-                        <Cloud size={10} color={Colors.playableMint} style={{ marginRight: 4 }} />
+                        <Cloud size={10} color={Colors.cobaltLight} style={{ marginRight: 4 }} />
                       ) : (
                         <HardDrive size={10} color={Colors.textMuted} style={{ marginRight: 4 }} />
                       )}
@@ -164,7 +170,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
 
                   {/* Champion Banner */}
                   <View style={styles.championBox}>
-                    <Crown size={14} color={Colors.goldLight} style={{ marginRight: 6 }} />
+                    <Crown size={14} color={Colors.silverLight} style={{ marginRight: 6 }} />
                     <Text style={styles.championName}>
                       Champion: {m.winnerName}
                     </Text>
@@ -221,8 +227,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
-    backgroundColor: 'rgba(6, 19, 13, 0.95)',
+    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
+    backgroundColor: 'rgba(8, 12, 20, 0.95)',
   },
   backBtn: {
     flexDirection: 'row',
@@ -232,13 +238,13 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     ...Typography.badge,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 10,
     letterSpacing: 1,
   },
   title: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.8,
   },
@@ -250,8 +256,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
@@ -268,7 +274,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     fontSize: 10,
     letterSpacing: 1,
   },
@@ -282,9 +288,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 6,
-    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(203, 178, 106, 0.25)',
+    borderColor: 'rgba(56, 189, 248, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -296,7 +302,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderWidth: 1,
     borderColor: Colors.borderSubtle,
     alignItems: 'center',
@@ -305,7 +311,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.5,
     marginBottom: 6,
@@ -318,8 +324,8 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   matchCard: {
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
@@ -367,22 +373,22 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   syncTextCloud: {
-    color: Colors.playableMint,
+    color: Colors.cobaltLight,
   },
   championBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderRadius: 6,
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.3)',
+    borderColor: 'rgba(56, 189, 248, 0.3)',
     paddingVertical: 7,
     paddingHorizontal: 10,
     marginBottom: 10,
   },
   championName: {
     ...Typography.bodySmall,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontWeight: '800',
     fontSize: 12.5,
   },
@@ -391,7 +397,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   playerScoreChip: {
-    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    backgroundColor: 'rgba(8, 12, 20, 0.85)',
     borderRadius: 4,
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -412,7 +418,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   chipScoreWinner: {
-    color: Colors.playableMint,
+    color: Colors.cobaltLight,
   },
   clearBtn: {
     flexDirection: 'row',

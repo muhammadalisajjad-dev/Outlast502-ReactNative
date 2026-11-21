@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider } from './src/context/GameContext';
+import { Colors } from './src/theme/colors';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { SetupScreen } from './src/screens/SetupScreen';
 import { GameScreen } from './src/screens/GameScreen';
@@ -61,9 +63,18 @@ function MainNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <GameProvider>
-        <MainNavigator />
-      </GameProvider>
+      <View style={styles.rootContainer}>
+        <GameProvider>
+          <MainNavigator />
+        </GameProvider>
+      </View>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: Colors.tableDeep,
+  },
+});

@@ -1,6 +1,6 @@
 import { TextStyle, Platform } from 'react-native';
 
-const FONT_FAMILY = Platform.select({
+const FONT_SANS = Platform.select({
   ios: 'System',
   android: 'sans-serif-medium',
   default: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -14,64 +14,64 @@ const FONT_SERIF = Platform.select({
 
 export const Typography: Record<string, TextStyle> = {
   displayTitle: {
-    fontFamily: FONT_SERIF,
-    fontSize: 32,
-    fontWeight: '800',
-    letterSpacing: 3,
+    fontFamily: FONT_SANS,
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: 4,
     color: '#f8fafc',
   },
   displaySubtitle: {
-    fontFamily: FONT_FAMILY,
-    fontSize: 11,
+    fontFamily: FONT_SANS,
+    fontSize: 10.5,
     fontWeight: '700',
-    letterSpacing: 2.5,
+    letterSpacing: 3,
     textTransform: 'uppercase',
   },
   titleLarge: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 1,
   },
   titleMedium: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   titleSmall: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.3,
   },
   bodyLarge: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 15,
     fontWeight: '500',
     lineHeight: 22,
   },
   bodyMedium: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 13,
     fontWeight: '400',
     lineHeight: 19,
   },
   bodySmall: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 11,
     fontWeight: '400',
     lineHeight: 15,
   },
   labelUpper: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.2,
+    fontWeight: '800',
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
   badge: {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FONT_SANS,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,

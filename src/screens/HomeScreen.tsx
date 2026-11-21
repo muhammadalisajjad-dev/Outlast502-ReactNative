@@ -52,9 +52,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
           <Text style={styles.logoTitle}>OUTLAST</Text>
           <View style={styles.badgeRow}>
-            <View style={styles.goldLine} />
+            <View style={styles.silverLine} />
             <Text style={styles.logoSubtitle}>HIGH-STAKES CARD SHEDDING</Text>
-            <View style={styles.goldLine} />
+            <View style={styles.silverLine} />
           </View>
 
           <Text style={styles.tagline}>
@@ -66,8 +66,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         <View style={styles.heroSection}>
           <Button
             title="QUICK PLAY (4 PLAYERS)"
-            icon={<Play size={16} color="#13110a" fill="#13110a" />}
-            variant="gold"
+            icon={<Play size={16} color="#ffffff" fill="#ffffff" />}
+            variant="cobalt"
             size="large"
             onPress={handleQuickPlay}
             style={styles.heroPlayBtn}
@@ -83,7 +83,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             onPress={() => onNavigate('setup')}
           >
             <View style={styles.cardIconBox}>
-              <Users size={18} color={Colors.goldLight} />
+              <Users size={18} color={Colors.cobaltLight} />
             </View>
             <Text style={styles.gridCardTitle}>Match Setup</Text>
             <Text style={styles.gridCardSub}>2–6 Players & Bots</Text>
@@ -95,7 +95,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             onPress={() => onNavigate('scoreboard')}
           >
             <View style={styles.cardIconBox}>
-              <BarChart3 size={18} color={Colors.goldLight} />
+              <BarChart3 size={18} color={Colors.cobaltLight} />
             </View>
             <Text style={styles.gridCardTitle}>Scoreboard</Text>
             <Text style={styles.gridCardSub}>Standings & Survival</Text>
@@ -107,7 +107,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             onPress={() => onNavigate('history')}
           >
             <View style={styles.cardIconBox}>
-              <History size={18} color={Colors.goldLight} />
+              <History size={18} color={Colors.cobaltLight} />
             </View>
             <Text style={styles.gridCardTitle}>Match History</Text>
             <Text style={styles.gridCardSub}>Local & Cloud Logs</Text>
@@ -119,7 +119,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             onPress={() => onNavigate('rules')}
           >
             <View style={styles.cardIconBox}>
-              <BookOpen size={18} color={Colors.goldLight} />
+              <BookOpen size={18} color={Colors.cobaltLight} />
             </View>
             <Text style={styles.gridCardTitle}>Official Rules</Text>
             <Text style={styles.gridCardSub}>Cards & Penalties</Text>
@@ -132,7 +132,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
           <View style={styles.tacticalRow}>
             <View style={styles.tacticalIconWrap}>
-              <Layers size={14} color={Colors.gold} />
+              <Layers size={14} color={Colors.cobaltLight} />
             </View>
             <View style={styles.tacticalContent}>
               <Text style={styles.tacticalHeading}>Shedding Mechanics</Text>
@@ -156,7 +156,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
           <View style={[styles.tacticalRow, { marginBottom: 0 }]}>
             <View style={styles.tacticalIconWrap}>
-              <Shield size={14} color={Colors.playableMint} />
+              <Shield size={14} color={Colors.silver} />
             </View>
             <View style={styles.tacticalContent}>
               <Text style={styles.tacticalHeading}>502 Point Survival</Text>
@@ -213,16 +213,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   crestShield: {
-    backgroundColor: '#0c2419',
+    backgroundColor: '#0c172a',
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: 4,
     marginHorizontal: 6,
     borderWidth: 0.5,
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
   },
   crestText: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontWeight: '900',
     fontSize: 9.5,
     letterSpacing: 0.5,
@@ -240,14 +240,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '85%',
   },
-  goldLine: {
+  silverLine: {
     flex: 1,
     height: 0.5,
-    backgroundColor: 'rgba(203, 178, 106, 0.4)',
+    backgroundColor: 'rgba(203, 213, 225, 0.3)',
   },
   logoSubtitle: {
     ...Typography.displaySubtitle,
-    color: Colors.gold,
+    color: Colors.silverLight,
     marginHorizontal: 8,
   },
   tagline: {
@@ -265,8 +265,6 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 15,
     borderRadius: 10,
-    backgroundColor: Colors.gold,
-    borderColor: Colors.goldLight,
   },
   heroPlayBtnText: {
     fontSize: 14,
@@ -282,25 +280,25 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     width: '48%',
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardIconBox: {
     width: 32,
     height: 32,
     borderRadius: 6,
-    backgroundColor: 'rgba(203, 178, 106, 0.1)',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.3)',
+    borderColor: 'rgba(56, 189, 248, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -319,8 +317,8 @@ const styles = StyleSheet.create({
   },
   tacticalCard: {
     width: '100%',
-    backgroundColor: 'rgba(8, 22, 16, 0.9)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(8, 12, 20, 0.92)',
+    borderColor: 'rgba(56, 189, 248, 0.18)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 16,
@@ -328,7 +326,7 @@ const styles = StyleSheet.create({
   },
   tacticalTitle: {
     ...Typography.labelUpper,
-    color: Colors.gold,
+    color: Colors.cobaltLight,
     fontSize: 10,
     letterSpacing: 1.5,
     marginBottom: 12,

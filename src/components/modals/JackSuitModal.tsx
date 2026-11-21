@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.titleSmall,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     letterSpacing: 1.5,
     marginBottom: 4,
   },

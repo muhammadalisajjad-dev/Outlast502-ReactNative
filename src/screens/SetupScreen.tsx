@@ -52,7 +52,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>MATCH SETUP</Text>
@@ -63,7 +63,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         {/* Human Player Identity */}
         <View style={styles.cardSection}>
           <View style={styles.sectionHeader}>
-            <User size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <User size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.sectionLabel}>HOST IDENTITY</Text>
           </View>
           <Text style={styles.sectionHint}>
@@ -83,7 +83,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         {/* Player Count Selection */}
         <View style={styles.cardSection}>
           <View style={styles.sectionHeader}>
-            <Users size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Users size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.sectionLabel}>
               TABLE SEATS ({playerCount} PLAYERS)
             </Text>
@@ -174,8 +174,8 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         {/* Start Button */}
         <Button
           title={`DEAL CARDS & START MATCH (${playerCount}P)`}
-          icon={<Play size={16} color="#13110a" fill="#13110a" />}
-          variant="gold"
+          icon={<Play size={16} color="#ffffff" fill="#ffffff" />}
+          variant="cobalt"
           size="large"
           onPress={handleStart}
           style={styles.startBtn}
@@ -198,8 +198,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
-    backgroundColor: 'rgba(6, 19, 13, 0.95)',
+    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
+    backgroundColor: 'rgba(8, 12, 20, 0.95)',
   },
   backBtn: {
     flexDirection: 'row',
@@ -209,13 +209,13 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     ...Typography.badge,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 10,
     letterSpacing: 1,
   },
   headerTitle: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.8,
   },
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   cardSection: {
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 16,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     fontSize: 11,
     letterSpacing: 1.2,
   },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   textInput: {
-    backgroundColor: 'rgba(6, 19, 13, 0.9)',
+    backgroundColor: 'rgba(8, 12, 20, 0.9)',
     borderColor: Colors.borderSubtle,
     borderWidth: 1,
     borderRadius: 8,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   countPill: {
     flex: 1,
     marginHorizontal: 3,
-    backgroundColor: 'rgba(6, 19, 13, 0.9)',
+    backgroundColor: 'rgba(8, 12, 20, 0.9)',
     borderColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderRadius: 8,
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countPillSelected: {
-    backgroundColor: Colors.gold,
-    borderColor: Colors.goldLight,
+    backgroundColor: Colors.cobalt,
+    borderColor: Colors.cobaltLight,
   },
   countPillNumber: {
     fontSize: 16,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   countPillNumberSelected: {
-    color: '#13110a',
+    color: '#ffffff',
   },
   countPillLabel: {
     fontSize: 9,
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   countPillLabelSelected: {
-    color: '#13110a',
+    color: '#ffffff',
   },
   rosterRow: {
     flexDirection: 'row',
@@ -312,9 +312,9 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   hostRosterRow: {
-    backgroundColor: 'rgba(203, 178, 106, 0.08)',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
     borderRadius: 6,
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderColor: 'rgba(56, 189, 248, 0.25)',
     borderWidth: 1,
     marginBottom: 4,
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.cobalt,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   avatarLetter: {
-    color: '#13110a',
+    color: '#ffffff',
     fontSize: 12,
     fontWeight: '800',
   },
@@ -352,17 +352,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   hostPill: {
-    backgroundColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(37, 99, 235, 0.2)',
     paddingHorizontal: 6,
     paddingVertical: 1.5,
     borderRadius: 4,
     borderWidth: 0.5,
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
   },
   hostPillText: {
     fontSize: 8.5,
     fontWeight: '800',
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     letterSpacing: 0.5,
   },
   botPill: {

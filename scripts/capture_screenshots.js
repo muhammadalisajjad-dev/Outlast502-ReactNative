@@ -102,9 +102,31 @@ async function run() {
   console.log('Navigating to History...');
   await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
+
+  // Seed a sample completed match into localStorage for visual demonstration
+  await page.evaluate(() => {
+    const sampleRecord = {
+      id: 'match-demo-1',
+      timestamp: Date.now() - 3600000,
+      totalRounds: 4,
+      winnerId: 'player-1',
+      winnerName: 'You',
+      players: [
+        { playerId: 'player-1', name: 'You', finalScore: 68, isWinner: true, isEliminated: false },
+        { playerId: 'player-2', name: 'Marcus', finalScore: 504, isWinner: false, isEliminated: true },
+        { playerId: 'player-3', name: 'Sophia', finalScore: 242, isWinner: false, isEliminated: false },
+        { playerId: 'player-4', name: 'Elena', finalScore: 310, isWinner: false, isEliminated: false },
+      ],
+      syncedToFirebase: true,
+    };
+    try {
+      localStorage.setItem('@outlast502_match_history', JSON.stringify([sampleRecord]));
+    } catch (e) {}
+  });
+
   const historyBtn = page.getByText('Match History');
   await historyBtn.first().click();
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(2000);
   console.log('Capturing 06_history_screen.png (390x844)');
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '06_history_screen.png') });
 

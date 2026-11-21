@@ -114,7 +114,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             {/* Recent Action Banner */}
             {recentLog ? (
               <View style={styles.logBanner}>
-                <Sparkles size={11} color={Colors.gold} style={{ marginRight: 6 }} />
+                <Sparkles size={11} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
                 <Text style={styles.logText} numberOfLines={1}>
                   {recentLog}
                 </Text>
@@ -207,15 +207,15 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...Typography.badge,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.5,
   },
   opponentsContainer: {
     paddingVertical: 6,
-    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    backgroundColor: 'rgba(8, 12, 20, 0.95)',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.12)',
+    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
   },
   opponentsScroll: {
     paddingHorizontal: 8,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   innerFeltBorder: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(203, 178, 106, 0.15)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderRadius: 16,
     padding: 10,
     justifyContent: 'space-between',
@@ -260,14 +260,14 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   watermarkSuits: {
-    color: 'rgba(203, 178, 106, 0.05)',
+    color: 'rgba(203, 213, 225, 0.05)',
     fontSize: 24,
     letterSpacing: 8,
     marginBottom: 4,
   },
   watermarkTitle: {
     ...Typography.badge,
-    color: 'rgba(203, 178, 106, 0.04)',
+    color: 'rgba(203, 213, 225, 0.04)',
     fontSize: 16,
     letterSpacing: 4,
   },
@@ -277,15 +277,15 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 110,
     borderWidth: 1,
-    borderColor: 'rgba(203, 178, 106, 0.03)',
+    borderColor: 'rgba(56, 189, 248, 0.04)',
   },
   tableFooterStatus: {
     paddingHorizontal: 10,
     paddingVertical: 3,
-    backgroundColor: 'rgba(6, 19, 13, 0.6)',
+    backgroundColor: 'rgba(8, 12, 20, 0.75)',
     borderRadius: 10,
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.15)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
   },
   tableFooterText: {
     ...Typography.badge,
@@ -296,12 +296,12 @@ const styles = StyleSheet.create({
   logBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    backgroundColor: 'rgba(8, 12, 20, 0.88)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderColor: 'rgba(56, 189, 248, 0.2)',
     maxWidth: '92%',
   },
   logText: {
@@ -320,8 +320,8 @@ const styles = StyleSheet.create({
     width: 28,
   },
   playerHandSection: {
-    backgroundColor: 'rgba(6, 19, 13, 0.98)',
+    backgroundColor: 'rgba(8, 12, 20, 0.98)',
     borderTopWidth: 1.5,
-    borderTopColor: 'rgba(203, 178, 106, 0.25)',
+    borderTopColor: 'rgba(56, 189, 248, 0.25)',
   },
 });

@@ -80,18 +80,18 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const isMini = size === 'mini';
   const isLarge = size === 'large';
 
-  // Special card tag
+  // Special card tag in Midnight Lounge styling
   let specialBadge: { label: string; bg: string; textCol: string } | null = null;
   if (card.rank === '7' && card.suit === 'hearts') {
-    specialBadge = { label: 'WIN', bg: Colors.gold, textCol: '#120f06' };
+    specialBadge = { label: 'WIN', bg: Colors.crimson, textCol: '#ffffff' };
   } else if (card.rank === 'J') {
-    specialBadge = { label: 'WILD', bg: Colors.gold, textCol: '#120f06' };
+    specialBadge = { label: 'WILD', bg: Colors.cobalt, textCol: '#ffffff' };
   } else if (card.rank === 'A' && card.suit === 'spades') {
     specialBadge = { label: '+5', bg: Colors.crimson, textCol: '#ffffff' };
   } else if (card.rank === '2') {
     specialBadge = { label: '+2', bg: Colors.amber, textCol: '#ffffff' };
   } else if (card.rank === '8') {
-    specialBadge = { label: 'SKIP', bg: Colors.surfaceElevated, textCol: Colors.textGold };
+    specialBadge = { label: 'SKIP', bg: Colors.surfaceElevated, textCol: Colors.textAccent };
   }
 
   return (
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 3,
     position: 'relative',
@@ -217,22 +217,22 @@ const styles = StyleSheet.create({
   },
   cardFaceDown: {
     backgroundColor: Colors.cardBack,
-    borderColor: Colors.goldDark,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
     borderWidth: 1,
     padding: 2.5,
   },
   cardBackPattern: {
     flex: 1,
-    backgroundColor: '#0a1b2d',
+    backgroundColor: '#0c162b',
     borderRadius: 4,
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.4)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
     padding: 2,
   },
   cardBackInnerFrame: {
     flex: 1,
     borderWidth: 0.5,
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    borderColor: 'rgba(203, 213, 225, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -240,31 +240,31 @@ const styles = StyleSheet.create({
     width: '60%',
     height: '60%',
     borderWidth: 0.75,
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
     transform: [{ rotate: '45deg' }],
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(203, 178, 106, 0.08)',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
   },
   cardBackText: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontWeight: '800',
     fontSize: 8.5,
     letterSpacing: 0.5,
     transform: [{ rotate: '-45deg' }],
   },
   cardPlayable: {
-    borderColor: Colors.playableMint,
+    borderColor: Colors.playableBlue,
     borderWidth: 1.5,
-    shadowColor: Colors.playableMint,
+    shadowColor: Colors.playableBlue,
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
     elevation: 6,
     transform: [{ translateY: -6 }],
   },
   cardSelected: {
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
     borderWidth: 2,
     transform: [{ translateY: -10 }],
   },

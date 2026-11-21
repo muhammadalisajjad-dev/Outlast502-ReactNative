@@ -36,14 +36,14 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
           {/* Winner Banner */}
           <View style={styles.winnerBanner}>
             <View style={styles.winnerHeaderRow}>
-              <Crown size={18} color={Colors.goldLight} style={{ marginRight: 6 }} />
+              <Crown size={18} color={Colors.silverLight} style={{ marginRight: 6 }} />
               <Text style={styles.winnerTitle}>
                 {roundResult.winnerName} Won
               </Text>
             </View>
 
             <View style={styles.winReasonRow}>
-              <Zap size={12} color={Colors.gold} style={{ marginRight: 4 }} />
+              <Zap size={12} color={Colors.cobaltLight} style={{ marginRight: 4 }} />
               <Text style={styles.winReason}>
                 {roundResult.winReason === 'seven_of_hearts'
                   ? '7 of Hearts Instant Round Victory'
@@ -115,7 +115,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
 
           <Button
             title="Start Next Round"
-            variant="gold"
+            variant="cobalt"
             size="medium"
             onPress={onNextRound}
             style={styles.actionBtn}
@@ -150,15 +150,15 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 11,
     letterSpacing: 1.8,
     textAlign: 'center',
     marginBottom: 12,
   },
   winnerBanner: {
-    backgroundColor: 'rgba(203, 178, 106, 0.1)',
-    borderColor: Colors.borderSubtle,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    borderColor: 'rgba(56, 189, 248, 0.3)',
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   winnerTitle: {
     ...Typography.titleSmall,
-    color: Colors.goldLight,
+    color: Colors.textPrimary,
     fontWeight: '800',
   },
   winReasonRow: {

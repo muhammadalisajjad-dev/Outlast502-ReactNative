@@ -15,7 +15,7 @@ import { triggerHaptic } from '../../utils/haptics';
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'gold' | 'emerald' | 'crimson' | 'outline' | 'subtle';
+  variant?: 'cobalt' | 'gold' | 'emerald' | 'crimson' | 'outline' | 'subtle';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
@@ -27,7 +27,7 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'gold',
+  variant = 'cobalt',
   size = 'medium',
   disabled = false,
   loading = false,
@@ -43,10 +43,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getContainerStyle = (): ViewStyle => {
     switch (variant) {
-      case 'gold':
-        return styles.goldContainer;
+      case 'cobalt':
+      case 'gold': // Alias gold to cobalt in Midnight theme for consistency
+        return styles.cobaltContainer;
       case 'emerald':
-        return styles.emeraldContainer;
+        return styles.midnightContainer;
       case 'crimson':
         return styles.crimsonContainer;
       case 'outline':
@@ -58,10 +59,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getTextStyle = (): TextStyle => {
     switch (variant) {
+      case 'cobalt':
       case 'gold':
-        return styles.goldText;
+        return styles.cobaltText;
       case 'emerald':
-        return styles.emeraldText;
+        return styles.midnightText;
       case 'crimson':
         return styles.crimsonText;
       case 'outline':
@@ -110,7 +112,7 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'gold' ? Colors.surfaceDark : Colors.textPrimary}
+          color="#ffffff"
         />
       ) : (
         <View style={styles.contentRow}>
@@ -151,32 +153,32 @@ const styles = StyleSheet.create({
     ...Typography.bodyMedium,
     fontWeight: '700',
     textAlign: 'center',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
-  goldContainer: {
-    backgroundColor: Colors.gold,
-    borderColor: Colors.goldLight,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 3,
+  cobaltContainer: {
+    backgroundColor: Colors.cobalt,
+    borderColor: Colors.cobaltLight,
+    shadowColor: Colors.cobalt,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  goldText: {
-    color: '#13110a',
+  cobaltText: {
+    color: '#ffffff',
     fontWeight: '800',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
   },
-  emeraldContainer: {
+  midnightContainer: {
     backgroundColor: Colors.surfaceElevated,
     borderColor: Colors.borderSubtle,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
     elevation: 2,
   },
-  emeraldText: {
+  midnightText: {
     color: Colors.textPrimary,
   },
   crimsonContainer: {
@@ -192,7 +194,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderSubtle,
   },
   outlineText: {
-    color: Colors.goldLight,
+    color: Colors.textAccent,
   },
   subtleContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -221,8 +223,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   largeText: {
-    fontSize: 15,
-    letterSpacing: 0.6,
+    fontSize: 14.5,
+    letterSpacing: 0.8,
   },
   disabledContainer: {
     opacity: 0.45,

@@ -29,7 +29,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.title}>OFFICIAL 502 RULES</Text>
@@ -40,7 +40,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         {/* Core Objective Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Shield size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Shield size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.cardTitle}>OBJECTIVE & SURVIVAL</Text>
           </View>
           <Text style={styles.bodyText}>
@@ -56,7 +56,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         {/* Turn Flow Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Layers size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Layers size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.cardTitle}>TURN STRUCTURE & DEAL</Text>
           </View>
 
@@ -99,7 +99,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         {/* Action Cards Grid */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Zap size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Zap size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.cardTitle}>ACTION & PENALTY CARDS</Text>
           </View>
 
@@ -157,7 +157,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         {/* Scoring Table */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <BookOpen size={14} color={Colors.gold} style={{ marginRight: 6 }} />
+            <BookOpen size={14} color={Colors.cobaltLight} style={{ marginRight: 6 }} />
             <Text style={styles.cardTitle}>PENALTY POINT VALUES</Text>
           </View>
           <Text style={styles.sectionHint}>
@@ -225,8 +225,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
-    backgroundColor: 'rgba(6, 19, 13, 0.95)',
+    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
+    backgroundColor: 'rgba(8, 12, 20, 0.95)',
   },
   backBtn: {
     flexDirection: 'row',
@@ -236,13 +236,13 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     ...Typography.badge,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 10,
     letterSpacing: 1,
   },
   title: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.8,
   },
@@ -251,8 +251,8 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   card: {
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 16,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...Typography.labelUpper,
-    color: Colors.gold,
+    color: Colors.cobaltLight,
     fontSize: 11,
     letterSpacing: 1.2,
   },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.cobaltLight,
     marginTop: 7,
     marginRight: 8,
   },
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   specialCardName: {
     ...Typography.bodySmall,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontWeight: '700',
     fontSize: 12.5,
   },
@@ -353,17 +353,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.3)',
+    borderBottomColor: 'rgba(56, 189, 248, 0.25)',
     marginBottom: 4,
   },
   tableColHeader: {
     ...Typography.labelUpper,
-    color: Colors.gold,
+    color: Colors.cobaltLight,
     fontSize: 9.5,
   },
   tableColHeaderRight: {
     ...Typography.labelUpper,
-    color: Colors.gold,
+    color: Colors.cobaltLight,
     fontSize: 9.5,
   },
   tableRow: {

@@ -10,13 +10,13 @@ interface OpponentSeatProps {
   isCurrentTurn: boolean;
 }
 
-const AVATAR_COLORS = ['#1e3a5f', '#2d3748', '#3b2d54', '#4a3b2c', '#234e52'];
+const AVATAR_COLORS = ['#1e293b', '#1e3a5f', '#172554', '#1f2937', '#0f172a'];
 
 export const OpponentSeat: React.FC<OpponentSeatProps> = ({
   player,
   isCurrentTurn,
 }) => {
-  const avatarBg = AVATAR_COLORS[player.avatarSeed % AVATAR_COLORS.length] || '#2d3748';
+  const avatarBg = AVATAR_COLORS[player.avatarSeed % AVATAR_COLORS.length] || '#1e293b';
 
   return (
     <View
@@ -47,7 +47,7 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
           </View>
         ) : player.immuneThisRound ? (
           <View style={styles.immuneTag}>
-            <Shield size={10} color={Colors.goldLight} />
+            <Shield size={10} color={Colors.textAccent} />
           </View>
         ) : isCurrentTurn ? (
           <View style={styles.activePill}>
@@ -93,8 +93,8 @@ export const OpponentSeat: React.FC<OpponentSeatProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgba(8, 22, 16, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(59, 130, 246, 0.2)',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
@@ -104,16 +104,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 2,
     elevation: 2,
   },
   activeTurnContainer: {
-    borderColor: Colors.gold,
-    backgroundColor: 'rgba(15, 36, 26, 0.95)',
-    shadowColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
+    backgroundColor: 'rgba(23, 34, 60, 0.95)',
+    shadowColor: Colors.cobalt,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.4,
     shadowRadius: 5,
     elevation: 4,
   },
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarActiveRing: {
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
     borderWidth: 1.5,
   },
   avatarInitial: {
@@ -151,13 +151,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -2,
     top: -2,
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.cobalt,
     paddingHorizontal: 3.5,
     paddingVertical: 1,
     borderRadius: 3,
   },
   activePillText: {
-    color: '#13110a',
+    color: '#ffffff',
     fontSize: 7,
     fontWeight: '900',
     letterSpacing: 0.4,
@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -2,
     top: -2,
-    backgroundColor: 'rgba(203, 178, 106, 0.25)',
+    backgroundColor: 'rgba(59, 130, 246, 0.25)',
     padding: 2,
     borderRadius: 3,
     borderWidth: 0.5,
-    borderColor: Colors.gold,
+    borderColor: Colors.cobaltLight,
   },
   eliminatedTag: {
     position: 'absolute',
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   nameActiveText: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontWeight: '800',
   },
   nameEliminatedText: {

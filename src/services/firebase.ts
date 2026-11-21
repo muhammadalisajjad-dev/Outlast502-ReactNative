@@ -108,36 +108,44 @@ export async function fetchFirebaseHistory(): Promise<MatchRecord[]> {
     const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
     const matches: MatchRecord[] = [];
 
-    if (uid) {
-      // Fetch user's own matches
-      try {
-        const userMatchesQuery = query(
-          collection(db, 'users', uid, 'matches'),
-          orderBy('timestamp', 'desc'),
-          limit(25)
-        );
-        const snapshot = await getDocs(userMatchesQuery);
-        snapshot.forEach(docSnap => {
-          matches.push(docSnap.data() as MatchRecord);
-        });
-      } catch (userErr) {
-        // Fall back to root matches query if rules allow
+    const fetchPromise = (async () => {
+      if (uid) {
+        // Fetch user's own matches
+        try {
+          const userMatchesQuery = query(
+            collection(db, 'users', uid, 'matches'),
+            orderBy('timestamp', 'desc'),
+            limit(25)
+          );
+          const snapshot = await getDocs(userMatchesQuery);
+          snapshot.forEach(docSnap => {
+            matches.push(docSnap.data() as MatchRecord);
+          });
+        } catch (userErr) {
+          // Fall back to root matches query if rules allow
+        }
       }
-    }
 
-    if (matches.length === 0) {
-      try {
-        const rootQuery = query(collection(db, 'matches'), orderBy('timestamp', 'desc'), limit(25));
-        const rootSnapshot = await getDocs(rootQuery);
-        rootSnapshot.forEach(docSnap => {
-          matches.push(docSnap.data() as MatchRecord);
-        });
-      } catch (rootErr) {
-        // Ignored if permissions are restricted
+      if (matches.length === 0) {
+        try {
+          const rootQuery = query(collection(db, 'matches'), orderBy('timestamp', 'desc'), limit(25));
+          const rootSnapshot = await getDocs(rootQuery);
+          rootSnapshot.forEach(docSnap => {
+            matches.push(docSnap.data() as MatchRecord);
+          });
+        } catch (rootErr) {
+          // Ignored if permissions are restricted
+        }
       }
-    }
 
-    return matches;
+      return matches;
+    })();
+
+    const timeoutPromise = new Promise<MatchRecord[]>(resolve => {
+      setTimeout(() => resolve([]), 2500);
+    });
+
+    return await Promise.race([fetchPromise, timeoutPromise]);
   } catch (error) {
     console.warn('Failed to fetch from Firebase Firestore:', error);
     return [];

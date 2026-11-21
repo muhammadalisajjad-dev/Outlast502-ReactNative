@@ -38,7 +38,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.75}>
-          <ChevronLeft size={18} color={Colors.goldLight} style={{ marginRight: 2 }} />
+          <ChevronLeft size={18} color={Colors.silverLight} style={{ marginRight: 2 }} />
           <Text style={styles.backBtnText}>BACK</Text>
         </TouchableOpacity>
         <Text style={styles.title}>MATCH SCOREBOARD</Text>
@@ -79,7 +79,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
 
                     {p.immuneThisRound && (
                       <View style={styles.pillBadge}>
-                        <Shield size={9} color={Colors.goldLight} style={{ marginRight: 3 }} />
+                        <Shield size={9} color={Colors.cobaltLight} style={{ marginRight: 3 }} />
                         <Text style={styles.immunityBadgeText}>IMMUNE</Text>
                       </View>
                     )}
@@ -138,7 +138,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({ onBack }) =>
                 <View style={styles.roundCardHeader}>
                   <Text style={styles.roundCardTitle}>Round {r.roundNumber}</Text>
                   <View style={styles.roundWinnerPill}>
-                    <Crown size={11} color={Colors.goldLight} style={{ marginRight: 4 }} />
+                    <Crown size={11} color={Colors.silverLight} style={{ marginRight: 4 }} />
                     <Text style={styles.roundWinnerText}>
                       {r.winnerName} won ({r.winReason === 'seven_of_hearts' ? '7♥ Instant' : 'Shed Hand'})
                     </Text>
@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(203, 178, 106, 0.15)',
-    backgroundColor: 'rgba(6, 19, 13, 0.95)',
+    borderBottomColor: 'rgba(203, 213, 225, 0.12)',
+    backgroundColor: 'rgba(8, 12, 20, 0.95)',
   },
   backBtn: {
     flexDirection: 'row',
@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     ...Typography.badge,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 10,
     letterSpacing: 1,
   },
   title: {
     ...Typography.badge,
-    color: Colors.gold,
+    color: Colors.silverLight,
     fontSize: 12,
     letterSpacing: 1.8,
   },
@@ -222,8 +222,8 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   cardSection: {
-    backgroundColor: 'rgba(15, 36, 26, 0.85)',
-    borderColor: 'rgba(203, 178, 106, 0.2)',
+    backgroundColor: 'rgba(13, 21, 39, 0.85)',
+    borderColor: 'rgba(56, 189, 248, 0.15)',
     borderWidth: 1,
     borderRadius: 10,
     padding: 16,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...Typography.labelUpper,
-    color: Colors.gold,
+    color: Colors.cobaltLight,
     fontSize: 11,
     letterSpacing: 1.2,
     marginBottom: 2,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   leaderRow: {
-    backgroundColor: 'rgba(203, 178, 106, 0.06)',
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
     borderRadius: 6,
     padding: 8,
     paddingBottom: 8,
@@ -286,12 +286,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   leaderName: {
-    color: Colors.goldLight,
+    color: Colors.silverLight,
   },
   pillBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(203, 178, 106, 0.12)',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderWidth: 0.5,
     borderColor: Colors.borderSubtle,
     borderRadius: 3,
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   immunityBadgeText: {
     fontSize: 8,
     fontWeight: '800',
-    color: Colors.goldLight,
+    color: Colors.cobaltLight,
     letterSpacing: 0.4,
   },
   eliminatedBadgeText: {
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: Colors.playableMint,
+    backgroundColor: Colors.cobaltLight,
     borderRadius: 2,
   },
   emptyRounds: {
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   roundCard: {
-    backgroundColor: 'rgba(6, 19, 13, 0.85)',
+    backgroundColor: 'rgba(8, 12, 20, 0.85)',
     borderColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderRadius: 8,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   },
   roundCardTitle: {
     ...Typography.labelUpper,
-    color: Colors.goldLight,
+    color: Colors.silverLight,
     fontSize: 10.5,
   },
   roundWinnerPill: {
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     color: Colors.crimsonLight,
   },
   colScoreWinner: {
-    color: Colors.playableMint,
+    color: Colors.cobaltLight,
   },
   forcedPenaltyBar: {
     flexDirection: 'row',
