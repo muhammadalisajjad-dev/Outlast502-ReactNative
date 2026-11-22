@@ -2,12 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Match history is private to the authenticated anonymous user.
-    // The application writes only to users/{uid}/matches/{matchId}.
+    // The application writes match history only to:
+    //   users/{uid}/matches/{matchId}
+    // Documents are private to the authenticated (anonymous) owner.
     match /users/{userId}/matches/{matchId} {
+      // Owner may read and delete their own records only.
       allow read, delete: if request.auth != null
         && request.auth.uid == userId;
 
+      // Owner may create/update, and the document must be well formed.
       allow create, update: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.userId == request.auth.uid
@@ -25,10 +28,11 @@ service cloud.firestore {
         && request.resource.data.players is list
         && request.resource.data.players.size() >= 2
         && request.resource.data.players.size() <= 6
-        && (request.resource.data.syncedAt == null || request.resource.data.syncedAt is number);
+        && request.resource.data.syncedAt is number;
     }
 
-    // No other collections are used by the application.
+    // No other collection is read or written by the application.
+    // Every other path stays denied by default.
     match /{document=**} {
       allow read, write: if false;
     }

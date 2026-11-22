@@ -58,6 +58,34 @@ export function isFirebaseConfigured(): boolean {
 }
 
 /**
+ * Builds the exact Firestore document written for a completed match.
+ *
+ * Kept as a pure function so the payload can be unit-tested against the
+ * constraints enforced in `firestore.rules`.
+ *
+ * Shape:
+ *   id: string (document id)
+ *   timestamp: number
+ *   totalRounds: integer
+ *   playerCount: integer (2-6)
+ *   winnerName: non-empty string
+ *   players: array of player score objects
+ *   userId: string (authenticated uid)
+ *   syncedAt: number
+ */
+export function buildMatchDocument(
+  match: MatchRecord,
+  uid: string,
+  now: number = Date.now()
+): MatchRecord & { userId: string; syncedAt: number } {
+  return {
+    ...match,
+    userId: uid,
+    syncedAt: now,
+  };
+}
+
+/**
  * Syncs a completed match record to Firebase Firestore.
  * Scoped securely under the authenticated user's history.
  */
@@ -76,11 +104,7 @@ export async function syncMatchToFirebase(match: MatchRecord): Promise<boolean> 
 
   try {
     const { doc, setDoc } = await import('firebase/firestore');
-    const matchData = {
-      ...match,
-      userId: uid,
-      syncedAt: Date.now(),
-    };
+    const matchData = buildMatchDocument(match, uid);
 
     await setDoc(doc(db, 'users', uid, 'matches', match.id), matchData);
     return true;
