@@ -74,7 +74,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     onNavigate(target);
   };
 
-  const titleSize = compact ? 44 : 52;
+  const titleSize = compact ? 46 : 56;
   const fanScale = compact ? 0.86 : 1;
 
   return (
@@ -103,6 +103,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             Shed every card. Survive every penalty. Be the last seated when the
             deck runs dry.
           </Text>
+
+          <View style={styles.heroRule} />
 
           <View style={[styles.cardFan, { transform: [{ scale: fanScale }] }]}>
             <Animated.View
@@ -239,6 +241,12 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     paddingTop: 18,
+  },
+  heroRule: {
+    width: 110,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.lineStrong,
+    marginVertical: 14,
   },
   eyebrow: {
     ...Typography.micro,

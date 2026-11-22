@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { StatusBar } from 'expo-status-bar';
 import { useResponsiveInsets } from '../hooks/useResponsiveInsets';
 import { useGame } from '../context/GameContext';
@@ -239,6 +240,31 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               { transform: [{ translateX: tableShakeAnim }] },
             ]}
           >
+            {/* Felt surface: layered radial material — deep green-teal field with
+                a soft centre glow. This replaces the flat panel fill so the table
+                reads as cloth rather than a UI box. */}
+            <Svg
+              style={styles.feltGradient}
+              width="100%"
+              height="100%"
+              viewBox="0 0 400 800"
+              preserveAspectRatio="xMidYMid slice"
+            >
+              <Defs>
+                <RadialGradient id="felt-field" cx="50%" cy="40%" r="62%">
+                  <Stop offset="0" stopColor="#1C2E27" />
+                  <Stop offset="0.55" stopColor="#141F1A" />
+                  <Stop offset="1" stopColor="#0C130F" />
+                </RadialGradient>
+                <RadialGradient id="felt-glow" cx="50%" cy="50%" r="55%">
+                  <Stop offset="0" stopColor={Colors.teal} stopOpacity="0.16" />
+                  <Stop offset="0.6" stopColor={Colors.teal} stopOpacity="0.05" />
+                  <Stop offset="1" stopColor={Colors.teal} stopOpacity="0" />
+                </RadialGradient>
+              </Defs>
+              <Rect width="400" height="800" fill="url(#felt-field)" />
+              <Rect width="400" height="800" fill="url(#felt-glow)" />
+            </Svg>
             <View style={styles.fieldLight} pointerEvents="none" />
 
             <View style={styles.tableContent}>
@@ -355,6 +381,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.45,
     shadowRadius: 14,
     elevation: 8,
+  },
+  feltGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   fieldLight: {
     position: 'absolute',

@@ -7,7 +7,7 @@ import {
   ViewStyle,
   Animated,
 } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Rect, Line, G } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, RadialGradient, Stop, Rect, Line, G, Circle } from 'react-native-svg';
 import { Card, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/card';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
@@ -47,6 +47,8 @@ const SPECIAL_STYLE: Record<
 const CardBackArt: React.FC<{ size: CardSize }> = ({ size }) => {
   const mini = size === 'mini';
   const lines = Array.from({ length: 10 }).map((_, i) => i * 14);
+  const cx = 35;
+  const cy = 52;
 
   return (
     <>
@@ -62,9 +64,23 @@ const CardBackArt: React.FC<{ size: CardSize }> = ({ size }) => {
             <Stop offset="0" stopColor={Colors.cardBack} />
             <Stop offset="1" stopColor={Colors.cardBackDeep} />
           </LinearGradient>
+          <RadialGradient id="card-back-glow" cx="50%" cy="28%" r="85%">
+            <Stop offset="0" stopColor={Colors.cardBack} stopOpacity="0.95" />
+            <Stop offset="0.55" stopColor={Colors.cardBack} stopOpacity="0.55" />
+            <Stop offset="1" stopColor={Colors.cardBackDeep} stopOpacity="1" />
+          </RadialGradient>
         </Defs>
 
         <Rect width="70" height="100" fill="url(#card-back-gradient)" />
+        <Rect width="70" height="100" fill="url(#card-back-glow)" />
+
+        {/* Concentric play arcs — the house motif of the table. */}
+        <G fill="none" stroke={Colors.paper} strokeOpacity="0.10" strokeWidth="0.35">
+          <Circle cx={cx} cy={cy} r="45" />
+          <Circle cx={cx} cy={cy} r="34" />
+          <Circle cx={cx} cy={cy} r="23" />
+          <Circle cx={cx} cy={cy} r="12" />
+        </G>
 
         <G stroke={Colors.paper} strokeOpacity={0.055} strokeWidth={0.6}>
           {lines.map(v => (
