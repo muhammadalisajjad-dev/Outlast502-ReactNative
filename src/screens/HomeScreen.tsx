@@ -14,12 +14,7 @@ import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { useGame } from '../context/GameContext';
 import { PlayingCard } from '../components/card/PlayingCard';
-import {
-  DecoBackdrop,
-  Monogram,
-  OrnamentDivider,
-  BrassDiamond,
-} from '../components/common/Deco';
+import { Atmosphere, Divider } from '../components/common/Chrome';
 import { ChevronRight } from 'lucide-react-native';
 import { triggerHaptic } from '../utils/haptics';
 import { soundManager } from '../utils/sound';
@@ -29,35 +24,15 @@ interface HomeScreenProps {
 }
 
 const MENU_ITEMS: Array<{
-  numeral: string;
+  index: string;
   title: string;
   caption: string;
   target: 'setup' | 'scoreboard' | 'history' | 'rules';
 }> = [
-  {
-    numeral: 'I',
-    title: 'THE TABLE',
-    caption: 'Choose two to six seats',
-    target: 'setup',
-  },
-  {
-    numeral: 'II',
-    title: 'THE STANDINGS',
-    caption: 'Live survival ledger',
-    target: 'scoreboard',
-  },
-  {
-    numeral: 'III',
-    title: 'THE ARCHIVE',
-    caption: 'Past matches, kept',
-    target: 'history',
-  },
-  {
-    numeral: 'IV',
-    title: 'HOUSE RULES',
-    caption: 'Powers, penalties and points',
-    target: 'rules',
-  },
+  { index: '01', title: 'The table', caption: 'Choose two to six seats', target: 'setup' },
+  { index: '02', title: 'Standings', caption: 'Live survival ledger', target: 'scoreboard' },
+  { index: '03', title: 'Archive', caption: 'Past matches, kept', target: 'history' },
+  { index: '04', title: 'Rules', caption: 'Powers, penalties and points', target: 'rules' },
 ];
 
 const SEVEN_OF_HEARTS = { id: 'home-seven-hearts', suit: 'hearts' as const, rank: '7' as const };
@@ -77,24 +52,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     const makeLoop = (value: Animated.Value, duration: number) =>
       Animated.loop(
         Animated.sequence([
-          Animated.timing(value, {
-            toValue: 1,
-            duration,
-            useNativeDriver: true,
-          }),
-          Animated.timing(value, {
-            toValue: 0,
-            duration,
-            useNativeDriver: true,
-          }),
+          Animated.timing(value, { toValue: 1, duration, useNativeDriver: true }),
+          Animated.timing(value, { toValue: 0, duration, useNativeDriver: true }),
         ])
       );
-
-    const loops = [
-      makeLoop(floatA, 3800),
-      makeLoop(floatB, 4600),
-      makeLoop(floatC, 4200),
-    ];
+    const loops = [makeLoop(floatA, 3800), makeLoop(floatB, 4600), makeLoop(floatC, 4200)];
     loops.forEach(loop => loop.start());
     return () => loops.forEach(loop => loop.stop());
   }, [floatA, floatB, floatC]);
@@ -112,67 +74,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     onNavigate(target);
   };
 
-  const titleSize = compact ? 34 : 42;
-  const titleSpacing = compact ? 4 : 6;
-  const fanScale = compact ? 0.9 : 1;
+  const titleSize = compact ? 44 : 52;
+  const fanScale = compact ? 0.86 : 1;
 
   return (
     <View style={styles.safeArea}>
-      <DecoBackdrop variant="home" />
+      <Atmosphere variant="home" />
 
       <ScrollView
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: insets.top + 10,
-            paddingBottom: Math.max(insets.bottom + 18, 28),
+            paddingTop: insets.top + 12,
+            paddingBottom: Math.max(insets.bottom + 20, 28),
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Club masthead */}
         <View style={styles.topBar}>
-          <View style={styles.topBarLeft}>
-            <Monogram size={30} shape="diamond" />
-            <View style={styles.clubBlock}>
-              <Text style={styles.clubName}>PRIVATE CARD CLUB</Text>
-              <Text style={styles.clubEst}>EST. MMXXVI</Text>
-            </View>
-          </View>
-          <View style={styles.topBarRight}>
-            <BrassDiamond size={4} />
-            <Text style={styles.membership}>NO. 502</Text>
-          </View>
+          <Text style={styles.wordmark}>Outlast 502</Text>
         </View>
 
-        {/* Hero */}
         <View style={styles.hero}>
-          <Text style={styles.eyebrow}>THE HOUSE OF</Text>
-
-          <Text
-            style={[
-              styles.title,
-              { fontSize: titleSize, letterSpacing: titleSpacing },
-            ]}
-          >
-            OUTLAST
-          </Text>
-
-          <View style={styles.fiveOhTwoRow}>
-            <View style={styles.fiveOhTwoLine} />
-            <Text style={styles.fiveOhTwo}>502</Text>
-            <View style={styles.fiveOhTwoLine} />
-          </View>
-
-          <Text style={styles.subtitle}>A GAME OF NERVE & NUMBERS</Text>
-
-          <OrnamentDivider style={styles.heroOrnament} />
-
+          <Text style={styles.eyebrow}>A card game of nerve and numbers</Text>
+          <Text style={[styles.title, { fontSize: titleSize }]}>Outlast</Text>
+          <Text style={styles.titleAccent}>502</Text>
           <Text style={styles.tagline}>
-            Shed every card. Survive every penalty. Be the last seated when the deck runs dry.
+            Shed every card. Survive every penalty. Be the last seated when the
+            deck runs dry.
           </Text>
 
-          {/* Fanned house hand */}
           <View style={[styles.cardFan, { transform: [{ scale: fanScale }] }]}>
             <Animated.View
               style={[
@@ -180,9 +111,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                 styles.fanLeft,
                 {
                   transform: [
-                    { translateX: -56 },
-                    { translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [4, -4] }) },
-                    { rotate: '-13deg' },
+                    { translateX: -62 },
+                    { translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [5, -5] }) },
+                    { rotate: '-14deg' },
                   ],
                 },
               ]}
@@ -196,7 +127,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                 styles.fanCenter,
                 {
                   transform: [
-                    { translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [-3, 4] }) },
+                    { translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [-4, 5] }) },
                   ],
                 },
               ]}
@@ -210,9 +141,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
                 styles.fanRight,
                 {
                   transform: [
-                    { translateX: 56 },
-                    { translateY: floatC.interpolate({ inputRange: [0, 1], outputRange: [4, -4] }) },
-                    { rotate: '13deg' },
+                    { translateX: 62 },
+                    { translateY: floatC.interpolate({ inputRange: [0, 1], outputRange: [5, -5] }) },
+                    { rotate: '14deg' },
                   ],
                 },
               ]}
@@ -222,11 +153,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           </View>
         </View>
 
-        {/* Primary invitation */}
         <View style={styles.actions}>
           <Button
-            title="TAKE A SEAT"
-            variant="cobalt"
+            title="Play"
+            variant="primary"
             size="large"
             onPress={handleQuickPlay}
             style={styles.primaryButton}
@@ -237,179 +167,125 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
             onPress={() => handleMenu('setup')}
             style={styles.secondaryAction}
           >
-            <Text style={styles.secondaryText}>CHOOSE YOUR TABLE</Text>
-            <View style={styles.secondaryMeta}>
-              <BrassDiamond size={3.5} />
-              <Text style={styles.secondaryMetaText}>2–6 PLAYERS</Text>
-            </View>
+            <Text style={styles.secondaryText}>Choose your table</Text>
+            <ChevronRight size={15} color={Colors.textMuted} />
           </TouchableOpacity>
         </View>
 
-        {/* Club ledger navigation */}
+        <View style={styles.facts}>
+          <View style={styles.fact}>
+            <Text style={styles.factNumber}>52</Text>
+            <Text style={styles.factLabel}>cards</Text>
+          </View>
+          <View style={styles.factDivider} />
+          <View style={styles.fact}>
+            <Text style={styles.factNumber}>2–6</Text>
+            <Text style={styles.factLabel}>players</Text>
+          </View>
+          <View style={styles.factDivider} />
+          <View style={styles.fact}>
+            <Text style={styles.factNumber}>502</Text>
+            <Text style={styles.factLabel}>limit</Text>
+          </View>
+        </View>
+
+        <Divider style={styles.menuDivider} />
+
         <View style={styles.menu}>
           {MENU_ITEMS.map((item, index) => (
             <TouchableOpacity
               key={item.target}
-              activeOpacity={0.65}
+              activeOpacity={0.7}
               onPress={() => handleMenu(item.target)}
               style={[styles.menuRow, index === 0 && styles.menuRowFirst]}
             >
-              <Text style={styles.menuNumeral}>{item.numeral}</Text>
+              <Text style={styles.menuIndex}>{item.index}</Text>
               <View style={styles.menuTextBlock}>
                 <Text style={styles.menuTitle}>{item.title}</Text>
                 <Text style={styles.menuCaption}>{item.caption}</Text>
               </View>
-              <ChevronRight size={14} color="rgba(198, 164, 96, 0.55)" />
+              <ChevronRight size={16} color={Colors.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>52 CARDS · 7 IN HAND · ONE SURVIVOR</Text>
-          <View style={styles.footerDiamonds}>
-            <BrassDiamond size={3} />
-            <BrassDiamond size={3} style={{ marginHorizontal: 5 }} />
-            <BrassDiamond size={3} />
-          </View>
-        </View>
+        <Text style={styles.footer}>52 cards · 7 in hand · one survivor</Text>
       </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.ink,
-  },
+  safeArea: { flex: 1, backgroundColor: Colors.ink },
   container: {
     width: '100%',
-    maxWidth: 500,
+    maxWidth: 480,
     alignSelf: 'center',
-    paddingHorizontal: 22,
+    paddingHorizontal: 24,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(198, 164, 96, 0.18)',
+    paddingBottom: 8,
   },
-  topBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  clubBlock: {
-    marginLeft: 10,
-  },
-  clubName: {
-    ...Typography.micro,
-    color: Colors.ivory,
-    fontSize: 7.4,
-    letterSpacing: 1.8,
-  },
-  clubEst: {
-    ...Typography.micro,
-    color: Colors.textMuted,
-    fontSize: 6.2,
-    letterSpacing: 1.4,
-    marginTop: 2,
-  },
-  topBarRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  membership: {
-    ...Typography.micro,
-    color: Colors.brass,
-    fontSize: 6.4,
-    letterSpacing: 1.4,
-    marginLeft: 6,
+  wordmark: {
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   hero: {
     alignItems: 'center',
-    paddingTop: 26,
+    paddingTop: 18,
   },
   eyebrow: {
     ...Typography.micro,
-    color: Colors.brass,
-    fontSize: 7.5,
-    letterSpacing: 3.4,
-    marginBottom: 4,
+    color: Colors.textMuted,
+    fontSize: 8.5,
+    letterSpacing: 1.8,
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   title: {
-    fontFamily: Typography.displayTitle.fontFamily,
+    fontFamily: Typography.hero.fontFamily,
+    fontSize: 52,
+    fontWeight: '700',
+    letterSpacing: -1.8,
+    lineHeight: 54,
+    color: Colors.textPrimary,
+  },
+  titleAccent: {
+    fontFamily: Typography.serifDisplay.fontFamily,
+    fontSize: 30,
     fontWeight: '400',
-    color: Colors.ivory,
-    textAlign: 'center',
-    lineHeight: 52,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  fiveOhTwoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  fiveOhTwoLine: {
-    width: 34,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(198, 164, 96, 0.5)',
-  },
-  fiveOhTwo: {
-    fontFamily: Typography.displayTitle.fontFamily,
-    fontSize: 22,
-    fontWeight: '400',
-    letterSpacing: 4,
-    color: Colors.brassLight,
-    marginHorizontal: 12,
-  },
-  subtitle: {
-    ...Typography.micro,
-    color: Colors.textSecondary,
-    fontSize: 7.4,
-    letterSpacing: 2.6,
-    marginTop: 8,
-  },
-  heroOrnament: {
-    width: 210,
-    marginTop: 12,
-    marginBottom: 4,
+    color: Colors.accent,
+    marginTop: -2,
+    marginBottom: 10,
   },
   tagline: {
-    ...Typography.serifItalic,
+    ...Typography.bodyMedium,
     color: Colors.textSecondary,
     fontSize: 13.5,
     lineHeight: 20,
     textAlign: 'center',
     maxWidth: 300,
-    marginTop: 6,
+    marginBottom: 16,
   },
   cardFan: {
     width: 250,
-    height: 132,
-    marginTop: 12,
+    height: 136,
     alignItems: 'center',
     justifyContent: 'flex-start',
-  },
-  fanCard: {
-    position: 'absolute',
-    top: 14,
-  },
-  fanLeft: {
-    zIndex: 1,
-  },
-  fanCenter: {
-    top: 0,
-    zIndex: 3,
-  },
-  fanRight: {
-    zIndex: 2,
-  },
-  actions: {
     marginTop: 4,
+  },
+  fanCard: { position: 'absolute', top: 12 },
+  fanLeft: { zIndex: 1 },
+  fanCenter: { top: 0, zIndex: 3 },
+  fanRight: { zIndex: 2 },
+  actions: {
+    marginTop: 16,
     alignItems: 'center',
   },
   primaryButton: {
@@ -417,80 +293,104 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   primaryButtonText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 2.6,
+    letterSpacing: 0.4,
   },
   secondaryAction: {
     marginTop: 14,
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  secondaryText: {
-    ...Typography.micro,
-    color: Colors.brassLight,
-    fontSize: 8,
-    letterSpacing: 2,
-  },
-  secondaryMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    paddingVertical: 4,
+    gap: 6,
   },
-  secondaryMetaText: {
+  secondaryText: {
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  facts: {
+    marginTop: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.line,
+  },
+  fact: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  factNumber: {
+    fontFamily: Typography.numeral.fontFamily,
+    fontSize: 20,
+    lineHeight: 22,
+    color: Colors.textPrimary,
+  },
+  factLabel: {
     ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 6.5,
-    letterSpacing: 1.4,
-    marginLeft: 5,
+    fontSize: 7.5,
+    letterSpacing: 1.2,
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  factDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 28,
+    backgroundColor: Colors.line,
+  },
+  menuDivider: {
+    marginTop: 22,
   },
   menu: {
-    marginTop: 22,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(198, 164, 96, 0.18)',
+    marginTop: 0,
   },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
+    paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(198, 164, 96, 0.14)',
+    borderBottomColor: Colors.line,
   },
-  menuRowFirst: {},
-  menuNumeral: {
-    ...Typography.serifBody,
-    color: Colors.brass,
-    fontSize: 10,
-    letterSpacing: 1,
-    width: 28,
+  menuRowFirst: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.line,
+  },
+  menuIndex: {
+    fontFamily: Typography.cardRank.fontFamily,
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.accent,
+    width: 26,
   },
   menuTextBlock: {
     flex: 1,
   },
   menuTitle: {
-    ...Typography.labelUpper,
-    color: Colors.ivory,
-    fontSize: 9.5,
-    letterSpacing: 2.2,
+    ...Typography.bodyMedium,
+    color: Colors.textPrimary,
+    fontSize: 13.5,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   menuCaption: {
     ...Typography.bodySmall,
     color: Colors.textMuted,
-    fontSize: 10,
+    fontSize: 11,
     marginTop: 2,
   },
   footer: {
-    alignItems: 'center',
-    marginTop: 26,
-  },
-  footerText: {
     ...Typography.micro,
-    color: 'rgba(201, 185, 154, 0.5)',
-    fontSize: 6.2,
-    letterSpacing: 1.8,
-  },
-  footerDiamonds: {
-    flexDirection: 'row',
-    marginTop: 9,
+    color: Colors.textMuted,
+    fontSize: 7.5,
+    letterSpacing: 1.4,
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 8,
   },
 });

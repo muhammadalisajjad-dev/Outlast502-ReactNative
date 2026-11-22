@@ -4,8 +4,8 @@ import { Suit, SUITS, SUIT_NAMES, SUIT_SYMBOLS, SUIT_COLORS } from '../../types/
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
-import { DecoModal } from '../common/DecoModal';
-import { OrnamentDivider } from '../common/Deco';
+import { Dialog } from '../common/Dialog';
+import { Divider } from '../common/Chrome';
 
 interface JackSuitModalProps {
   visible: boolean;
@@ -22,14 +22,14 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
   };
 
   return (
-    <DecoModal visible={visible} maxWidth={330}>
+    <Dialog visible={visible} maxWidth={330}>
       <Text style={styles.kicker}>THE JACK IS WILD</Text>
       <Text style={styles.title}>Name the Suit</Text>
       <Text style={styles.subtitle}>
         The next player must follow your demand, answer with a Jack or 7♥, or draw.
       </Text>
 
-      <OrnamentDivider compact style={styles.divider} />
+      <Divider compact style={styles.divider} />
 
       <View style={styles.grid}>
         {SUITS.map(suit => {
@@ -55,21 +55,21 @@ export const JackSuitModal: React.FC<JackSuitModalProps> = ({
           );
         })}
       </View>
-    </DecoModal>
+    </Dialog>
   );
 };
 
 const styles = StyleSheet.create({
   kicker: {
     ...Typography.micro,
-    color: Colors.brass,
+    color: Colors.accent,
     fontSize: 7,
     letterSpacing: 2.2,
     textAlign: 'center',
   },
   title: {
     ...Typography.serifHeading,
-    color: Colors.ivory,
+    color: Colors.paper,
     fontSize: 23,
     textAlign: 'center',
     marginTop: 3,
@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
   },
   suitButton: {
     width: '48.5%',
-    backgroundColor: Colors.cardIvoryInner,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.cardPaperInner,
+    borderColor: Colors.cardEdge,
     borderWidth: 0.8,
     borderRadius: 3,
     paddingVertical: 13,

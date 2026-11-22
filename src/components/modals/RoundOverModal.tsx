@@ -5,8 +5,8 @@ import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { Crown, AlertTriangle, Shield, Skull } from 'lucide-react-native';
-import { DecoModal } from '../common/DecoModal';
-import { OrnamentDivider, BrassDiamond } from '../common/Deco';
+import { Dialog } from '../common/Dialog';
+import { Divider } from '../common/Chrome';
 
 interface RoundOverModalProps {
   visible: boolean;
@@ -24,14 +24,14 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
   if (!roundResult) return null;
 
   return (
-    <DecoModal visible={visible} maxWidth={360}>
+    <Dialog visible={visible} maxWidth={360}>
       <Text style={styles.kicker}>ROUND {roundResult.roundNumber} · COMPLETE</Text>
       <Text style={styles.title}>The Round Closes</Text>
 
-      <OrnamentDivider compact style={styles.divider} />
+      <Divider style={styles.divider} />
 
       <View style={styles.winnerRow}>
-        <Crown size={14} color={Colors.brassLight} style={{ marginRight: 7 }} />
+        <Crown size={14} color={Colors.accentSoft} style={{ marginRight: 7 }} />
         <Text style={styles.winnerName}>{roundResult.winnerName}</Text>
         <Text style={styles.winnerSuffix}>
           {roundResult.winnerName.trim().toLowerCase() === 'you'
@@ -50,7 +50,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
         <View style={styles.notice}>
           <AlertTriangle
             size={12}
-            color={Colors.crimsonLight}
+            color={Colors.danger}
             style={{ marginRight: 7 }}
           />
           <Text style={styles.noticeText}>
@@ -82,9 +82,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
             >
               <View style={styles.playerInfo}>
                 <View style={styles.nameLine}>
-                  {isWinner ? (
-                    <BrassDiamond size={4} filled style={{ marginRight: 6 }} />
-                  ) : null}
+                  {isWinner ? <View style={styles.winnerDot} /> : null}
                   <Text
                     style={[
                       styles.playerName,
@@ -103,7 +101,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
                   <View style={styles.statusPill}>
                     <Shield
                       size={8}
-                      color={Colors.brassLight}
+                      color={Colors.accentSoft}
                       style={{ marginRight: 3 }}
                     />
                     <Text style={styles.immunityBadge}>IMMUNE</Text>
@@ -114,7 +112,7 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
                   <View style={[styles.statusPill, styles.eliminatedPill]}>
                     <Skull
                       size={8}
-                      color={Colors.crimsonLight}
+                      color={Colors.danger}
                       style={{ marginRight: 3 }}
                     />
                     <Text style={styles.eliminatedBadge}>ELIMINATED</Text>
@@ -143,26 +141,26 @@ export const RoundOverModal: React.FC<RoundOverModalProps> = ({
 
       <Button
         title="Start Next Round"
-        variant="gold"
+        variant="secondary"
         size="medium"
         onPress={onNextRound}
         style={styles.actionBtn}
       />
-    </DecoModal>
+    </Dialog>
   );
 };
 
 const styles = StyleSheet.create({
   kicker: {
     ...Typography.micro,
-    color: Colors.brass,
+    color: Colors.accent,
     fontSize: 7.4,
     letterSpacing: 2.2,
     textAlign: 'center',
   },
   title: {
     ...Typography.serifHeading,
-    color: Colors.ivory,
+    color: Colors.paper,
     fontSize: 24,
     textAlign: 'center',
     marginTop: 3,
@@ -181,8 +179,15 @@ const styles = StyleSheet.create({
   },
   winnerName: {
     ...Typography.serifSubheading,
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
     fontSize: 18,
+  },
+  winnerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.accent,
+    marginRight: 6,
   },
   winnerSuffix: {
     ...Typography.serifItalic,
@@ -192,7 +197,7 @@ const styles = StyleSheet.create({
   },
   winReason: {
     ...Typography.micro,
-    color: Colors.ivoryMuted,
+    color: Colors.textMuted,
     fontSize: 7,
     letterSpacing: 1.3,
     textAlign: 'center',
@@ -201,16 +206,16 @@ const styles = StyleSheet.create({
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.burgundyMuted,
+    backgroundColor: Colors.dangerMuted,
     borderLeftWidth: 2,
-    borderLeftColor: Colors.burgundyLight,
+    borderLeftColor: Colors.danger,
     paddingVertical: 7,
     paddingHorizontal: 9,
     marginTop: 12,
   },
   noticeText: {
     ...Typography.bodySmall,
-    color: Colors.crimsonLight,
+    color: Colors.danger,
     fontSize: 10,
     lineHeight: 14,
     flex: 1,
@@ -223,7 +228,7 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     ...Typography.micro,
-    color: Colors.brass,
+    color: Colors.accent,
     fontSize: 7.2,
     letterSpacing: 1.8,
   },
@@ -261,12 +266,12 @@ const styles = StyleSheet.create({
   },
   playerName: {
     ...Typography.serifBody,
-    color: Colors.ivorySoft,
+    color: Colors.textSecondary,
     fontSize: 13,
     lineHeight: 16,
   },
   winnerNameText: {
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
   },
   statusPill: {
     flexDirection: 'row',
@@ -285,13 +290,13 @@ const styles = StyleSheet.create({
     ...Typography.micro,
     fontSize: 6.4,
     letterSpacing: 0.9,
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
   },
   eliminatedBadge: {
     ...Typography.micro,
     fontSize: 6.4,
     letterSpacing: 0.9,
-    color: Colors.crimsonLight,
+    color: Colors.danger,
   },
   scoreDetails: {
     alignItems: 'flex-end',
@@ -300,7 +305,7 @@ const styles = StyleSheet.create({
     ...Typography.serifSubheading,
     fontSize: 16,
     lineHeight: 18,
-    color: Colors.crimsonLight,
+    color: Colors.danger,
   },
   ptsUnit: {
     ...Typography.micro,
@@ -309,7 +314,7 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   winnerScoreText: {
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
   },
   cumulativeText: {
     ...Typography.micro,

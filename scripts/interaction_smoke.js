@@ -42,7 +42,7 @@ async function run() {
   });
 
   await page.goto('http://localhost:8088', { waitUntil: 'networkidle' });
-  await page.getByText('TAKE A SEAT').first().click();
+  await page.getByText('Play', { exact: true }).first().click();
   await page.waitForTimeout(1400);
 
   const playable = page.locator('[data-testid="playable-card"]');
@@ -71,11 +71,11 @@ async function run() {
 
   await page.getByLabel('Open Scoreboard').first().click();
   await page.waitForTimeout(500);
-  await page.getByText('BACK').first().click();
+  await page.getByLabel('Back').first().click();
   await page.waitForTimeout(500);
   await page.getByLabel('Open Rules').first().click();
   await page.waitForTimeout(500);
-  await page.getByText('BACK').first().click();
+  await page.getByLabel('Back').first().click();
   await page.waitForTimeout(500);
 
   // Six-seat table layout
@@ -84,7 +84,7 @@ async function run() {
   await page.waitForTimeout(500);
   await page.getByText('FULL HOUSE').first().click();
   await page.waitForTimeout(400);
-  await page.getByText(/DEAL THE CARDS/).first().click();
+  await page.getByText(/Deal cards/i).first().click();
   await page.waitForTimeout(1400);
   await page.screenshot({ path: path.join(SHOTS, '03_game_table_6p_390x844.png') });
 
@@ -94,7 +94,7 @@ async function run() {
   await page.waitForTimeout(500);
   await page.getByText('DUEL').first().click();
   await page.waitForTimeout(400);
-  await page.getByText(/DEAL THE CARDS/).first().click();
+  await page.getByText(/Deal cards/i).first().click();
   await page.waitForTimeout(1400);
   await page.screenshot({ path: path.join(SHOTS, '03_game_table_2p_390x844.png') });
 

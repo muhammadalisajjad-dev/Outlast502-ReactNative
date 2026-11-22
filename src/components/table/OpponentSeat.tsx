@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Player } from '../../types/game';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
@@ -10,173 +10,94 @@ interface OpponentSeatProps {
   isCurrentTurn: boolean;
 }
 
-const SEAT_TONES = [
-  { bg: '#173B2E', ring: '#C6A460' },
-  { bg: '#4A1D26', ring: '#C9A36A' },
-  { bg: '#263B2A', ring: '#D8C08A' },
-  { bg: '#1D2D38', ring: '#B9A27A' },
-  { bg: '#3A2A1E', ring: '#D0B47C' },
+const TONES = [
+  { bg: '#26362F', fg: '#D8E2DC' },
+  { bg: '#3A2B28', fg: '#EBD3CB' },
+  { bg: '#2B3530', fg: '#D5DED8' },
+  { bg: '#32302A', fg: '#E5DFCE' },
+  { bg: '#253239', fg: '#CFE0E2' },
 ];
 
 export const OpponentSeat: React.FC<OpponentSeatProps> = ({
   player,
   isCurrentTurn,
 }) => {
-  const turnPulse = useRef(new Animated.Value(0)).current;
-  const tone = SEAT_TONES[player.avatarSeed % SEAT_TONES.length] || SEAT_TONES[0];
-
-  useEffect(() => {
-    let loop: Animated.CompositeAnimation | null = null;
-    if (isCurrentTurn) {
-      loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(turnPulse, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(turnPulse, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      loop.start();
-    } else {
-      turnPulse.setValue(0);
-    }
-    return () => {
-      if (loop) loop.stop();
-    };
-  }, [isCurrentTurn, turnPulse]);
-
-  const activeGlow = turnPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.35, 0.95],
-  });
-
-  const activeScale = turnPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.035],
-  });
-
-  const miniCardsCount = Math.min(player.hand.length, 4);
-  const miniCards = Array.from({ length: miniCardsCount });
+  const tone = TONES[player.avatarSeed % TONES.length] || TONES[0];
   const isDanger = player.cumulativeScore >= 400 && !player.isEliminated;
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.container,
         isCurrentTurn && styles.activeContainer,
-        player.isEliminated && styles.eliminatedContainer,
-        isCurrentTurn && { transform: [{ scale: activeScale }] },
+        player.isEliminated && styles.eliminated,
       ]}
     >
-      {isCurrentTurn && (
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.activeTopRule, { opacity: activeGlow }]}
-        />
-      )}
-
-      {/* Small fan of card backs behind the portrait */}
-      {!player.isEliminated && player.hand.length > 0 && (
-        <View style={styles.fanContainer} pointerEvents="none">
-          {miniCards.map((_, index) => {
-            const rotation = (index - (miniCardsCount - 1) / 2) * 10;
-            return (
-              <View
-                key={index}
-                style={[
-                  styles.miniCardBack,
-                  {
-                    transform: [{ rotate: `${rotation}deg` }],
-                    left: 21 + (index - (miniCardsCount - 1) / 2) * 4,
-                    zIndex: index,
-                  },
-                ]}
-              >
-                <View style={styles.miniCardDiamond} />
-              </View>
-            );
-          })}
-        </View>
-      )}
-
       <View style={styles.avatarWrap}>
         <View
           style={[
-            styles.avatarOuter,
-            { borderColor: player.isEliminated ? 'rgba(198,164,96,0.18)' : tone.ring },
+            styles.avatarRing,
+            {
+              borderColor: isCurrentTurn
+                ? Colors.accent
+                : player.isEliminated
+                ? Colors.line
+                : Colors.lineStrong,
+            },
           ]}
         >
           <View style={[styles.avatar, { backgroundColor: tone.bg }]}>
-            <Text style={styles.avatarInitial}>
+            <Text style={[styles.initial, { color: tone.fg }]}>
               {player.name.charAt(0).toUpperCase()}
             </Text>
           </View>
         </View>
-
-        {isCurrentTurn && (
-          <Animated.View
-            pointerEvents="none"
-            style={[styles.turnRing, { opacity: activeGlow }]}
-          />
-        )}
       </View>
 
       <View style={styles.nameRow}>
         <Text
           style={[
-            styles.nameText,
-            isCurrentTurn && styles.nameActiveText,
-            player.isEliminated && styles.nameEliminatedText,
+            styles.name,
+            isCurrentTurn && styles.nameActive,
+            player.isEliminated && styles.nameOut,
           ]}
           numberOfLines={1}
         >
           {player.name}
         </Text>
         {player.immuneThisRound && !player.isEliminated && (
-          <Shield size={8} color={Colors.brassLight} style={{ marginLeft: 2 }} />
+          <Shield size={9} color={Colors.tealLight} style={styles.metaIcon} />
         )}
         {player.isEliminated && (
-          <Skull size={8} color={Colors.crimsonLight} style={{ marginLeft: 2 }} />
+          <Skull size={9} color={Colors.danger} style={styles.metaIcon} />
         )}
-        {isDanger && (
-          <Flame size={8} color={Colors.crimsonLight} style={{ marginLeft: 2 }} />
-        )}
+        {isDanger && <Flame size={9} color={Colors.warning} style={styles.metaIcon} />}
       </View>
 
       <View style={styles.statsRow}>
         <Text
           style={[
-            styles.scoreText,
+            styles.score,
             isDanger && styles.scoreDanger,
-            player.isEliminated && styles.scoreEliminated,
+            player.isEliminated && styles.scoreOut,
           ]}
         >
-          {player.isEliminated ? 'OUT' : `${player.cumulativeScore}`}
-          {!player.isEliminated && <Text style={styles.unit}> PTS</Text>}
+          {player.isEliminated ? 'Out' : player.cumulativeScore}
         </Text>
-
         {!player.isEliminated && (
           <View style={styles.cardStat}>
             <View style={styles.cardGlyph}>
               <View style={styles.cardGlyphInner} />
             </View>
-            <Text style={styles.cardCountText}>{player.hand.length}</Text>
+            <Text style={styles.cardCount}>{player.hand.length}</Text>
           </View>
         )}
       </View>
 
-      {isCurrentTurn && (
-        <Animated.Text style={[styles.toActText, { opacity: activeGlow }]}>
-          TO ACT
-        </Animated.Text>
-      )}
-    </Animated.View>
+      <Text style={[styles.turnLabel, isCurrentTurn && styles.turnLabelActive]}>
+        {isCurrentTurn ? 'To act' : ''}
+      </Text>
+    </View>
   );
 };
 
@@ -190,116 +111,56 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     paddingHorizontal: 2,
     alignItems: 'center',
-    borderRadius: 6,
-    position: 'relative',
   },
-  activeContainer: {
-    backgroundColor: 'rgba(198, 164, 96, 0.07)',
-  },
-  eliminatedContainer: {
+  activeContainer: {},
+  eliminated: {
     opacity: 0.45,
   },
-  activeTopRule: {
-    position: 'absolute',
-    top: 0,
-    left: 8,
-    right: 8,
-    height: 1,
-    backgroundColor: Colors.brassLight,
-    shadowColor: Colors.brass,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 4,
-  },
-  fanContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 0,
-  },
-  miniCardBack: {
-    position: 'absolute',
-    top: 1,
-    width: 13,
-    height: 19,
-    backgroundColor: Colors.emerald,
-    borderColor: 'rgba(198, 164, 96, 0.55)',
-    borderWidth: 0.6,
-    borderRadius: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  miniCardDiamond: {
-    width: 5,
-    height: 5,
-    borderWidth: 0.5,
-    borderColor: 'rgba(198, 164, 96, 0.7)',
-    transform: [{ rotate: '45deg' }],
-  },
   avatarWrap: {
-    position: 'relative',
-    marginTop: 2,
-    zIndex: 1,
+    marginBottom: 5,
   },
-  avatarOuter: {
-    width: 31,
-    height: 31,
-    borderRadius: 15.5,
-    borderWidth: 1,
+  avatarRing: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.inkSoft,
+    backgroundColor: Colors.paperFaint,
   },
   avatar: {
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarInitial: {
-    color: Colors.ivory,
-    fontSize: 11,
+  initial: {
     fontFamily: Typography.titleSmall.fontFamily,
+    fontSize: 13,
     fontWeight: '700',
   },
-  turnRing: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: -3,
-    bottom: -3,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: Colors.brassLight,
-    shadowColor: Colors.brass,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
+  metaIcon: {
+    marginLeft: 4,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4,
     maxWidth: '100%',
   },
-  nameText: {
-    ...Typography.micro,
+  name: {
+    ...Typography.bodySmall,
     color: Colors.textSecondary,
-    fontSize: 7.6,
-    letterSpacing: 0.9,
-    textAlign: 'center',
+    fontSize: 10.5,
+    lineHeight: 13,
+    fontWeight: '600',
     maxWidth: '100%',
   },
-  nameActiveText: {
-    color: Colors.ivory,
+  nameActive: {
+    color: Colors.textPrimary,
   },
-  nameEliminatedText: {
+  nameOut: {
     color: Colors.textMuted,
     textDecorationLine: 'line-through',
   },
@@ -309,26 +170,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 1,
   },
-  scoreText: {
-    ...Typography.serifBody,
-    color: Colors.brassLight,
-    fontSize: 11,
-    lineHeight: 13,
-    fontWeight: '700',
-  },
-  unit: {
-    fontSize: 6,
-    color: Colors.textMuted,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+  score: {
+    fontFamily: Typography.numeral.fontFamily,
+    color: Colors.textPrimary,
+    fontSize: 14,
+    lineHeight: 16,
   },
   scoreDanger: {
-    color: Colors.crimsonLight,
+    color: Colors.warning,
   },
-  scoreEliminated: {
-    color: Colors.textMuted,
+  scoreOut: {
+    fontFamily: Typography.micro.fontFamily,
     fontSize: 8,
-    letterSpacing: 0.6,
+    letterSpacing: 1,
+    color: Colors.textMuted,
   },
   cardStat: {
     flexDirection: 'row',
@@ -337,10 +192,10 @@ const styles = StyleSheet.create({
   },
   cardGlyph: {
     width: 7,
-    height: 9,
-    borderWidth: 0.6,
-    borderColor: 'rgba(198, 164, 96, 0.55)',
-    borderRadius: 1,
+    height: 10,
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
+    borderRadius: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 3,
@@ -348,22 +203,26 @@ const styles = StyleSheet.create({
   cardGlyphInner: {
     width: 3,
     height: 3,
-    borderWidth: 0.5,
-    borderColor: 'rgba(198, 164, 96, 0.65)',
-    transform: [{ rotate: '45deg' }],
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
+    borderRadius: 0.5,
   },
-  cardCountText: {
+  cardCount: {
     ...Typography.bodySmall,
-    color: Colors.ivoryMuted,
-    fontSize: 8.5,
-    lineHeight: 10,
+    color: Colors.textMuted,
+    fontSize: 9,
+    lineHeight: 11,
     fontWeight: '600',
   },
-  toActText: {
+  turnLabel: {
     ...Typography.micro,
-    color: Colors.brassLight,
-    fontSize: 6.2,
-    letterSpacing: 1.1,
-    marginTop: 1,
+    fontSize: 6.5,
+    letterSpacing: 1.2,
+    marginTop: 2,
+    minHeight: 9,
+    color: 'transparent',
+  },
+  turnLabelActive: {
+    color: Colors.accentSoft,
   },
 });

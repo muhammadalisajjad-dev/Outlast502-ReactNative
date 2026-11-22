@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { triggerHaptic } from '../../utils/haptics';
 import { BarChart3, BookOpen } from 'lucide-react-native';
-import { Monogram, BrassDiamond } from '../common/Deco';
 
 interface TableHeaderProps {
   roundNumber: number;
@@ -40,59 +39,38 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onOpenScoreboard,
   onOpenRules,
 }) => {
-  const pulse = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 0,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse]);
-
-  const pulseOpacity = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.35, 1],
-  });
-
-  const turnLabel = isMyTurn ? 'YOUR TURN' : `${activePlayerName.toUpperCase()} TO ACT`;
+  const turnLabel = isMyTurn
+    ? 'Your turn'
+    : `${activePlayerName} to act`;
 
   return (
     <View style={styles.container}>
-      <View style={styles.leftCol}>
-        <Monogram size={28} />
-        <View style={styles.roundBlock}>
-          <Text style={styles.gameTitle}>OUTLAST 502</Text>
-          <Text style={styles.roundText}>ROUND {toRoman(roundNumber)}</Text>
+      <View style={styles.left}>
+        <View style={styles.mark}>
+          <Text style={styles.markText}>502</Text>
+        </View>
+        <View>
+          <Text style={styles.title}>Outlast 502</Text>
+          <Text style={styles.round}>Round {toRoman(roundNumber)}</Text>
         </View>
       </View>
 
-      <Animated.View style={styles.turnBlock}>
-        <Animated.View style={{ opacity: isMyTurn ? pulseOpacity : 0.5 }}>
-          <BrassDiamond size={5} filled={isMyTurn} />
-        </Animated.View>
+      <View style={styles.center}>
+        <View
+          style={[styles.turnDot, isMyTurn && styles.turnDotActive]}
+          pointerEvents="none"
+        />
         <Text
           style={[styles.turnText, isMyTurn && styles.turnTextActive]}
           numberOfLines={1}
         >
           {turnLabel}
         </Text>
-      </Animated.View>
+      </View>
 
-      <View style={styles.rightCol}>
+      <View style={styles.right}>
         <TouchableOpacity
-          style={styles.iconBtn}
+          style={styles.iconButton}
           activeOpacity={0.7}
           onPress={() => {
             triggerHaptic('light');
@@ -100,11 +78,10 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           }}
           accessibilityLabel="Open Scoreboard"
         >
-          <BarChart3 size={14} color={Colors.brassLight} />
+          <BarChart3 size={15} color={Colors.textPrimary} />
         </TouchableOpacity>
-
         <TouchableOpacity
-          style={styles.iconBtn}
+          style={styles.iconButton}
           activeOpacity={0.7}
           onPress={() => {
             triggerHaptic('light');
@@ -112,7 +89,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           }}
           accessibilityLabel="Open Rules"
         >
-          <BookOpen size={14} color={Colors.brassLight} />
+          <BookOpen size={15} color={Colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -124,61 +101,86 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(198, 164, 96, 0.18)',
+    borderBottomColor: Colors.line,
   },
-  leftCol: {
+  left: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: 118,
+    width: 132,
   },
-  roundBlock: {
-    marginLeft: 8,
+  mark: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: Colors.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
   },
-  gameTitle: {
-    ...Typography.micro,
-    color: Colors.brassLight,
-    fontSize: 7.5,
-    letterSpacing: 1.6,
+  markText: {
+    fontFamily: Typography.cardRank.fontFamily,
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.ink,
+    letterSpacing: 0.2,
   },
-  roundText: {
+  title: {
+    ...Typography.bodySmall,
+    color: Colors.textPrimary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  round: {
     ...Typography.micro,
     color: Colors.textMuted,
     fontSize: 7,
-    letterSpacing: 1.2,
-    marginTop: 2,
+    letterSpacing: 1.1,
+    marginTop: 1,
   },
-  turnBlock: {
+  center: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  turnDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.lineStrong,
+    marginRight: 6,
+  },
+  turnDotActive: {
+    backgroundColor: Colors.accent,
   },
   turnText: {
-    ...Typography.micro,
+    ...Typography.bodySmall,
     color: Colors.textSecondary,
-    fontSize: 7.5,
-    letterSpacing: 1.4,
-    marginLeft: 6,
+    fontSize: 10.5,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   turnTextActive: {
-    color: Colors.brassLight,
+    color: Colors.textPrimary,
   },
-  rightCol: {
+  right: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    width: 118,
+    width: 132,
   },
-  iconBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 0.7,
-    borderColor: 'rgba(198, 164, 96, 0.35)',
-    backgroundColor: 'rgba(198, 164, 96, 0.05)',
+  iconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.line,
+    backgroundColor: Colors.paperFaint,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 8,

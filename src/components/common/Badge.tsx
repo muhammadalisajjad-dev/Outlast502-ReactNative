@@ -89,31 +89,31 @@ const styles = StyleSheet.create({
   },
   cobaltContainer: {
     backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    borderColor: Colors.borderSubtle,
+    borderColor: Colors.lineStrong,
   },
   cobaltText: {
-    color: Colors.textAccent,
+    color: Colors.accentSoft,
   },
   silverContainer: {
     backgroundColor: 'rgba(203, 213, 225, 0.1)',
     borderColor: 'rgba(203, 213, 225, 0.3)',
   },
   silverText: {
-    color: Colors.silverLight,
+    color: Colors.textPrimary,
   },
   blueHighlightContainer: {
     backgroundColor: 'rgba(56, 189, 248, 0.15)',
     borderColor: 'rgba(56, 189, 248, 0.35)',
   },
   blueHighlightText: {
-    color: Colors.playableBlue,
+    color: Colors.accentSoft,
   },
   crimsonContainer: {
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
     borderColor: 'rgba(239, 68, 68, 0.35)',
   },
   crimsonText: {
-    color: Colors.crimsonLight,
+    color: Colors.danger,
   },
   amberContainer: {
     backgroundColor: 'rgba(217, 119, 6, 0.15)',
@@ -124,14 +124,14 @@ const styles = StyleSheet.create({
   },
   suitContainer: {
     backgroundColor: Colors.surfaceElevated,
-    borderColor: Colors.borderSubtle,
+    borderColor: Colors.lineStrong,
   },
   suitText: {
     color: Colors.textPrimary,
   },
   neutralContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderColor: Colors.borderMuted,
+    borderColor: Colors.line,
   },
   neutralText: {
     color: Colors.textSecondary,

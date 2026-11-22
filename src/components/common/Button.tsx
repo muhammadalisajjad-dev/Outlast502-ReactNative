@@ -16,7 +16,7 @@ import { triggerHaptic } from '../../utils/haptics';
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'cobalt' | 'gold' | 'emerald' | 'crimson' | 'outline' | 'subtle';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
@@ -28,7 +28,7 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'cobalt',
+  variant = 'primary',
   size = 'medium',
   disabled = false,
   loading = false,
@@ -41,7 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   const handlePressIn = () => {
     if (disabled || loading) return;
     Animated.spring(scaleAnim, {
-      toValue: 0.975,
+      toValue: 0.97,
       useNativeDriver: true,
       speed: 40,
       bounciness: 2,
@@ -64,93 +64,69 @@ export const Button: React.FC<ButtonProps> = ({
     onPress();
   };
 
-  const getContainerStyle = (): ViewStyle => {
+  const containerStyle = (() => {
     switch (variant) {
-      case 'cobalt':
-        return styles.primaryContainer;
-      case 'gold':
-        return styles.goldContainer;
-      case 'emerald':
-        return styles.emeraldContainer;
-      case 'crimson':
-        return styles.crimsonContainer;
+      case 'primary':
+        return styles.primary;
+      case 'secondary':
+        return styles.secondary;
       case 'outline':
-        return styles.outlineContainer;
-      case 'subtle':
-        return styles.subtleContainer;
+        return styles.outline;
+      case 'ghost':
+        return styles.ghost;
+      case 'danger':
+        return styles.danger;
     }
-  };
+  })();
 
-  const getTextStyle = (): TextStyle => {
+  const labelStyle = (() => {
     switch (variant) {
-      case 'cobalt':
+      case 'primary':
         return styles.primaryText;
-      case 'gold':
-        return styles.goldText;
-      case 'emerald':
-        return styles.emeraldText;
-      case 'crimson':
-        return styles.crimsonText;
+      case 'secondary':
+        return styles.secondaryText;
       case 'outline':
         return styles.outlineText;
-      case 'subtle':
-        return styles.subtleText;
+      case 'ghost':
+        return styles.ghostText;
+      case 'danger':
+        return styles.dangerText;
     }
-  };
+  })();
 
-  const getSizeStyle = (): { container: ViewStyle; text: TextStyle } => {
+  const sizeStyle = (() => {
     switch (size) {
       case 'small':
-        return {
-          container: styles.smallContainer,
-          text: styles.smallText,
-        };
+        return { container: styles.small, text: styles.smallText };
       case 'large':
-        return {
-          container: styles.largeContainer,
-          text: styles.largeText,
-        };
-      case 'medium':
+        return { container: styles.large, text: styles.largeText };
       default:
-        return {
-          container: styles.mediumContainer,
-          text: styles.mediumText,
-        };
+        return { container: styles.medium, text: styles.mediumText };
     }
-  };
-
-  const sizeStyle = getSizeStyle();
+  })();
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
       <TouchableOpacity
-        activeOpacity={0.85}
+        activeOpacity={0.9}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={handlePress}
         disabled={disabled || loading}
         style={[
-          styles.baseContainer,
-          getContainerStyle(),
+          styles.base,
+          containerStyle,
           sizeStyle.container,
-          disabled && styles.disabledContainer,
+          disabled && styles.disabled,
           style,
         ]}
       >
         {loading ? (
-          <ActivityIndicator size="small" color={Colors.brassLight} />
+          <ActivityIndicator size="small" color={Colors.accentSoft} />
         ) : (
-          <View style={styles.contentRow}>
-            {icon && <View style={styles.iconWrapper}>{icon}</View>}
-            <Text
-              style={[
-                styles.baseText,
-                getTextStyle(),
-                sizeStyle.text,
-                disabled && styles.disabledText,
-                textStyle,
-              ]}
-            >
+          <View style={styles.row}>
+            {icon ? <View style={styles.iconBox}>{icon}</View> : null}
+            <Text style={[styles.text, labelStyle, sizeStyle.text, textStyle]}>
               {title}
             </Text>
           </View>
@@ -161,114 +137,90 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  baseContainer: {
-    borderRadius: 3,
+  base: {
+    borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contentRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconWrapper: {
+  iconBox: {
     marginRight: 8,
   },
-  baseText: {
+  text: {
     ...Typography.bodyMedium,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.2,
     textAlign: 'center',
-    letterSpacing: 1.1,
   },
-  primaryContainer: {
-    backgroundColor: Colors.emeraldMid,
-    borderColor: Colors.brass,
-    shadowColor: Colors.brass,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.22,
-    shadowRadius: 8,
+  primary: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
     elevation: 4,
   },
   primaryText: {
-    color: Colors.brassLight,
-    fontWeight: '700',
-    letterSpacing: 1.6,
+    color: Colors.accentInk,
   },
-  goldContainer: {
-    backgroundColor: Colors.brass,
-    borderColor: Colors.brassLight,
-    shadowColor: Colors.brass,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.28,
-    shadowRadius: 7,
-    elevation: 4,
+  secondary: {
+    backgroundColor: Colors.paper,
+    borderColor: Colors.paper,
   },
-  goldText: {
-    color: Colors.inkBlack,
-    fontWeight: '700',
-    letterSpacing: 1.6,
+  secondaryText: {
+    color: Colors.ink,
   },
-  emeraldContainer: {
-    backgroundColor: 'rgba(13, 42, 33, 0.7)',
-    borderColor: 'rgba(198, 164, 96, 0.4)',
-  },
-  emeraldText: {
-    color: Colors.ivory,
-    fontWeight: '600',
-  },
-  crimsonContainer: {
-    backgroundColor: Colors.burgundy,
-    borderColor: 'rgba(198, 164, 96, 0.55)',
-  },
-  crimsonText: {
-    color: Colors.ivory,
-    fontWeight: '700',
-  },
-  outlineContainer: {
+  outline: {
     backgroundColor: 'transparent',
-    borderColor: 'rgba(198, 164, 96, 0.5)',
+    borderColor: Colors.lineStrong,
   },
   outlineText: {
-    color: Colors.brassLight,
-    fontWeight: '600',
+    color: Colors.textPrimary,
   },
-  subtleContainer: {
+  ghost: {
     backgroundColor: 'transparent',
-    borderColor: 'rgba(198, 164, 96, 0.16)',
+    borderColor: 'transparent',
   },
-  subtleText: {
+  ghostText: {
     color: Colors.textSecondary,
   },
-  smallContainer: {
-    paddingVertical: 7,
+  danger: {
+    backgroundColor: Colors.danger,
+    borderColor: Colors.danger,
+  },
+  dangerText: {
+    color: '#FFF6F2',
+  },
+  small: {
+    paddingVertical: 8,
     paddingHorizontal: 12,
   },
   smallText: {
-    fontSize: 10.5,
-    letterSpacing: 0.9,
+    fontSize: 11,
   },
-  mediumContainer: {
-    paddingVertical: 11,
-    paddingHorizontal: 16,
+  medium: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
   },
   mediumText: {
-    fontSize: 12.5,
+    fontSize: 13,
   },
-  largeContainer: {
-    paddingVertical: 15,
-    paddingHorizontal: 22,
+  large: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   largeText: {
-    fontSize: 13,
-    letterSpacing: 1.4,
+    fontSize: 14,
   },
-  disabledContainer: {
-    opacity: 0.4,
+  disabled: {
+    opacity: 0.45,
     shadowOpacity: 0,
     elevation: 0,
-  },
-  disabledText: {
-    color: Colors.textMuted,
   },
 });

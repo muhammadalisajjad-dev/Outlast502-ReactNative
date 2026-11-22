@@ -19,98 +19,60 @@ export const DiscardPile: React.FC<DiscardPileProps> = ({
   count,
 }) => {
   const landingAnim = useRef(new Animated.Value(1)).current;
-  const pulseDemandAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!topCard) return;
-    landingAnim.setValue(1.1);
+    landingAnim.setValue(1.06);
     Animated.spring(landingAnim, {
       toValue: 1,
-      speed: 26,
-      bounciness: 5,
+      speed: 28,
+      bounciness: 4,
       useNativeDriver: true,
     }).start();
   }, [topCard?.id, landingAnim]);
 
-  useEffect(() => {
-    let loop: Animated.CompositeAnimation | null = null;
-    if (declaredSuit) {
-      loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseDemandAnim, {
-            toValue: 1,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseDemandAnim, {
-            toValue: 0,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      loop.start();
-    } else {
-      pulseDemandAnim.setValue(0);
-    }
-    return () => {
-      if (loop) loop.stop();
-    };
-  }, [declaredSuit, pulseDemandAnim]);
-
-  const demandGlow = pulseDemandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.35, 0.9],
-  });
-
-  const demandSuitColor =
+  const demandColor =
     declaredSuit && SUIT_COLORS[declaredSuit] === 'red'
-      ? Colors.crimsonLight
-      : Colors.brassLight;
+      ? Colors.cardRedSuit
+      : Colors.tealLight;
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.pileWrapper, { transform: [{ scale: landingAnim }] }]}>
+      <Animated.View style={[styles.wrapper, { transform: [{ scale: landingAnim }] }]}>
         {count > 2 && <View style={[styles.shadowCard, styles.shadowCard2]} />}
         {count > 1 && <View style={[styles.shadowCard, styles.shadowCard1]} />}
 
         {topCard ? (
-          <View style={styles.cardRotateWrapper}>
+          <View style={styles.cardTilt}>
             <PlayingCard card={topCard} size="large" />
           </View>
         ) : (
-          <View style={styles.emptyPlaceholder}>
-            <View style={styles.emptyDiamond} />
-            <Text style={styles.emptyText}>AWAITING</Text>
-            <Text style={styles.emptyText}>OPENING CARD</Text>
+          <View style={styles.empty}>
+            <View style={styles.emptyGlyph} />
+            <Text style={styles.emptyText}>Awaiting</Text>
+            <Text style={styles.emptyText}>opening card</Text>
           </View>
         )}
 
-        <View style={styles.badgeContainer}>
+        <View style={styles.badge}>
           <Text style={styles.badgeText}>{count}</Text>
         </View>
       </Animated.View>
 
-      <Text style={styles.pileLabel}>DISCARD</Text>
-      <Text style={styles.pileSubLabel}>{count === 1 ? '1 CARD PLAYED' : `${count} CARDS PLAYED`}</Text>
+      <Text style={styles.label}>Discard</Text>
+      <Text style={styles.subLabel}>
+        {count === 1 ? '1 played' : `${count} played`}
+      </Text>
 
       {declaredSuit && (
-        <Animated.View
-          style={[
-            styles.declaredBadge,
-            {
-              opacity: demandGlow,
-              borderColor: demandSuitColor,
-            },
-          ]}
-        >
-          <Text style={[styles.declaredSuit, { color: demandSuitColor }]}>
+        <View style={[styles.demand, { borderColor: demandColor }]}>
+          <Text style={[styles.demandSuit, { color: demandColor }]}>
             {SUIT_SYMBOLS[declaredSuit]}
           </Text>
-          <Text style={[styles.declaredText, { color: demandSuitColor }]}>
-            {SUIT_NAMES[declaredSuit].toUpperCase()} DEMANDED
+          <Text style={[styles.demandText, { color: demandColor }]}>
+            {SUIT_NAMES[declaredSuit]}
           </Text>
-        </Animated.View>
+        </View>
       )}
     </View>
   );
@@ -121,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pileWrapper: {
+  wrapper: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
@@ -131,107 +93,103 @@ const styles = StyleSheet.create({
     width: LARGE.width,
     height: LARGE.height,
     borderRadius: LARGE.borderRadius,
-    backgroundColor: Colors.emeraldDeep,
-    borderWidth: 0.7,
-    borderColor: 'rgba(198, 164, 96, 0.28)',
+    backgroundColor: Colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
   },
   shadowCard1: {
     top: 3,
     right: -3,
-    transform: [{ rotate: '3.5deg' }],
+    transform: [{ rotate: '3deg' }],
   },
   shadowCard2: {
     top: 5,
     left: -4,
-    transform: [{ rotate: '-4deg' }],
-    opacity: 0.75,
+    transform: [{ rotate: '-3.5deg' }],
+    opacity: 0.7,
   },
-  cardRotateWrapper: {
-    transform: [{ rotate: '-1.6deg' }],
+  cardTilt: {
+    transform: [{ rotate: '-1.5deg' }],
   },
-  emptyPlaceholder: {
+  empty: {
     width: LARGE.width,
     height: LARGE.height,
     borderRadius: LARGE.borderRadius,
-    borderWidth: 0.8,
-    borderColor: 'rgba(198, 164, 96, 0.35)',
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(5, 11, 9, 0.5)',
+    backgroundColor: 'rgba(11, 16, 14, 0.5)',
   },
-  emptyDiamond: {
-    width: 12,
-    height: 12,
-    borderWidth: 0.8,
-    borderColor: 'rgba(198, 164, 96, 0.45)',
-    transform: [{ rotate: '45deg' }],
+  emptyGlyph: {
+    width: 10,
+    height: 14,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
     marginBottom: 8,
   },
   emptyText: {
     ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 6.5,
+    fontSize: 7,
     letterSpacing: 1.2,
   },
-  badgeContainer: {
+  badge: {
     position: 'absolute',
-    bottom: -7,
-    right: -7,
+    bottom: -6,
+    right: -6,
     minWidth: 22,
-    height: 18,
-    paddingHorizontal: 5,
-    backgroundColor: Colors.inkBlack,
-    borderColor: Colors.brass,
-    borderWidth: 0.8,
-    borderRadius: 2,
+    height: 20,
+    paddingHorizontal: 6,
+    backgroundColor: Colors.inkRaised,
+    borderColor: Colors.lineStrong,
+    borderWidth: 1,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-    elevation: 4,
   },
   badgeText: {
-    fontFamily: Typography.titleSmall.fontFamily,
-    color: Colors.brassLight,
+    fontFamily: Typography.cardRank.fontFamily,
+    color: Colors.textPrimary,
     fontSize: 11,
     fontWeight: '700',
-    lineHeight: 13,
   },
-  pileLabel: {
+  label: {
     ...Typography.micro,
     color: Colors.textMuted,
-    marginTop: 11,
+    marginTop: 12,
     fontSize: 7.5,
-    letterSpacing: 1.8,
+    letterSpacing: 1.4,
   },
-  pileSubLabel: {
+  subLabel: {
     ...Typography.micro,
-    color: 'rgba(198, 164, 96, 0.45)',
+    color: Colors.textMuted,
     fontSize: 6.5,
-    letterSpacing: 1.2,
+    letterSpacing: 1,
     marginTop: 2,
+    opacity: 0.8,
   },
-  declaredBadge: {
-    marginTop: 7,
+  demand: {
+    marginTop: 9,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(5, 11, 9, 0.9)',
-    borderWidth: 0.8,
-    borderRadius: 2,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: Colors.paperFaint,
   },
-  declaredSuit: {
+  demandSuit: {
     fontSize: 11,
     lineHeight: 13,
     marginRight: 5,
   },
-  declaredText: {
+  demandText: {
     ...Typography.micro,
-    fontSize: 6.5,
-    letterSpacing: 1.1,
+    fontSize: 7,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
 });

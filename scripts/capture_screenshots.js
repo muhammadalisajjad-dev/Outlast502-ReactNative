@@ -79,12 +79,12 @@ async function captureViewport(browser, viewport) {
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `01_home_screen_${tag}.png`) });
 
   console.log(`Capturing setup (${tag})`);
-  await page.getByText('THE TABLE').first().click();
+  await page.getByText('The table', { exact: true }).first().click();
   await page.waitForTimeout(700);
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `02_setup_screen_${tag}.png`) });
 
   console.log(`Capturing game table (${tag})`);
-  await page.getByText(/DEAL THE CARDS/).first().click();
+  await page.getByText(/Deal cards/i).first().click();
   await page.waitForTimeout(1400);
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `03_game_table_screen_${tag}.png`) });
 
@@ -94,7 +94,7 @@ async function captureViewport(browser, viewport) {
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `04_rules_screen_${tag}.png`) });
 
   console.log(`Capturing scoreboard (${tag})`);
-  await page.getByText('BACK').first().click();
+  await page.getByLabel('Back').first().click();
   await page.waitForTimeout(600);
   await page.getByLabel('Open Scoreboard').first().click();
   await page.waitForTimeout(700);
@@ -104,7 +104,7 @@ async function captureViewport(browser, viewport) {
   await page.goto('http://localhost:8086', { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
   await seedHistory(page);
-  await page.getByText('THE ARCHIVE').first().click();
+  await page.getByText('Archive', { exact: true }).first().click();
   await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, `06_history_screen_${tag}.png`) });
 
@@ -123,7 +123,7 @@ async function captureDesktop(browser) {
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '01_home_screen_desktop.png') });
 
   console.log('Capturing desktop game table');
-  await page.getByText('TAKE A SEAT').first().click();
+  await page.getByText('Play', { exact: true }).first().click();
   await page.waitForTimeout(1400);
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '03_game_table_screen_desktop.png') });
   await context.close();

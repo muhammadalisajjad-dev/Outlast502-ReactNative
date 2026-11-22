@@ -101,7 +101,7 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
       <View style={styles.iconWrap}>
         <View style={styles.iconDiamond}>
           <View style={styles.iconCounter}>
-            <AlertTriangle size={11} color={Colors.brassLight} />
+            <AlertTriangle size={11} color={Colors.accentSoft} />
           </View>
         </View>
       </View>
@@ -113,7 +113,7 @@ export const PenaltyModal: React.FC<PenaltyModalProps> = ({
 
       <Button
         title={details.actionTitle}
-        variant="crimson"
+        variant="danger"
         size="small"
         onPress={onAcceptPenalty}
         style={styles.actionBtn}
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 2,
-    backgroundColor: Colors.burgundyLight,
+    backgroundColor: Colors.danger,
     borderTopLeftRadius: 3,
     borderBottomLeftRadius: 3,
   },
@@ -175,13 +175,13 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     ...Typography.labelUpper,
-    color: Colors.ivory,
+    color: Colors.paper,
     fontSize: 8.4,
     letterSpacing: 1.5,
   },
   bannerSubtitle: {
     ...Typography.serifItalic,
-    color: Colors.ivoryMuted,
+    color: Colors.textMuted,
     fontSize: 10.5,
     lineHeight: 14,
     marginTop: 2,

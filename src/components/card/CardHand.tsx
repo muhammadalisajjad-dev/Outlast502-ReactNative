@@ -4,15 +4,14 @@ import {
   View,
   Text,
   StyleSheet,
-  ViewStyle,
   Animated,
   useWindowDimensions,
+  ViewStyle,
 } from 'react-native';
 import { Card } from '../../types/card';
 import { PlayingCard, CARD_SIZES } from './PlayingCard';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
-import { BrassDiamond } from '../common/Deco';
 
 interface CardHandProps {
   hand: Card[];
@@ -45,14 +44,14 @@ export const CardHand: React.FC<CardHandProps> = ({
     dealAnim.setValue(0);
     Animated.spring(dealAnim, {
       toValue: 1,
-      speed: 17,
+      speed: 18,
       bounciness: 3,
       useNativeDriver: true,
     }).start();
   }, [hand.length, dealAnim]);
 
   const compact = screenWidth < 380 || screenHeight < 760;
-  // Leave room for the rotated cards at both edges so the fan never clips.
+  // Reserve room for the rotated end cards so the fan never clips.
   const availableWidth = Math.min(screenWidth - 48, 520);
   const count = hand.length;
 
@@ -74,41 +73,32 @@ export const CardHand: React.FC<CardHandProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.headerRow}>
-        <View style={styles.handIdentity}>
-          <Text style={styles.handKicker}>
-            {playerName && playerName.trim().toLowerCase() !== 'you'
-              ? `${playerName.toUpperCase()}'S HAND`
-              : 'YOUR HAND'}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.label}>Your hand</Text>
+          <Text style={styles.count}>
+            <Text style={styles.countNumber}>{hand.length}</Text>
+            <Text style={styles.countUnit}> cards</Text>
           </Text>
-          <View style={styles.countGroup}>
-            <Text style={styles.handCount}>{hand.length}</Text>
-            <Text style={styles.handCountLabel}>CARDS</Text>
-          </View>
         </View>
 
         <View style={styles.headerRight}>
           {isMyTurn ? (
             playableCount > 0 ? (
-              <View style={styles.hintRow}>
-                <BrassDiamond size={5} filled />
-                <Text style={styles.hintPlayable}>
-                  {playableCount} {playableCount === 1 ? 'PLAY' : 'PLAYS'} AVAILABLE
-                </Text>
-              </View>
+              <Text style={styles.hintPlayable}>
+                {playableCount} {playableCount === 1 ? 'play' : 'plays'} ready
+              </Text>
             ) : (
-              <Text style={styles.hintDraw}>NO MATCH · TAP DECK TO DRAW</Text>
+              <Text style={styles.hintQuiet}>No match · tap the deck</Text>
             )
           ) : (
-            <Text style={styles.hintWaiting}>AWAITING YOUR TURN</Text>
+            <Text style={styles.hintQuiet}>Waiting for your turn</Text>
           )}
           {typeof playerScore === 'number' && (
-            <Text style={styles.scoreLine}>{playerScore} PTS</Text>
+            <Text style={styles.score}>{playerScore} pts</Text>
           )}
         </View>
       </View>
-
-      <View style={styles.railLine} pointerEvents="none" />
 
       <Animated.View
         style={{
@@ -171,90 +161,75 @@ export const CardHand: React.FC<CardHandProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 9,
+    paddingTop: 12,
     paddingBottom: 2,
     width: '100%',
+    backgroundColor: 'rgba(11, 16, 14, 0.94)',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.line,
   },
-  headerRow: {
+  header: {
     flexDirection: 'row',
+    alignItems: 'baseline',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     marginBottom: 2,
   },
-  handIdentity: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
-  handKicker: {
-    ...Typography.labelUpper,
-    color: Colors.brassLight,
-    fontSize: 8.5,
-    letterSpacing: 2,
-    marginRight: 10,
-  },
-  countGroup: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  handCount: {
-    ...Typography.numeral,
-    fontSize: 17,
-    color: Colors.ivory,
-    lineHeight: 19,
-    marginRight: 4,
-  },
-  handCountLabel: {
+  label: {
     ...Typography.micro,
     color: Colors.textMuted,
-    fontSize: 7.5,
+    fontSize: 8,
     letterSpacing: 1.4,
+    marginRight: 10,
+    textTransform: 'uppercase',
+  },
+  count: {
+    fontFamily: Typography.numeral.fontFamily,
+    fontSize: 17,
+    lineHeight: 20,
+    color: Colors.textSecondary,
+  },
+  countNumber: {
+    color: Colors.textPrimary,
+    fontSize: 19,
+  },
+  countUnit: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    fontFamily: Typography.bodySmall.fontFamily,
   },
   headerRight: {
     alignItems: 'flex-end',
   },
-  hintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   hintPlayable: {
     ...Typography.micro,
-    color: Colors.brassLight,
-    fontSize: 8,
-    letterSpacing: 1.4,
-    marginLeft: 5,
-  },
-  hintDraw: {
-    ...Typography.micro,
-    color: Colors.textMuted,
-    fontSize: 7.8,
-    letterSpacing: 1.2,
-  },
-  hintWaiting: {
-    ...Typography.micro,
-    color: Colors.textMuted,
-    fontSize: 7.8,
-    letterSpacing: 1.2,
-  },
-  scoreLine: {
-    ...Typography.micro,
-    color: Colors.ivoryMuted,
+    color: Colors.accentSoft,
     fontSize: 7.5,
-    letterSpacing: 1.3,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+  },
+  hintQuiet: {
+    ...Typography.micro,
+    color: Colors.textMuted,
+    fontSize: 7.5,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+  },
+  score: {
+    ...Typography.micro,
+    color: Colors.textSecondary,
+    fontSize: 7.5,
+    letterSpacing: 1,
     marginTop: 3,
   },
-  railLine: {
-    position: 'absolute',
-    left: 18,
-    right: 18,
-    bottom: 9,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(198, 164, 96, 0.2)',
-  },
   scrollContent: {
-    paddingHorizontal: 13,
+    paddingHorizontal: 14,
     paddingTop: 18,
-    paddingBottom: 13,
+    paddingBottom: 14,
     alignItems: 'flex-end',
   },
   scrollContentLeft: {},
@@ -262,10 +237,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
   },
-  cardWrapper: {
-    // transform and zIndex set inline per card
-  },
+  cardWrapper: {},
   cardWrapperPlayable: {
-    marginBottom: 4,
+    marginBottom: 6,
   },
 });

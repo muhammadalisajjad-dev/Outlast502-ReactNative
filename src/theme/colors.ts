@@ -1,103 +1,114 @@
 /**
- * OUTLAST 502 — Art Deco Card Club palette.
+ * OUTLAST 502 — palette.
  *
- * Deep ink and emerald foundations, warm ivory paper, restrained brass
- * detailing and burgundy for consequence. The older token names are kept
- * as aliases so existing components continue to resolve while the visual
- * language is unified around the club palette.
+ * A quiet night-table palette: deep ink foundations, muted teal surfaces,
+ * warm paper for the cards, and a single terracotta signal used for play.
+ * Older token names remain as aliases so legacy call sites resolve while the
+ * UI is migrated.
  */
 export const Colors = {
-  // Ink & emerald foundations
-  ink: '#050B09',
-  inkSoft: '#08120F',
-  inkRaised: '#0B1915',
-  inkBlack: '#030806',
+  // Ink foundations
+  ink: '#0B100E',
+  inkSoft: '#101714',
+  inkRaised: '#151E1A',
 
-  tableDeep: '#050B09',
-  tableFelt: '#0A1E18',
-  tableFeltInner: '#0E2A21',
-  tableRail: '#030806',
-  tableBorder: '#1C3A2E',
-  tableGlow: 'rgba(198, 164, 96, 0.10)',
+  // Muted teal surfaces
+  surface: '#151F1B',
+  surfaceRaised: '#1B2722',
+  surfaceElevated: '#223029',
+  surfaceField: 'rgba(21, 31, 27, 0.72)',
+  teal: '#3F6B60',
+  tealLight: '#86ADA0',
+  tealMuted: 'rgba(134, 173, 160, 0.14)',
 
-  emeraldDeep: '#07130F',
-  emerald: '#0D2A21',
-  emeraldMid: '#12382C',
-  emeraldLight: '#1A4A3A',
-  emeraldBright: '#256B52',
+  // Warm paper (cards)
+  paper: '#F4EFE3',
+  paperInner: '#FBF7EC',
+  paperEdge: '#DCD2BA',
+  paperDim: 'rgba(244, 239, 227, 0.62)',
+  paperFaint: 'rgba(244, 239, 227, 0.08)',
 
-  // Brass / foil detailing
-  brass: '#C6A460',
-  brassLight: '#E6CE96',
-  brassDark: '#8A6C39',
-  brassMuted: 'rgba(198, 164, 96, 0.16)',
-  brassFaint: 'rgba(198, 164, 96, 0.07)',
+  // Signal / interaction
+  accent: '#DF7A5E',
+  accentSoft: '#ECA08B',
+  accentDeep: '#B95A42',
+  accentMuted: 'rgba(223, 122, 94, 0.14)',
+  accentInk: '#1B120E',
 
-  // Warm ivory paper
-  ivory: '#F2E8D5',
-  ivorySoft: '#E8DAC0',
-  ivoryMuted: '#C9B99A',
-  ivoryDim: 'rgba(242, 232, 213, 0.55)',
+  // Consequence
+  danger: '#CC6A5C',
+  dangerDeep: '#A84F43',
+  dangerMuted: 'rgba(204, 106, 92, 0.14)',
+  warning: '#D3A24B',
 
-  // Burgundy consequence
-  burgundy: '#6B1F2A',
-  burgundyLight: '#A63D49',
-  burgundyMuted: 'rgba(166, 61, 73, 0.18)',
+  // Text
+  textPrimary: '#F2EEE4',
+  textSecondary: '#B9B7AB',
+  textMuted: '#7D867E',
 
-  // Legacy accent aliases (now brass, not cobalt)
-  cobalt: '#0D2A21',
-  cobaltLight: '#C6A460',
-  cobaltGlow: 'rgba(198, 164, 96, 0.35)',
-  cobaltMuted: 'rgba(198, 164, 96, 0.12)',
-  silver: '#C9B99A',
-  silverLight: '#F2E8D5',
-  silverMuted: 'rgba(201, 185, 154, 0.25)',
+  // Lines & shadows
+  line: 'rgba(242, 238, 228, 0.10)',
+  lineStrong: 'rgba(242, 238, 228, 0.20)',
+  shadow: 'rgba(0, 0, 0, 0.45)',
+  overlay: 'rgba(6, 10, 9, 0.70)',
 
-  gold: '#C6A460',
-  goldLight: '#E6CE96',
-  goldGlow: 'rgba(230, 206, 150, 0.35)',
-  goldMuted: 'rgba(198, 164, 96, 0.14)',
-  textGold: '#E6CE96',
+  // Cards
+  cardPaper: '#F4EFE3',
+  cardPaperInner: '#FBF7EC',
+  cardEdge: '#DCD2BA',
+  cardBlackSuit: '#202824',
+  cardRedSuit: '#A8443C',
+  cardBack: '#1C332E',
+  cardBackDeep: '#12201C',
+  cardBackPattern: '#285047',
 
-  // Action / playable highlights
-  playableBlue: '#E6CE96',
-  playableGlow: 'rgba(230, 206, 150, 0.45)',
-  playableMint: '#9CC5A8',
-
-  // Danger & penalty accents
-  crimson: '#8E2A35',
-  crimsonLight: '#C4555F',
-  crimsonMuted: 'rgba(166, 61, 73, 0.18)',
-  crimsonGlow: 'rgba(166, 61, 73, 0.40)',
-  amber: '#B8823A',
-  amberLight: '#D8A65A',
-
-  // Playing cards
-  cardIvory: '#F4ECDA',
-  cardIvoryInner: '#FBF6EA',
-  cardBorder: '#C9B99A',
-  cardShadow: 'rgba(0, 0, 0, 0.55)',
-  cardMidnight: '#07130F',
-  cardBack: '#0C2A21',
-  cardBackPattern: '#174536',
-  cardRedSuit: '#9E2F38',
-  cardBlackSuit: '#13201B',
-
-  // UI surfaces
-  surfaceDark: '#08120F',
-  surfaceCard: '#0B1915',
-  surfaceElevated: '#10251E',
-  surfaceSubtle: 'rgba(242, 232, 213, 0.04)',
-  borderCobalt: '#C6A460',
-  borderSubtle: 'rgba(198, 164, 96, 0.28)',
-  borderMuted: 'rgba(242, 232, 213, 0.10)',
-
-  // Editorial type
-  textPrimary: '#F2E8D5',
-  textSecondary: '#C9B99A',
-  textMuted: '#8C8168',
-  textAccent: '#E6CE96',
-
-  // Overlays
-  overlayDark: 'rgba(3, 8, 6, 0.92)',
+  // Legacy aliases
+  tableDeep: '#0B100E',
+  tableFelt: '#151F1B',
+  tableFeltInner: '#1B2722',
+  tableRail: '#0B100E',
+  tableBorder: 'rgba(242, 238, 228, 0.10)',
+  emeraldDeep: '#101714',
+  emerald: '#1B2722',
+  emeraldMid: '#223029',
+  emeraldLight: '#3F6B60',
+  emeraldBright: '#86ADA0',
+  brass: '#DF7A5E',
+  brassLight: '#ECA08B',
+  brassDark: '#B95A42',
+  brassMuted: 'rgba(223, 122, 94, 0.14)',
+  brassFaint: 'rgba(223, 122, 94, 0.07)',
+  cobalt: '#DF7A5E',
+  cobaltLight: '#ECA08B',
+  cobaltGlow: 'rgba(223, 122, 94, 0.30)',
+  cobaltMuted: 'rgba(223, 122, 94, 0.12)',
+  silver: '#B9B7AB',
+  silverLight: '#F2EEE4',
+  silverMuted: 'rgba(185, 183, 171, 0.25)',
+  gold: '#DF7A5E',
+  goldLight: '#ECA08B',
+  goldGlow: 'rgba(223, 122, 94, 0.30)',
+  goldMuted: 'rgba(223, 122, 94, 0.14)',
+  textGold: '#ECA08B',
+  playableBlue: '#ECA08B',
+  playableGlow: 'rgba(223, 122, 94, 0.35)',
+  playableMint: '#86ADA0',
+  crimson: '#CC6A5C',
+  crimsonLight: '#CC6A5C',
+  crimsonMuted: 'rgba(204, 106, 92, 0.14)',
+  crimsonGlow: 'rgba(204, 106, 92, 0.35)',
+  amber: '#D3A24B',
+  amberLight: '#D3A24B',
+  cardIvory: '#F4EFE3',
+  cardIvoryInner: '#FBF7EC',
+  cardBorder: '#DCD2BA',
+  cardMidnight: '#101714',
+  surfaceDark: '#101714',
+  surfaceCard: '#151F1B',
+  surfaceSubtle: 'rgba(244, 239, 227, 0.04)',
+  borderCobalt: '#DF7A5E',
+  borderSubtle: 'rgba(242, 238, 228, 0.20)',
+  borderMuted: 'rgba(242, 238, 228, 0.10)',
+  textAccent: '#ECA08B',
+  overlayDark: 'rgba(6, 10, 9, 0.70)',
 };

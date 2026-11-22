@@ -5,8 +5,8 @@ import { Button } from '../common/Button';
 import { Colors } from '../../theme/colors';
 import { Typography } from '../../theme/typography';
 import { Trophy, Skull, RotateCcw, Home } from 'lucide-react-native';
-import { DecoModal } from '../common/DecoModal';
-import { OrnamentDivider, BrassDiamond } from '../common/Deco';
+import { Dialog } from '../common/Dialog';
+import { Divider } from '../common/Chrome';
 
 interface GameOverModalProps {
   visible: boolean;
@@ -38,15 +38,15 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   });
 
   return (
-    <DecoModal visible={visible} maxWidth={366}>
+    <Dialog visible={visible} maxWidth={366}>
       <View style={styles.crest}>
-        <Trophy size={19} color={Colors.brassLight} />
+        <Trophy size={19} color={Colors.accentSoft} />
       </View>
 
       <Text style={styles.kicker}>MATCH COMPLETE</Text>
       <Text style={styles.title}>The Club Champion</Text>
 
-      <OrnamentDivider compact style={styles.divider} />
+      <Divider style={styles.divider} />
 
       <Text style={styles.championLabel}>OUTLAST 502 CHAMPION</Text>
       <Text style={styles.winnerName} numberOfLines={1}>
@@ -79,9 +79,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
                 </Text>
                 <View style={styles.rankNameBlock}>
                   <View style={styles.nameLine}>
-                    {isFirst ? (
-                      <BrassDiamond size={4} filled style={{ marginRight: 6 }} />
-                    ) : null}
+                    {isFirst ? <View style={styles.winnerDot} /> : null}
                     <Text
                       style={[styles.playerName, isFirst && styles.firstPlayerName]}
                       numberOfLines={1}
@@ -96,7 +94,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
                     <View style={styles.eliminatedTag}>
                       <Skull
                         size={8}
-                        color={Colors.crimsonLight}
+                        color={Colors.danger}
                         style={{ marginRight: 3 }}
                       />
                       <Text style={styles.statusText}>Eliminated · 502+</Text>
@@ -117,22 +115,22 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
       <View style={styles.buttonRow}>
         <Button
           title="Play Again"
-          icon={<RotateCcw size={13} color={Colors.inkBlack} />}
-          variant="gold"
+          icon={<RotateCcw size={13} color={Colors.ink} />}
+          variant="secondary"
           size="medium"
           onPress={onPlayAgain}
           style={{ flex: 1, marginRight: 8 }}
         />
         <Button
           title="Main Menu"
-          icon={<Home size={13} color={Colors.brassLight} />}
+          icon={<Home size={13} color={Colors.accentSoft} />}
           variant="outline"
           size="medium"
           onPress={onGoHome}
           style={{ flex: 1 }}
         />
       </View>
-    </DecoModal>
+    </Dialog>
   );
 };
 
@@ -151,14 +149,14 @@ const styles = StyleSheet.create({
   },
   kicker: {
     ...Typography.micro,
-    color: Colors.brass,
+    color: Colors.accent,
     fontSize: 7.4,
     letterSpacing: 2.2,
     textAlign: 'center',
   },
   title: {
     ...Typography.serifHeading,
-    color: Colors.ivory,
+    color: Colors.paper,
     fontSize: 24,
     textAlign: 'center',
     marginTop: 3,
@@ -178,7 +176,7 @@ const styles = StyleSheet.create({
   },
   winnerName: {
     ...Typography.serifDisplay,
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
     fontSize: 27,
     lineHeight: 32,
     textAlign: 'center',
@@ -199,7 +197,7 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     ...Typography.micro,
-    color: Colors.brass,
+    color: Colors.accent,
     fontSize: 7.2,
     letterSpacing: 1.8,
   },
@@ -221,6 +219,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(242, 232, 213, 0.08)',
   },
+  winnerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.accent,
+    marginRight: 6,
+  },
   firstRow: {
     backgroundColor: 'rgba(198, 164, 96, 0.05)',
   },
@@ -241,7 +246,7 @@ const styles = StyleSheet.create({
     width: 24,
   },
   firstRankNumber: {
-    color: Colors.brass,
+    color: Colors.accent,
   },
   rankNameBlock: {
     flex: 1,
@@ -252,12 +257,12 @@ const styles = StyleSheet.create({
   },
   playerName: {
     ...Typography.serifBody,
-    color: Colors.ivorySoft,
+    color: Colors.textSecondary,
     fontSize: 13.5,
     lineHeight: 17,
   },
   firstPlayerName: {
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
   },
   eliminatedTag: {
     flexDirection: 'row',
@@ -268,7 +273,7 @@ const styles = StyleSheet.create({
     ...Typography.micro,
     fontSize: 6.4,
     letterSpacing: 0.8,
-    color: Colors.crimsonLight,
+    color: Colors.danger,
   },
   scoreText: {
     ...Typography.serifSubheading,
@@ -282,7 +287,7 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   firstScoreText: {
-    color: Colors.brassLight,
+    color: Colors.accentSoft,
   },
   buttonRow: {
     flexDirection: 'row',

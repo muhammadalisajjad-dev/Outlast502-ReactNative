@@ -264,13 +264,13 @@ export const TableMotionOverlay: React.FC<TableMotionOverlayProps> = ({
           <View
             style={[
               styles.bannerAccent,
-              specialEvent.type === 'victory' && { backgroundColor: Colors.brass },
+              specialEvent.type === 'victory' && { backgroundColor: Colors.accent },
               specialEvent.type === 'penalty' && {
-                backgroundColor: Colors.crimsonLight,
+                backgroundColor: Colors.danger,
               },
-              specialEvent.type === 'jack' && { backgroundColor: Colors.brass },
+              specialEvent.type === 'jack' && { backgroundColor: Colors.accent },
               specialEvent.type === 'skip' && {
-                backgroundColor: Colors.ivoryMuted,
+                backgroundColor: Colors.textMuted,
               },
             ]}
             pointerEvents="none"
@@ -278,28 +278,28 @@ export const TableMotionOverlay: React.FC<TableMotionOverlayProps> = ({
 
           <View style={styles.bannerIconBox}>
             {specialEvent.type === 'victory' && (
-              <Crown size={20} color={Colors.brassLight} />
+              <Crown size={20} color={Colors.accentSoft} />
             )}
             {specialEvent.type === 'penalty' && (
-              <Flame size={20} color={Colors.crimsonLight} />
+              <Flame size={20} color={Colors.danger} />
             )}
             {specialEvent.type === 'jack' && (
-              <Sparkles size={20} color={Colors.brassLight} />
+              <Sparkles size={20} color={Colors.accentSoft} />
             )}
             {specialEvent.type === 'skip' && (
-              <Zap size={20} color={Colors.ivorySoft} />
+              <Zap size={20} color={Colors.textSecondary} />
             )}
           </View>
           <View style={styles.bannerTextBox}>
             <Text
               style={[
                 styles.bannerTitle,
-                specialEvent.type === 'victory' && { color: Colors.brassLight },
+                specialEvent.type === 'victory' && { color: Colors.accentSoft },
                 specialEvent.type === 'penalty' && {
-                  color: Colors.crimsonLight,
+                  color: Colors.danger,
                 },
-                specialEvent.type === 'jack' && { color: Colors.brassLight },
-                specialEvent.type === 'skip' && { color: Colors.ivory },
+                specialEvent.type === 'jack' && { color: Colors.accentSoft },
+                specialEvent.type === 'skip' && { color: Colors.paper },
               ]}
             >
               {specialEvent.title}
@@ -367,15 +367,15 @@ const styles = StyleSheet.create({
   },
   bannerVictory: {
     borderColor: 'rgba(198, 164, 96, 0.7)',
-    shadowColor: Colors.brass,
+    shadowColor: Colors.accent,
   },
   bannerPenalty: {
     borderColor: 'rgba(196, 85, 95, 0.7)',
-    shadowColor: Colors.crimson,
+    shadowColor: Colors.danger,
   },
   bannerJack: {
     borderColor: 'rgba(198, 164, 96, 0.6)',
-    shadowColor: Colors.brass,
+    shadowColor: Colors.accent,
   },
   bannerSkip: {
     borderColor: 'rgba(242, 232, 213, 0.3)',
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   bannerSubtitle: {
     ...Typography.serifItalic,
-    color: Colors.ivoryMuted,
+    color: Colors.textMuted,
     fontSize: 10.5,
     lineHeight: 14,
     marginTop: 2,
