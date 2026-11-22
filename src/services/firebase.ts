@@ -21,6 +21,31 @@ const DEFAULT_FIREBASE_CONFIG = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
 };
 
+async function createAuthInstance(app: any) {
+  const authModule: any = await import('firebase/auth');
+
+  // React Native is not a browser: getAuth() there falls back to memory
+  // persistence, which loses the anonymous UID on every app restart.
+  const isReactNative =
+    typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
+
+  if (isReactNative && typeof authModule.getReactNativePersistence === 'function') {
+    try {
+      const asyncStorageModule = await import('@react-native-async-storage/async-storage');
+      const AsyncStorage = asyncStorageModule.default;
+      return authModule.initializeAuth(app, {
+        persistence: authModule.getReactNativePersistence(AsyncStorage),
+      });
+    } catch (error) {
+      // Most likely "auth/already-initialized" after a Fast Refresh, or the
+      // storage module is unavailable. Fall back to the existing instance.
+      console.warn('React Native auth persistence setup failed:', error);
+    }
+  }
+
+  return authModule.getAuth(app);
+}
+
 async function getFirebaseInstances() {
   if (dbInstance && authInstance) return { db: dbInstance, auth: authInstance };
   if (!DEFAULT_FIREBASE_CONFIG.projectId) {
@@ -30,15 +55,24 @@ async function getFirebaseInstances() {
   try {
     const { initializeApp, getApps } = await import('firebase/app');
     const { getFirestore } = await import('firebase/firestore');
-    const { getAuth, signInAnonymously } = await import('firebase/auth');
 
     const app = getApps().length === 0 ? initializeApp(DEFAULT_FIREBASE_CONFIG) : getApps()[0];
     dbInstance = getFirestore(app);
-    authInstance = getAuth(app);
+    authInstance = await createAuthInstance(app);
 
-    // Ensure anonymous authentication for secure per-user rules
+    // With AsyncStorage persistence the user is restored asynchronously.
+    // Wait for that restore before deciding to create a new anonymous user.
+    if (typeof authInstance.authStateReady === 'function') {
+      try {
+        await authInstance.authStateReady();
+      } catch (readyErr) {
+        console.warn('Auth state restore check failed:', readyErr);
+      }
+    }
+
     if (!authInstance.currentUser) {
       try {
+        const { signInAnonymously } = await import('firebase/auth');
         await signInAnonymously(authInstance);
       } catch (authErr) {
         console.warn('Anonymous sign-in skipped or failed:', authErr);
