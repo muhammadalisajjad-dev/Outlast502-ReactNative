@@ -180,23 +180,21 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       playCard(card);
       return;
     }
+    // Feedback is immediate: the state updates on tap and the flying card is
+    // a purely cosmetic overlay, so the hand never lags behind the press.
     setFlyingAction({ card, from: 'hand', to: 'discard' });
     triggerHaptic('medium');
     soundManager.playCardSnap();
-    setTimeout(() => {
-      playCard(card);
-      setFlyingAction(null);
-    }, 180);
+    playCard(card);
+    setTimeout(() => setFlyingAction(null), 240);
   };
 
   const handleDrawCardAnimated = () => {
     setFlyingAction({ from: 'deck', to: 'hand' });
     triggerHaptic('medium');
     soundManager.playCardDraw();
-    setTimeout(() => {
-      drawCard();
-      setFlyingAction(null);
-    }, 180);
+    drawCard();
+    setTimeout(() => setFlyingAction(null), 240);
   };
 
   const statusText = gameState.pendingPenalty.active

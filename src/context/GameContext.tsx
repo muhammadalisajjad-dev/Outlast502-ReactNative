@@ -6,7 +6,7 @@ import React, {
   useRef,
   ReactNode,
 } from 'react';
-import { GameState, MatchPhase } from '../types/game';
+import { GameState, MatchPhase, Player } from '../types/game';
 import { Card, Suit } from '../types/card';
 import { MatchRecord, PlayerHistoryScore } from '../types/history';
 import {
@@ -18,6 +18,7 @@ import {
 } from '../engine/gameEngine';
 import { getPlayableCards, hasPenaltyCounter } from '../engine/rules';
 import { decideBotMove } from '../ai/botStrategy';
+import { botThinkDelay } from '../ai/botTiming';
 import { saveMatchHistory } from '../services/storage';
 import { syncMatchToFirebase } from '../services/firebase';
 
@@ -39,6 +40,21 @@ interface GameContextType {
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
+
+/** Applies an already-calculated bot decision to the engine state. */
+function applyBotDecision(
+  state: GameState,
+  bot: Player,
+  decision: ReturnType<typeof decideBotMove>
+): GameState {
+  if (decision.type === 'PLAY_CARD') {
+    return executePlayCard(state, bot.id, decision.cardId, decision.declaredSuit);
+  }
+  if (decision.type === 'DRAW_CARD') {
+    return executeDrawCard(state, bot.id);
+  }
+  return executeAcceptPenalty(state, bot.id);
+}
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -133,33 +149,25 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (botTimerRef.current) clearTimeout(botTimerRef.current);
 
+    // Decide as soon as the turn begins so the pause reflects the decision
+    // the bot actually faces, then apply it after that pause.
+    const decision = decideBotMove(gameState, current);
+    const thinkDelay = botThinkDelay(decision, gameState, current);
+
     botTimerRef.current = setTimeout(() => {
       setGameState(prevState => {
         if (!prevState || prevState.matchPhase !== 'in_round') return prevState;
         const bot = prevState.players[prevState.activePlayerIndex];
         if (!bot || bot.isHuman || bot.isEliminated) return prevState;
 
-        const decision = decideBotMove(prevState, bot);
-
         try {
-          if (decision.type === 'PLAY_CARD') {
-            return executePlayCard(
-              prevState,
-              bot.id,
-              decision.cardId,
-              decision.declaredSuit
-            );
-          } else if (decision.type === 'DRAW_CARD') {
-            return executeDrawCard(prevState, bot.id);
-          } else if (decision.type === 'ACCEPT_PENALTY') {
-            return executeAcceptPenalty(prevState, bot.id);
-          }
+          return applyBotDecision(prevState, bot, decideBotMove(prevState, bot));
         } catch (e) {
           console.error('Error executing bot move:', e);
         }
         return prevState;
       });
-    }, 900); // 900ms thinking delay for realistic game rhythm
+    }, thinkDelay);
 
     return () => {
       if (botTimerRef.current) clearTimeout(botTimerRef.current);
