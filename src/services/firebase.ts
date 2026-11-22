@@ -69,22 +69,20 @@ export async function syncMatchToFirebase(match: MatchRecord): Promise<boolean> 
 
   const { db, auth } = instances;
   const uid = auth.currentUser?.uid;
+  if (!uid) {
+    console.warn('Firebase sync skipped: anonymous user is not available.');
+    return false;
+  }
 
   try {
     const { doc, setDoc } = await import('firebase/firestore');
     const matchData = {
       ...match,
-      userId: uid || 'anonymous',
+      userId: uid,
       syncedAt: Date.now(),
     };
 
-    if (uid) {
-      // Primary: user-scoped secure document
-      await setDoc(doc(db, 'users', uid, 'matches', match.id), matchData);
-    } else {
-      // Fallback
-      await setDoc(doc(db, 'matches', match.id), matchData);
-    }
+    await setDoc(doc(db, 'users', uid, 'matches', match.id), matchData);
     return true;
   } catch (error) {
     console.warn('Failed to sync match to Firebase:', error);
@@ -109,33 +107,20 @@ export async function fetchFirebaseHistory(): Promise<MatchRecord[]> {
     const matches: MatchRecord[] = [];
 
     const fetchPromise = (async () => {
-      if (uid) {
-        // Fetch user's own matches
-        try {
-          const userMatchesQuery = query(
-            collection(db, 'users', uid, 'matches'),
-            orderBy('timestamp', 'desc'),
-            limit(25)
-          );
-          const snapshot = await getDocs(userMatchesQuery);
-          snapshot.forEach(docSnap => {
-            matches.push(docSnap.data() as MatchRecord);
-          });
-        } catch (userErr) {
-          // Fall back to root matches query if rules allow
-        }
-      }
+      if (!uid) return matches;
 
-      if (matches.length === 0) {
-        try {
-          const rootQuery = query(collection(db, 'matches'), orderBy('timestamp', 'desc'), limit(25));
-          const rootSnapshot = await getDocs(rootQuery);
-          rootSnapshot.forEach(docSnap => {
-            matches.push(docSnap.data() as MatchRecord);
-          });
-        } catch (rootErr) {
-          // Ignored if permissions are restricted
-        }
+      try {
+        const userMatchesQuery = query(
+          collection(db, 'users', uid, 'matches'),
+          orderBy('timestamp', 'desc'),
+          limit(25)
+        );
+        const snapshot = await getDocs(userMatchesQuery);
+        snapshot.forEach(docSnap => {
+          matches.push(docSnap.data() as MatchRecord);
+        });
+      } catch (userErr) {
+        console.warn('Failed to fetch user match history:', userErr);
       }
 
       return matches;

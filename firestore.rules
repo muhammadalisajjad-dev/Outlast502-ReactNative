@@ -1,16 +1,36 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Secure user-scoped match history:
-    // Only authenticated users (including Anonymous Auth) can read, create, and manage their own matches.
+    // Match history is private to the authenticated anonymous user.
+    // The application writes only to users/{uid}/matches/{matchId}.
     match /users/{userId}/matches/{matchId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if request.auth != null
+        && request.auth.uid == userId;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.id == matchId
+        && request.resource.data.timestamp is number
+        && request.resource.data.totalRounds is int
+        && request.resource.data.totalRounds >= 1
+        && request.resource.data.totalRounds <= 1000
+        && request.resource.data.playerCount is int
+        && request.resource.data.playerCount >= 2
+        && request.resource.data.playerCount <= 6
+        && request.resource.data.winnerName is string
+        && request.resource.data.winnerName.size() > 0
+        && request.resource.data.winnerName.size() <= 64
+        && request.resource.data.players is list
+        && request.resource.data.players.size() >= 2
+        && request.resource.data.players.size() <= 6
+        && (request.resource.data.syncedAt == null || request.resource.data.syncedAt is number);
     }
 
-    // Direct collection fallback (if querying top-level matches collection):
-    match /matches/{matchId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    // No other collections are used by the application.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

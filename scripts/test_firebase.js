@@ -111,10 +111,41 @@ async function main() {
       id:          { stringValue: docId },
       timestamp:   { integerValue: String(Date.now()) },
       totalRounds: { integerValue: '2' },
+      playerCount: { integerValue: '2' },
       winnerId:    { stringValue: uid },
       winnerName:  { stringValue: 'LiveTestPlayer' },
       userId:      { stringValue: uid },
       syncedAt:    { integerValue: String(Date.now()) },
+      players: {
+        arrayValue: {
+          values: [
+            {
+              mapValue: {
+                fields: {
+                  playerId: { stringValue: uid },
+                  name: { stringValue: 'LiveTestPlayer' },
+                  isHuman: { booleanValue: true },
+                  finalScore: { integerValue: '120' },
+                  isEliminated: { booleanValue: false },
+                  isWinner: { booleanValue: true },
+                },
+              },
+            },
+            {
+              mapValue: {
+                fields: {
+                  playerId: { stringValue: 'opponent_1' },
+                  name: { stringValue: 'Opponent' },
+                  isHuman: { booleanValue: false },
+                  finalScore: { integerValue: '240' },
+                  isEliminated: { booleanValue: false },
+                  isWinner: { booleanValue: false },
+                },
+              },
+            },
+          ],
+        },
+      },
     },
   };
 
