@@ -23,20 +23,15 @@ interface HomeScreenProps {
   onNavigate: (screen: 'game' | 'setup' | 'scoreboard' | 'history' | 'rules') => void;
 }
 
-const MENU_ITEMS: Array<{
-  index: string;
-  title: string;
-  caption: string;
-  target: 'setup' | 'scoreboard' | 'history' | 'rules';
-}> = [
-  { index: '01', title: 'The table', caption: 'Choose two to six seats', target: 'setup' },
-  { index: '02', title: 'Standings', caption: 'Live survival ledger', target: 'scoreboard' },
-  { index: '03', title: 'Archive', caption: 'Past matches, kept', target: 'history' },
-  { index: '04', title: 'Rules', caption: 'Powers, penalties and points', target: 'rules' },
-];
-
 const SEVEN_OF_HEARTS = { id: 'home-seven-hearts', suit: 'hearts' as const, rank: '7' as const };
 const ACE_OF_SPADES = { id: 'home-ace-spades', suit: 'spades' as const, rank: 'A' as const };
+
+const NAV_ITEMS: Array<{ label: string; target: 'setup' | 'scoreboard' | 'history' | 'rules' }> = [
+  { label: 'Table', target: 'setup' },
+  { label: 'Standings', target: 'scoreboard' },
+  { label: 'Archive', target: 'history' },
+  { label: 'Rules', target: 'rules' },
+];
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const { startMatch } = useGame();
@@ -74,7 +69,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     onNavigate(target);
   };
 
-  const titleSize = compact ? 46 : 56;
   const fanScale = compact ? 0.86 : 1;
 
   return (
@@ -96,16 +90,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </View>
 
         <View style={styles.hero}>
-          <Text style={styles.eyebrow}>A card game of nerve and numbers</Text>
-          <Text style={[styles.title, { fontSize: titleSize }]}>Outlast</Text>
-          <Text style={styles.titleAccent}>502</Text>
-          <Text style={styles.tagline}>
-            Shed every card. Survive every penalty. Be the last seated when the
-            deck runs dry.
-          </Text>
-
-          <View style={styles.heroRule} />
-
           <View style={[styles.cardFan, { transform: [{ scale: fanScale }] }]}>
             <Animated.View
               style={[
@@ -153,6 +137,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               <PlayingCard faceDown size="normal" />
             </Animated.View>
           </View>
+
+          <Text style={styles.eyebrow}>A card game of nerve and numbers</Text>
+          <Text style={styles.title}>Outlast</Text>
+          <Text style={styles.titleAccent}>502</Text>
+          <Text style={styles.tagline}>
+            Shed every card. Survive every penalty. Be the last seated when the
+            deck runs dry.
+          </Text>
+
+          <View style={styles.heroRule} />
         </View>
 
         <View style={styles.actions}>
@@ -174,39 +168,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.facts}>
-          <View style={styles.fact}>
-            <Text style={styles.factNumber}>52</Text>
-            <Text style={styles.factLabel}>cards</Text>
-          </View>
-          <View style={styles.factDivider} />
-          <View style={styles.fact}>
-            <Text style={styles.factNumber}>2–6</Text>
-            <Text style={styles.factLabel}>players</Text>
-          </View>
-          <View style={styles.factDivider} />
-          <View style={styles.fact}>
-            <Text style={styles.factNumber}>502</Text>
-            <Text style={styles.factLabel}>limit</Text>
-          </View>
-        </View>
-
-        <Divider style={styles.menuDivider} />
-
-        <View style={styles.menu}>
-          {MENU_ITEMS.map((item, index) => (
+        <View style={styles.navRow}>
+          {NAV_ITEMS.map(item => (
             <TouchableOpacity
               key={item.target}
               activeOpacity={0.7}
               onPress={() => handleMenu(item.target)}
-              style={[styles.menuRow, index === 0 && styles.menuRowFirst]}
+              style={styles.navChip}
             >
-              <Text style={styles.menuIndex}>{item.index}</Text>
-              <View style={styles.menuTextBlock}>
-                <Text style={styles.menuTitle}>{item.title}</Text>
-                <Text style={styles.menuCaption}>{item.caption}</Text>
-              </View>
-              <ChevronRight size={16} color={Colors.textMuted} />
+              <Text style={styles.navChipText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -240,37 +210,43 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingTop: 18,
+    paddingTop: 22,
+    paddingBottom: 8,
   },
-  heroRule: {
-    width: 110,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.lineStrong,
-    marginVertical: 14,
+  cardFan: {
+    width: 250,
+    height: 136,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginBottom: 18,
   },
+  fanCard: { position: 'absolute', top: 12 },
+  fanLeft: { zIndex: 1 },
+  fanCenter: { top: 0, zIndex: 3 },
+  fanRight: { zIndex: 2 },
   eyebrow: {
     ...Typography.micro,
     color: Colors.textMuted,
     fontSize: 8.5,
     letterSpacing: 1.8,
-    marginBottom: 8,
+    marginBottom: 6,
     textTransform: 'uppercase',
   },
   title: {
     fontFamily: Typography.hero.fontFamily,
-    fontSize: 52,
+    fontSize: 56,
     fontWeight: '700',
-    letterSpacing: -1.8,
-    lineHeight: 54,
+    letterSpacing: -2,
+    lineHeight: 58,
     color: Colors.textPrimary,
   },
   titleAccent: {
     fontFamily: Typography.serifDisplay.fontFamily,
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '400',
     color: Colors.accent,
     marginTop: -2,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   tagline: {
     ...Typography.bodyMedium,
@@ -279,21 +255,16 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
     maxWidth: 300,
-    marginBottom: 16,
+    marginBottom: 0,
   },
-  cardFan: {
-    width: 250,
-    height: 136,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginTop: 4,
+  heroRule: {
+    width: 110,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.lineStrong,
+    marginTop: 14,
   },
-  fanCard: { position: 'absolute', top: 12 },
-  fanLeft: { zIndex: 1 },
-  fanCenter: { top: 0, zIndex: 3 },
-  fanRight: { zIndex: 2 },
   actions: {
-    marginTop: 16,
+    marginTop: 20,
     alignItems: 'center',
   },
   primaryButton: {
@@ -319,78 +290,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.2,
   },
-  facts: {
-    marginTop: 22,
+  navRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.line,
+    gap: 8,
+    marginTop: 26,
+    flexWrap: 'wrap',
   },
-  fact: {
-    flex: 1,
-    alignItems: 'center',
+  navChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: Colors.lineStrong,
+    borderRadius: 20,
+    backgroundColor: Colors.paperFaint,
   },
-  factNumber: {
-    fontFamily: Typography.numeral.fontFamily,
-    fontSize: 20,
-    lineHeight: 22,
-    color: Colors.textPrimary,
-  },
-  factLabel: {
-    ...Typography.micro,
-    color: Colors.textMuted,
-    fontSize: 7.5,
-    letterSpacing: 1.2,
-    marginTop: 2,
-    textTransform: 'uppercase',
-  },
-  factDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 28,
-    backgroundColor: Colors.line,
-  },
-  menuDivider: {
-    marginTop: 22,
-  },
-  menu: {
-    marginTop: 0,
-  },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.line,
-  },
-  menuRowFirst: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: Colors.line,
-  },
-  menuIndex: {
-    fontFamily: Typography.cardRank.fontFamily,
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.accent,
-    width: 26,
-  },
-  menuTextBlock: {
-    flex: 1,
-  },
-  menuTitle: {
-    ...Typography.bodyMedium,
-    color: Colors.textPrimary,
-    fontSize: 13.5,
-    fontWeight: '600',
-    letterSpacing: 0.2,
-  },
-  menuCaption: {
+  navChipText: {
     ...Typography.bodySmall,
-    color: Colors.textMuted,
-    fontSize: 11,
-    marginTop: 2,
+    color: Colors.textSecondary,
+    fontSize: 11.5,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
   footer: {
     ...Typography.micro,
@@ -398,7 +318,7 @@ const styles = StyleSheet.create({
     fontSize: 7.5,
     letterSpacing: 1.4,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 24,
     marginBottom: 8,
   },
 });
