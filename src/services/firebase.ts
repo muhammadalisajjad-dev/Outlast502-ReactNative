@@ -151,7 +151,9 @@ export async function fetchFirebaseHistory(): Promise<MatchRecord[]> {
     })();
 
     const timeoutPromise = new Promise<MatchRecord[]>(resolve => {
-      setTimeout(() => resolve([]), 2500);
+      // Allow enough time for a cold Firestore connection. A too-short timeout
+      // makes the UI report "local" even when cloud records are reachable.
+      setTimeout(() => resolve([]), 8000);
     });
 
     return await Promise.race([fetchPromise, timeoutPromise]);

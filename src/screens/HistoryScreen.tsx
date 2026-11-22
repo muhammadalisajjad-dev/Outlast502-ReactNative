@@ -37,7 +37,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack }) => {
         try {
           const cloud = await Promise.race([
             fetchFirebaseHistory(),
-            new Promise<MatchRecord[]>(resolve => setTimeout(() => resolve([]), 1500)),
+            new Promise<MatchRecord[]>(resolve => setTimeout(() => resolve([]), 9000)),
           ]);
           if (cloud.length > 0) {
             setCloudActive(true);

@@ -1,0 +1,152 @@
+{
+  "uid": "PsH4LsbJ4uPxs9TnKksSSewab4n2",
+  "rounds": 5,
+  "actions": 99,
+  "doc": {
+    "name": "projects/outlast-502/databases/(default)/documents/users/PsH4LsbJ4uPxs9TnKksSSewab4n2/matches/1795346450377_wrubn",
+    "id": "1795346450377_wrubn",
+    "timestamp": 1795346450377,
+    "totalRounds": 6,
+    "playerCount": 2,
+    "winnerName": "Marcus",
+    "userId": "PsH4LsbJ4uPxs9TnKksSSewab4n2",
+    "syncedAt": 1795346451323,
+    "players": [
+      {
+        "playerId": "player_0",
+        "name": "You",
+        "isHuman": true,
+        "finalScore": 535,
+        "isEliminated": true,
+        "isWinner": false
+      },
+      {
+        "playerId": "player_1",
+        "name": "Marcus",
+        "isHuman": false,
+        "finalScore": 165,
+        "isEliminated": false,
+        "isWinner": true
+      }
+    ]
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "Document is scoped to the app UID"
+    },
+    {
+      "ok": true,
+      "label": "Document id field matches its document path"
+    },
+    {
+      "ok": true,
+      "label": "timestamp is a number"
+    },
+    {
+      "ok": true,
+      "label": "totalRounds is a positive integer"
+    },
+    {
+      "ok": true,
+      "label": "playerCount is 2",
+      "detail": "2"
+    },
+    {
+      "ok": true,
+      "label": "players list has 2 entries"
+    },
+    {
+      "ok": true,
+      "label": "winnerName is present",
+      "detail": "Marcus"
+    },
+    {
+      "ok": true,
+      "label": "syncedAt is a number"
+    },
+    {
+      "ok": true,
+      "label": "Exactly one winner and it matches winnerName"
+    },
+    {
+      "ok": true,
+      "label": "Players include the human seat and the bot seat"
+    },
+    {
+      "ok": true,
+      "label": "Archive shows exactly 1 entry"
+    },
+    {
+      "ok": true,
+      "label": "Archive shows the champion name",
+      "detail": "Marcus"
+    },
+    {
+      "ok": true,
+      "label": "Archive shows the round count",
+      "detail": "6 rounds"
+    },
+    {
+      "ok": true,
+      "label": "Archive shows You with 535 pts"
+    },
+    {
+      "ok": true,
+      "label": "Archive shows Marcus with 165 pts"
+    },
+    {
+      "ok": true,
+      "label": "Archive reports the cloud ledger as active"
+    },
+    {
+      "ok": true,
+      "label": "Archive still shows 1 entry after reload"
+    },
+    {
+      "ok": true,
+      "label": "Champion still present after reload"
+    },
+    {
+      "ok": true,
+      "label": "Cloud ledger still active after reload"
+    },
+    {
+      "ok": true,
+      "label": "Archive rebuilds the entry from Firestore alone"
+    },
+    {
+      "ok": true,
+      "label": "Cloud-only entry shows the champion"
+    },
+    {
+      "ok": true,
+      "label": "Cloud ledger active on cloud-only load"
+    },
+    {
+      "ok": true,
+      "label": "Does not fall back to local while cloud works"
+    },
+    {
+      "ok": true,
+      "label": "Shows local ledger when cloud is unreachable"
+    },
+    {
+      "ok": true,
+      "label": "Does not claim cloud when cloud is unreachable"
+    },
+    {
+      "ok": true,
+      "label": "Cloud collection readable at the end"
+    },
+    {
+      "ok": true,
+      "label": "Exactly one cloud record after match, reloads and clears",
+      "detail": "1 found"
+    },
+    {
+      "ok": true,
+      "label": "No duplicate document ids"
+    }
+  ]
+}
